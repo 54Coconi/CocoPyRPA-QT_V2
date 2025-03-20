@@ -1,0 +1,425 @@
+{
+    "task_name": "temp",
+    "steps": [
+        {
+            "type": "mouse",
+            "action": "click",
+            "icon": ":/icons/mouse-click-left",
+            "params": {
+                "name": "鼠标左键点击(500,500)",
+                "target_pos": [
+                    500,
+                    500
+                ],
+                "clicks": 1,
+                "interval": 0.0,
+                "duration": 1.2000000000000002,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "e5aa8e13"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "click",
+            "icon": ":/icons/mouse-click-right",
+            "params": {
+                "name": "鼠标右键点击",
+                "target_pos": [
+                    0,
+                    0
+                ],
+                "clicks": 1,
+                "interval": 0.0,
+                "duration": 0.0,
+                "retries": 0,
+                "button": "right",
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "551b9a68"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "click",
+            "icon": ":/icons/mouse-click-middle",
+            "params": {
+                "name": "鼠标中键点击",
+                "target_pos": [
+                    0,
+                    0
+                ],
+                "clicks": 1,
+                "interval": 0.2,
+                "duration": 0.0,
+                "retries": 0,
+                "button": "middle",
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "99197fbc"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveTo",
+            "icon": ":/icons/mouse-move",
+            "params": {
+                "name": "鼠标定点移动",
+                "target_pos": [
+                    0,
+                    0
+                ],
+                "duration": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "c20f701e"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveRel",
+            "icon": ":/icons/mouse-rel-move",
+            "params": {
+                "name": "鼠标相对移动",
+                "offset": [
+                    0,
+                    0
+                ],
+                "duration": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "99a91f6e"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragTo",
+            "icon": ":/icons/mouse-drag",
+            "params": {
+                "name": "鼠标定点拖动",
+                "target_pos": [
+                    0,
+                    0
+                ],
+                "duration": 0.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "153170fe"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragRel",
+            "icon": ":/icons/mouse-rel-drag",
+            "params": {
+                "name": "鼠标相对拖动",
+                "offset": [
+                    0,
+                    0
+                ],
+                "duration": 0.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "4e9e177c"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "scrollV",
+            "icon": ":/icons/wheel-v",
+            "params": {
+                "name": "鼠标竖直滚动",
+                "scroll_units": 0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "7ff67bd9"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "scrollH",
+            "icon": ":/icons/wheel-h",
+            "params": {
+                "name": "鼠标水平滚动",
+                "scroll_units": 0,
+                "retries": 0,
+                "is_active": true,
+                "status": 0,
+                "id": "4db4621d"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下",
+                "key": "enter",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "bf684e20"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放",
+                "key": "enter",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "79a136da"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyTap",
+            "icon": ":/icons/key-tap",
+            "params": {
+                "name": "键盘敲击",
+                "key": "enter",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "ebc45b35"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "hotkey",
+            "icon": ":/icons/key-hotkey",
+            "params": {
+                "name": "热键组合",
+                "keys": [
+                    "Alt",
+                    "Tab"
+                ],
+                "hold_time": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "bde22136"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyType",
+            "icon": ":/icons/key-type",
+            "params": {
+                "name": "键盘输入文本",
+                "text_str": "",
+                "interval": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "ba2b888b"
+            }
+        },
+        {
+            "type": "image",
+            "action": "imageMatch",
+            "icon": ":/icons/img-match",
+            "params": {
+                "name": "图片匹配",
+                "template_img": "work/work_images\\IMAGE_2025-01-14-234350.png",
+                "error_retries": 0,
+                "error_retries_time": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "status": 0,
+                "id": "2a8abb9e"
+            }
+        },
+        {
+            "type": "image",
+            "action": "imageClick",
+            "icon": ":/icons/img-click",
+            "params": {
+                "name": "图片点击",
+                "template_img": "",
+                "error_retries": 0,
+                "error_retries_time": 0.0,
+                "clicks": 0,
+                "interval": 0.0,
+                "duration": 0.0,
+                "button": "left",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "a994c6b4"
+            }
+        },
+        {
+            "type": "image",
+            "action": "imageOcr",
+            "icon": ":/icons/img-ocr",
+            "params": {
+                "name": "文字识别",
+                "text": "",
+                "match_mode": "完全匹配",
+                "error_retries": 0,
+                "error_retries_time": 0.0,
+                "retries": 0,
+                "is_ignore_case": false,
+                "is_active": true,
+                "status": 0,
+                "id": "ccc6c239"
+            }
+        },
+        {
+            "type": "image",
+            "action": "imageOcrClick",
+            "icon": ":/icons/img-ocr-click",
+            "params": {
+                "name": "文字点击",
+                "text": "",
+                "match_mode": "完全匹配",
+                "error_retries": 0,
+                "error_retries_time": 0.0,
+                "clicks": 0,
+                "interval": 0.0,
+                "duration": 0.0,
+                "button": "left",
+                "retries": 0,
+                "is_ignore_case": false,
+                "use_regex": false,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "451160a3"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "if",
+            "icon": ":/icons/if",
+            "params": {
+                "name": "If 判断",
+                "condition": "results_list['e5aa8e13']['status'] == 0",
+                "then_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 1.0,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "41cf6384"
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "if",
+                        "icon": ":/icons/if",
+                        "params": {
+                            "name": "If 判断",
+                            "condition": "true",
+                            "then_commands": [
+                                {
+                                    "type": "flow",
+                                    "action": "delay",
+                                    "icon": ":/icons/delay",
+                                    "params": {
+                                        "name": "等待 1.00 秒",
+                                        "delay_time": 1.0,
+                                        "is_active": true,
+                                        "status": 0,
+                                        "id": "fb710097"
+                                    }
+                                }
+                            ],
+                            "else_commands": [],
+                            "is_active": true,
+                            "status": 0,
+                            "id": "9b93a6cf"
+                        }
+                    }
+                ],
+                "else_commands": [],
+                "is_active": true,
+                "status": 0,
+                "id": "a8d3726f"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "loop",
+            "icon": ":/icons/loop",
+            "params": {
+                "name": "Loop 循环",
+                "count": 0,
+                "loop_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 1.0,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "f0c9742c"
+                        }
+                    }
+                ],
+                "is_active": true,
+                "status": 0,
+                "id": "4d00ede7"
+            }
+        },
+        {
+            "type": "script",
+            "action": "dos",
+            "icon": ":/icons/script-dos",
+            "params": {
+                "name": "执行 DOS 命令",
+                "dos_cmd": "start cmd",
+                "working_dir": null,
+                "timeout": null,
+                "is_active": true,
+                "status": 0,
+                "id": "12a2fe41"
+            }
+        },
+        {
+            "type": "script",
+            "action": "python",
+            "icon": ":/icons/script-python",
+            "params": {
+                "name": "执行 Python 脚本",
+                "code": "",
+                "is_active": true,
+                "status": 0,
+                "id": "277b3439"
+            }
+        }
+    ]
+}

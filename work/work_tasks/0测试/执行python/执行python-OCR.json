@@ -1,0 +1,17 @@
+{
+    "task_name": "执行python-OCR",
+    "steps": [
+        {
+            "type": "script",
+            "action": "python",
+            "icon": ":/icons/script-python",
+            "params": {
+                "name": "执行 Python 脚本",
+                "code": "import pyautogui\nimport numpy as np\n\n# 初始化OCR工具\nocr_tool = OCRTool()\n# 全屏截图\nimg = np.array(pyautogui.screenshot())\n# 执行OCR识别\nocr_results = ocr_tool.perform_ocr(img)\n# 绘制OCR结果\nresult_img = ocr_tool.draw_results(img, ocr_results)\n# 显示结果并根据 save 参数控制是否保存\nocr_tool.show_results(result_img, save=True)",
+                "is_active": true,
+                "status": 0,
+                "id": "1634ab0a"
+            }
+        }
+    ]
+}

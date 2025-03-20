@@ -1,0 +1,116 @@
+{
+    "task_name": "测试条件构建",
+    "steps": [
+        {
+            "type": "image",
+            "action": "imageMatch",
+            "icon": ":/icons/img-match",
+            "params": {
+                "name": "图片匹配",
+                "template_img": "G:/CocoPyRPA_QT/CocoPyRPA-QT_v2.0/CocoPyRPA_v2.0.0/work/work_images/IMAGE_2024-12-03-195421.png",
+                "error_retries": 10,
+                "error_retries_time": 0.6000000000000001,
+                "retries": 0,
+                "is_active": true,
+                "status": 0,
+                "id": "c6b34896"
+            }
+        },
+        {
+            "type": "image",
+            "action": "imageClick",
+            "icon": ":/icons/img-click",
+            "params": {
+                "name": "图片点击",
+                "template_img": "G:/CocoPyRPA_QT/CocoPyRPA-QT_v2.0/CocoPyRPA_v2.0.0/work/work_images/IMAGE_2024-12-03-195421.png",
+                "error_retries": 10,
+                "error_retries_time": 1.0,
+                "clicks": 0,
+                "interval": 0.0,
+                "duration": 1.9999999999999998,
+                "button": "left",
+                "retries": 0,
+                "is_active": false,
+                "use_pynput": true,
+                "status": 0,
+                "id": "2ba01704"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "if",
+            "icon": ":/icons/if",
+            "params": {
+                "name": "If 判断",
+                "condition": "results_list['c6b34896']['status'] == 2",
+                "then_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 2.00 秒",
+                            "delay_time": 1.9999999999999998,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "6bdc1d39"
+                        }
+                    },
+                    {
+                        "type": "mouse",
+                        "action": "moveRel",
+                        "icon": ":/icons/mouse-rel-move",
+                        "params": {
+                            "name": "鼠标相对移动(200,0)",
+                            "offset": [
+                                200,
+                                0
+                            ],
+                            "duration": 1.9999999999999998,
+                            "retries": 0,
+                            "is_active": true,
+                            "use_pynput": false,
+                            "status": 0,
+                            "id": "ce4560fa"
+                        }
+                    }
+                ],
+                "else_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 2.00 秒",
+                            "delay_time": 1.9999999999999998,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "7e13740b"
+                        }
+                    },
+                    {
+                        "type": "mouse",
+                        "action": "moveRel",
+                        "icon": ":/icons/mouse-rel-move",
+                        "params": {
+                            "name": "鼠标相对移动(0,200)",
+                            "offset": [
+                                0,
+                                200
+                            ],
+                            "duration": 1.9999999999999998,
+                            "retries": 0,
+                            "is_active": true,
+                            "use_pynput": false,
+                            "status": 0,
+                            "id": "3ae595f8"
+                        }
+                    }
+                ],
+                "is_active": true,
+                "status": 0,
+                "id": "635b7ab4"
+            }
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "task_name": "执行python-ImageMatch",
+    "steps": [
+        {
+            "type": "script",
+            "action": "python",
+            "icon": ":/icons/script-python",
+            "params": {
+                "name": "执行 Python 脚本",
+                "code": "import pyautogui\nimport numpy as np\nimport cv2\n\nimg = np.array(pyautogui.screenshot())\nnew_img, threshold = drawRectangle(img, r\"work/work_images/IMAGE_2024-12-03-195421.png\")\nif new_img is not None:\n    cv2.imwrite(\"temp_result.png\", new_img)\n    print(\"匹配成功,结果保存在 temp_result.png 中,匹配度为:\", threshold)\nelse:\n    print(\"匹配失败，置信度为\",threshold) ",
+                "is_active": true,
+                "status": 0,
+                "id": "a3588d63"
+            }
+        }
+    ]
+}

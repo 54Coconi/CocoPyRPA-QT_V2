@@ -1,0 +1,951 @@
+/* ======================================= 全局定义 ======================================= */
+
+*{
+    font-family: "Microsoft Yahei";
+    /* font-size: 17px; */
+    /* background-color: #848484; */
+}
+
+
+/* ======================================= 菜单项 ======================================= */
+QMenu {
+    background-color: rgba(51,51,51,100);  /* 菜单项背景色 */
+    margin: 1px;	/* 菜单周围的一些间距 */
+    font-size: 19px;
+}
+
+QMenu::item {
+    font-family: "Microsoft Yahei";
+    font-size: 19px;
+    color: rgba(255,255,255,255);  /* 菜单项字体色 */
+    padding: 2px 25px 2px 20px;
+    border: 1px solid transparent;   /*为选择边框预留空间*/
+}
+
+/* 使用鼠标或键盘选择项时 */
+QMenu::item:selected {
+    border-color: rgba(23,108,106,255);  /* 边框色 */
+    background: rgba(23,108,106,255);   /* 背景色 */
+}
+
+/* 出现“选中”图标 */
+QMenu::icon:checked {
+    background: gray;
+    border: 1px inset gray;
+
+    top: 1px;
+    right: 1px;
+    bottom: 1px;
+    left: 1px;
+}
+
+/* 分割线 */
+QMenu::separator {
+    height: 1px;
+    background: #9D9D9D;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+/* 指示器 */
+QMenu::indicator {
+    width: 20px;
+    height: 20px;
+}
+
+/* 复选框样式指示器 */
+QMenu::indicator:non-exclusive:unchecked {
+    image: url();
+}
+
+QMenu::indicator:non-exclusive:unchecked:selected {
+    image: url();
+}
+
+QMenu::indicator:non-exclusive:checked {
+    image: url(':/icons/checked1');
+}
+
+QMenu::indicator:non-exclusive:checked:selected {
+    image: url(':/icons/checked1');
+}
+
+/* 单选按钮样式指示器 */
+QMenu::indicator:exclusive:unchecked {
+    image: url();
+}
+
+QMenu::indicator:exclusive:unchecked:selected {
+    image: url();
+}
+
+QMenu::indicator:exclusive:checked {
+    image: url();
+}
+
+QMenu::indicator:exclusive:checked:selected {
+    image: url();
+}
+
+/* =================================== 菜单栏 =================================== */
+
+QMenuBar {
+    font-family: "Microsoft Yahei";
+    font-size: 18px;
+    /*font-weight: 320;*/
+    color: rgb(234,234,234);
+    background-color: rgb(51,51,51);
+    /* 菜单栏项目之间的间距 */
+    spacing: 5px;
+}
+
+QMenuBar::item {
+    padding: 2px 4px;
+    background: transparent;
+    border-radius: 4px;
+}
+
+/*当使用鼠标或键盘选择时*/
+QMenuBar::item:selected{
+    background: #2b5b64;
+}
+
+QMenuBar::item:pressed{
+    background: #50a7b7;
+}
+
+/* =================================== 工具栏 =================================== */
+
+QToolBar {
+    border: 1px solid rgba(45, 43, 43, 255);
+    background: rgb(51,51,51);
+    spacing: 2px; /* 工具栏中项目之间的间距 */
+}
+
+/* 鼠标悬浮在工具栏按钮时 */
+QToolBar QToolButton:hover{
+	border-radius: 5px;
+	background: rgb(129,124,90);
+}
+
+QToolBar::separator {
+    border: 0px solid;
+    width: 1px;
+    background-color: rgb(95,95,95);
+}
+
+/* 工具栏的手柄，用于移动工具栏 */
+QToolBar::handle {
+    image: url(:/icons/toolbar-handle-1);
+}
+
+/* ============================ 底部状态栏QStatusBar ============================ */
+
+QStatusBar{
+    font-family: "Microsoft Yahei";
+    font: 20px;
+	color: rgb(255,255,255);
+	background: solid rgba(34,40,49,240);
+}
+
+/* ============================  任务列表QTreeView  ============================*/
+QTreeView#tasks_view_treeView{
+	background: solid rgba(34,40,49,255);
+	color: rgba(255,255,255,255);
+	font: 25 10pt "Microsoft YaHei";
+	selection-background-color: transparent;
+	border-bottom-left-radius: 3px; /* 设置左下角圆角 */
+}
+
+#tasks_view_treeView::item {
+
+}
+
+/* ================================ 指令编辑器 ================================ */
+
+/* 设置所有 QTreeWidget 整体样式 */
+QTreeWidget{
+	outline: 0px;
+	background: solid rgba(34,40,49, 255);  /* 背景 */
+	color: rgba(200,200,200,220);  /* 字体颜色 */
+	font-size: 20px;
+	selection-background-color: transparent;
+}
+
+/* 设置行间距(默认上下都为0) */
+QTreeWidget::item{
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+/* item 悬停颜色 */
+#cmd_treeWidget::item:hover,
+#cmd_treeWidget::item:hover:has-children:!has-siblings,
+#cmd_treeWidget::item:hover:has-children:has-siblings {
+	show-decoration-selected: 1;
+	background-color: rgb(90,95,118);  /* 悬停背景色 */
+	color: rgb(255,255,255); /* 悬停字体色 */
+}
+
+/* item 选中颜色 */
+#cmd_treeWidget::item:selected,
+#cmd_treeWidget::item:selected:has-children:!has-siblings,
+#cmd_treeWidget::item:selected:has-children:has-siblings {
+	border-left-color:transparent;
+	border-right-color: transparent;
+	border-top-color: transparent;
+	border-bottom-color: transparent;
+	background-color: rgb(147,152,191);  /* 选中背景色 */
+	color: rgb(255,255,255);  /* 选中字体色 */
+}
+
+/* 设置item"右上角"和"右下角"样式圆角 */
+#cmd_treeWidget::item{
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+}
+
+#cmd_treeWidget::item:!has-children {
+	border-bottom: 0px solid rgba(0, 0, 0, 100);
+	border-bottom-right: 0px solid rgba(0, 0, 0, 100);
+}
+
+/* TODO: 设置父节点展开时会有一条紧靠右边的竖直线 */
+#cmd_treeWidget::branch:!has-children{
+    margin-left: 0px;  /* 设置分支的左边距为0 */
+    margin-right: 0px;	/* 设置分支的右边距为23像素，使紧靠左边 */
+    border-right: 2px solid rgb(57,77,98); /* 设置分支的右边框为8像素宽且是半透明的固态边框 */
+}
+
+/* 设置分支紧邻项时的边框为0像素，意味着边框不可见 */
+#cmd_treeWidget::branch:adjoins-item:!has-children {
+    margin-right: 0px;
+	border: 0px solid rgba(0,0,0,200);
+}
+
+/* ------------------ 设置节点折叠、展开样式 ------------------ */
+
+/* TODO: 设置父节点折叠的branch分支样式 */
+#cmd_treeWidget::branch:closed:has-children,
+#cmd_treeWidget::branch:closed:has-children:has-siblings {
+    margin: 0px;
+	border-image: none;
+	border: 0px	solid rgb(57,77,98);
+	/*border-left: 2px solid rgba(57,77,98,255);  !* 左侧边界 宽度 颜色 *!*/
+	border-right: 2px solid rgb(57,77,98);  /* 右侧边界 宽度 颜色 */
+	/*border-top: 3px solid rgba(57,77,98,255);  !* 上方边界 宽度 颜色 *!*/
+	/*border-bottom: 3px solid rgba(57,77,98,255);  !* 下方边界 宽度 颜色 *!*/
+
+    image: url(':/icons/right-indicator-1-blue');  /* 折叠图标 */
+}
+
+/* TODO: 设置父节点展开的branch分支样式 */
+#cmd_treeWidget::branch:open:has-children:!has-siblings,
+#cmd_treeWidget::branch:open:has-children:has-siblings {
+    margin: 0px;
+	border-image: none;
+	border: 0px	solid rgb(57,77,98);
+	/*border-left: 2px solid rgba(57,77,98,255);  !* 左侧边界 宽度 颜色 *!*/
+	border-right: 2px solid rgb(57,77,98); /* 右侧边界 宽度 颜色 */
+	/*border-top: 3px solid rgba(57,77,98,255); !* 上方边界 宽度 颜色 *!*/
+	/*border-bottom: 3px solid rgba(57,77,98,255); !* 下方边界 宽度 颜色 *!*/
+
+    image: url(':/icons/down-indicator-1-blue');  /* 展开图标 */
+}
+
+/* 设置父节点的对应item样式(折叠和展开相同样式) */
+#cmd_treeWidget::item:has-children:!has-siblings,
+#cmd_treeWidget::item:has-children:has-siblings {
+	background: solid rgb(57,77,98);
+	margin: 0px;
+	outline: 0px;
+}
+
+/* ===============================  指令库  ============================== */
+
+QTreeWidget#op_view_treeWidget{
+    outline: 0px;
+    border: 2px solid rgb(49,57,75);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-size: 20px;
+	background: solid rgba(34,40,49,255);
+	color: rgba(32,207,222,255);
+
+}
+QTreeWidget#op_view_treeWidget::branch{
+	/* background: rgba(255,255,255,100); */
+	color: rgba(255,255,255,255)
+}
+
+/* 悬停颜色背景(只有item) */
+QTreeWidget#op_view_treeWidget::item:hover,
+QTreeWidget#op_view_treeWidget::item:hover:has-children:!has-siblings,
+QTreeWidget#op_view_treeWidget::item:hover:has-children:has-siblings {
+	show-decoration-selected:1;
+	background-color: rgba(49, 58, 66,200);
+	selection-background-color: rgba(80,98,113,255);
+	color: rgb(255,255,255); /* 悬停字体色 */
+}
+
+/* 选中颜色背景(只有item) */
+QTreeWidget#op_view_treeWidget::item:selected,
+QTreeWidget#op_view_treeWidget::item:selected:has-children:!has-siblings,
+QTreeWidget#op_view_treeWidget::item:selected:has-children:has-siblings {
+	border-left-color:transparent;
+	border-right-color: transparent;
+	border-top-color: transparent;
+	border-bottom-color: transparent;
+	background-color: rgba(0,100,137,255);
+	color: rgb(255,191,191);
+}
+
+/* 设置行间距(默认上下都为0) */
+QTreeWidget#op_view_treeWidget::item{
+	margin-top:1px;
+	margin-bottom:1px;
+}
+
+/* ==============================  日志浏览器  ============================== */
+
+QTextEdit#log_textEdit {
+
+	border-top: 3px solid rgb(57,57,62);  /* 日志浏览器与指令编辑器中间的分割线 */
+	border-bottom-right-radius: 0px; /* 设置右下角圆角 */
+    background-color: rgb(34,40,49);
+	/* background-image: url(draft.png);*/
+	background-attachment: scroll;
+}
+
+/* ===============================  属性表  =============================== */
+
+QTableWidget{
+    outline: 0px;
+    border: 2px solid rgb(57,57,62);
+    border-radius: 6px;
+    font-family: "Microsoft Yahei";
+	font-size: 17px;
+    background-color: rgba(34,40,49,255);
+    color: rgb(222,222,222);  /* 字体颜色 */
+}
+
+QTableWidget::item{
+    margin: 0px;
+    padding: 0px;
+	/* 表格网格颜色 */
+    border: 1px solid rgb(73,79,107);
+	border-left-width: 0px;
+    border-right-width: 1px;
+    border-top-width: 0px;
+	border-bottom-width: 1px;
+}
+
+QTableWidget::item:hover{
+	background-color: rgb(51, 60, 73)
+}
+
+
+QTableWidget::item:selected{
+	background-color: #1B89A1;
+}
+
+QHeaderView::section,QTableCornerButton:section{
+	font-family: "Microsoft Yahei";
+	font-size: 19px;
+    padding: 2px;
+    margin: 0px;
+    color: rgb(85,98,173);  /* 表头字体颜色 */
+    border: 1px solid rgb(73,79,107);
+    border-left-width: 0px;
+    border-right-width: 3px;
+    border-top-width: 0px;
+    border-bottom-width: 3px;
+    background: qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,
+                    stop:0 #404040,stop:1 #0F111A);
+}
+
+
+/* ============================= 主窗口内部分割线 ============================ */
+QMainWindow::separator {
+    background: rgb(62,77,93);
+    width: 1px;
+    height: 4px;
+    margin: 0px;
+    padding: 0px;
+}
+QMainWindow::separator:hover{
+	background: rgb(98,121,144);
+}
+/* ==============================  停靠窗口DockWidget  =========================== */
+QDockWidget {
+	font-family: "Microsoft Yahei";
+	font: 18px;
+    color: rgb(200,200,200);  /* 窗口标题颜色 */
+    border: 0px solid rgb(0,0,0);
+    titlebar-close-icon: url(:/icons/close-white);  /* 关闭按钮 */
+    titlebar-normal-icon: url(:/icons/float-white);  /* 浮动按钮 */
+}
+
+/* 标题设置 */
+QDockWidget::title{
+    border: 2px solid rgb(41,41,41);
+    border-bottom: 0px;
+    border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+    text-align: center;
+    background: rgb(51,51,51);
+    padding-left: 50px;
+}
+
+/* 关闭和显示按钮 */
+QDockWidget::close-button, QDockWidget::float-button {
+    border: 0px solid transparent;
+    background: rgb(51,51,51);
+    padding: 1px;
+    icon-size: 20px; /* maximum icon size */
+}
+
+/* 按钮鼠标悬浮状态 */
+QDockWidget::close-button:hover{
+    background: rgb(243, 44, 44);
+}
+
+QDockWidget::float-button:hover{
+	background: rgb(183, 183, 183);
+}
+
+/* 按钮鼠标按下状态 */
+QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
+    padding: 1px -1px -1px 1px;
+}
+
+/* 把按钮移到左上角 */
+QDockWidget::close-button {
+    subcontrol-position: top left;
+    subcontrol-origin: margin;
+    position: absolute;
+    top: 0px; left: 2px; bottom: 0px;
+    width: 16px;
+}
+
+QDockWidget::float-button {
+    subcontrol-position: top left;
+    subcontrol-origin: margin;
+    position: absolute;
+    top: 0px; left: 25px; bottom: 0px;
+    width: 16px;
+}
+
+/* attr_edit_dockWidgetContents */
+/* op_view_dockWidgetContents */
+QWidget#attr_edit_dockWidgetContents, QWidget#op_view_dockWidgetContents{
+    border: 3px solid rgba(34,40,49, 255);
+    border-radius: 2px;
+    padding: 0px;
+	background-color: rgba(34,40,49, 255);
+    /* background-image: url(res/); */
+}
+
+
+/* ============================== 工具提示信息 ============================== */
+
+QToolTip {
+    border: 3px solid darkkhaki;
+    padding: 5px;
+    border-radius: 3px;
+    opacity: 200;
+}
+/* ============================== QSplitter样式 ============================ */
+QSplitter::handle {
+	background: rgb(57,57,62);
+}
+
+
+/* ================================= 垂直滚动条 ================================= */
+QScrollBar:vertical{
+	margin: 16px 0px 16px 0px;
+	background-color: transparent;
+	border: 0px;
+	width: 10px;
+}
+
+QScrollBar::handle:vertical{
+	background-color:rgba(59,103,168,100);
+	border-radius:5px;
+	width:11px;
+}
+
+QScrollBar::handle:vertical:hover{
+	background-color:rgba(106,144,201,220);
+}
+
+QScrollBar::sub-line:vertical{
+	subcontrol-position: top;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 1px solid transparent;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	height:14px;
+}
+
+QScrollBar::add-line:vertical{
+	subcontrol-position: bottom;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 1px solid transparent;
+	border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+	height:14px;
+}
+
+/* 滚动条上下按钮 */
+QScrollBar::up-arrow:vertical{
+	border-image:url(:/icons/scrollV-up-darkblue);
+	width:11px;
+	height:11px;
+}
+
+QScrollBar::down-arrow:vertical{
+	border-image:url(:/icons/scrollV-down-darkblue);
+	width:11px;
+	height:11px;
+}
+
+QScrollBar::sub-page:vertical,QScrollBar::add-page:vertical{
+	background-color: transparent;
+}
+
+/* ================================= 水平滚动条 ================================= */
+
+QScrollBar:horizontal{
+	margin: 0px 0px 0px 0px;
+	background-color: transparent;
+	border: none;
+	height: 8px;
+}
+
+QScrollBar::handle:horizontal{
+	background-color: rgba(59,103,168,190);
+	border-radius: 4px;
+	height: 8px;
+}
+
+QScrollBar::handle:horizontal:hover {
+	background-color:rgba(106,144,201,220);
+}
+
+QScrollBar::add-line:horizontal{
+	subcontrol-position: right;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 1px solid transparent;
+	height: 1px;
+	width: 1px;
+}
+
+QScrollBar::sub-line:horizontal{
+	subcontrol-position: left;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 1px solid transparent;
+	height: 1px;
+	width: 1px;
+}
+
+QScrollBar::left-arrow:horizontal{
+	border-image:url(:/icons/);
+	width: 1px;
+	height: 1px;
+}
+
+QScrollBar::right-arrow:horizontal{
+	border-image:url(:/icons/);
+	width: 1px;
+	height: 1px;
+}
+
+QScrollBar::sub-page:horizontal,QScrollBar::add-page:horizontal{
+	background-color: transparent;
+}
+
+
+/* ============================== *_frame对象样式 ============================== */
+
+QFrame#main_left_frame {
+    border: 3px solid rgb(57,57,62);
+	border-right: 2px solid rgb(57,57,62);
+	border-bottom-left-radius: 2px; /* 设置左下角圆角 */
+    padding: 0px;
+    /* background-image: url(res/); */
+}
+
+/*  main_middle_frame  */
+QFrame#main_middle_frame {
+    border: 3px solid rgb(57,57,62);
+	border-left: 1px solid rgb(57,57,62);
+	border-bottom-right-radius: 2px; /* 设置右下角圆角 */
+    padding: 0px;
+    /* background-image: url(res/); */
+}
+QTreeWidget > QBox{
+	background-color: rgb(0,0,0);
+}
+
+/* ================================  按钮  ================================ */
+
+QPushButton {
+    border: 2px solid rgba(144,144,144,250);
+    border-radius: 5px;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                      stop: 0 rgb(92, 92, 92), stop: 1 rgb(0, 0, 0));
+    min-width: 80px;
+    min-height: 30px;
+    color: rgb(249, 233, 85);
+    font-size: 20px;
+}
+
+QPushButton:pressed {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                      stop: 0 rgba(0, 23, 105, 71), stop: 1 rgba(0, 15, 61, 154));
+}
+
+QPushButton:flat {
+    border: none; /* 扁平按钮没有边框 */
+}
+
+QPushButton:default {
+    border-color: rgba(100, 211, 248, 200); /* 使默认按钮突出显示 */
+}
+
+QPushButton:open { /* 当按钮的菜单打开时 */
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                      stop: 0 rgb(85, 85, 85), stop: 1 rgb(210, 210, 210));
+}
+
+QPushButton::menu-indicator {
+    image: url();
+    subcontrol-origin: padding;
+    subcontrol-position: bottom right;
+}
+
+QPushButton::menu-indicator:pressed, QPushButton::menu-indicator:open {
+    position: relative;
+    top: 2px; left: 2px; /* 将箭头移动 2 像素 */
+}
+
+/* ================================ 输入对话窗样式 ================================ */
+QInputDialog {
+    background-color: rgba(59, 94, 129, 80);
+    border: none; /* 无边框 */
+}
+
+QInputDialog > QLabel {
+    font-family: "微软雅黑";
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+}
+
+QInputDialog > QLineEdit {
+    font-size: 20px;
+    font-weight: bold;
+    border: 2px solid gray;
+    border-radius: 10px;
+    padding: 2 8px;
+    background: rgba(248, 248, 162, 255);
+    selection-background-color: #9d488892;
+    min-height: 30px;
+}
+
+/* ================================ 标签 ================================ */
+
+QLabel#task_label, QLabel#cmd_label{
+	padding-left: 5px;  /* 为设置文字距离左边边界的距离 */
+	padding-top: 5px;   /* 设置文字距离顶边边界的距离 */
+	padding-right: 5px;  /* 设置文字距离右边边界的距离 */
+	padding-bottom: 5px;  /* 设置文字距离底边边界的距离 */
+    font-size: 17px;
+    color: rgba(0,173,181,230);
+	background-color: rgba(26,59,72,240);
+	background-clip: border;
+	border: 0px;
+	margin: 0px;
+
+}
+
+/* ================================ 搜索框组合 ================================ */
+#op_search_frame {
+	border: 2px solid rgba(49,57,75,255);  /* border 的宽度 类型 颜色 */
+	border-radius: 6px;  /* border圆角 */
+	background-color: rgb(34,40,49);  /* 搜索框外部背景色 */
+}
+
+#op_search_btn {
+	padding:4px 4px;
+	border-radius: 2px;
+	background-color: rgba(34,40,49,180);
+}
+/* 按钮点击效果 */
+#op_search_btn:pressed {
+	padding-left: 4px;
+	padding-top: 4px;
+}
+
+#op_search_line {
+	font-family: "微软雅黑";
+	font-size: 15px;  /* 搜索框字体大小 */
+	font-weight: bold;
+
+	border: 0px solid rgb();
+    border-radius: 1px;
+
+	padding: 0px;
+	color: rgb(255,255,255);  /* 搜索框字体颜色 */
+    background: rgba(34,40,49, 255);  /* 搜索框背景色 */
+    selection-background-color: #9d488892;
+    min-height: 0px;
+}
+
+/* ============================== QDialog ============================== */
+QDialog {
+    background-color: rgb(34,40,49);
+    color: rgb(255,255,255);
+    border: 1px solid rgba(131,131,131,100);
+    border-radius: 2px;
+}
+
+QDialog > QPushButton {
+    background-color: rgb(235, 235, 235);
+    color: #000000;
+	border: 1px outset rgb(255,255,255);
+    border-radius: 8px;
+	font-family: "Microsoft YaHei";
+    font-size: 16px;
+	text-align: center center;
+}
+
+QDialog > QPushButton:hover {
+    background-color: rgb(113,113,113);
+    color: #FFFFFF;
+	border: 2px outset rgba(113,113,113, 0);
+}
+
+QDialog > QPushButton:pressed {
+    background-color: rgb(100,100,100);
+    color: #FFFFFF;
+	border: 4px outset rgba(100,100,100, 0);
+}
+
+QDialog > QLabel{
+	font-family: "Microsoft YaHei";
+	font-size: 16px;
+	font-weight: bold;
+	color: #FFFFFF;
+}
+
+QDialog > QLineEdit {
+    font-family: "Microsoft YaHei";
+    font: 16px;
+    font-weight: bold;
+    color: #FFFFFF;
+    background-color: rgb(51, 60, 73);
+    border: 2px solid rgba(131,131,131,100);
+    border-radius: 5px;
+    padding: 0px 5px;
+    text-align: center center;
+}
+
+QDialog > QTextBrowser {
+    border: 0px;
+    border-top: 1px solid rgb(128, 128, 128);
+}
+
+/* ================================ QMessageBox样式 ================================ */
+QMessageBox{
+    background-color: rgba(59, 94, 129, 80);
+}
+QMessageBox > QLabel{
+    font-family: "微软雅黑";
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+}
+
+/* ========================== 属性编辑器内的 QCheckBox ========================== */
+QCheckBox{
+	border: none;/*最外层边框*/
+}
+QCheckBox::indicator{/*选择框尺寸*/
+    background-color: rgba(255, 255, 255, 0);
+    border: 0px solid #b1b1b1;
+	width: 50px;
+	height: 25px;
+}
+QCheckBox:enabled:checked{
+	color: rgb(255, 255, 255);
+}
+QCheckBox:enabled:!checked{
+	color: rgb(255, 255, 255);
+}
+QCheckBox:enabled:hover{
+ 	color: rgb(0, 200, 0);
+}
+QCheckBox:!enabled{
+	color: rgb(80, 80, 80);
+}
+/* 选择指示器 */
+QCheckBox::indicator:unchecked {
+        image: url(":/icons/checkbox-off");
+}
+QCheckBox::indicator:unchecked:hover {
+        image: url(":/icons/checkbox-off");
+}
+QCheckBox::indicator:unchecked:pressed {
+        image: url(":/icons/checkbox-off");
+}
+QCheckBox::indicator:checked {
+        image: url(":/icons/checkbox-on");
+}
+QCheckBox::indicator:checked:hover {
+        image: url(":/icons/checkbox-on");
+}
+QCheckBox::indicator:checked:pressed {
+        image: url(":/icons/checkbox-on");
+}
+
+/* ==================== 属性编辑器内的 QSpinBox,QDoubleSpinBox ==================== */
+QSpinBox, QDoubleSpinBox {
+    padding-top: 2px;
+    padding-bottom: 2px;
+	padding-left: 4px;
+    padding-right: 15px;
+    border: 1px solid rgb(64,64,64);
+    border-radius: 3px;
+	color: rgb(230, 230, 230);  /* 文字颜色 */
+    background-color: rgb(34,40,49);  /* 背景颜色 */
+	selection-color: rgb(255, 255, 255);  /* 选中文字颜色 */
+	selection-background-color: rgb(83,121,180);  /* 选中背景颜色 */
+	font-family: "Microsoft Yahei";
+	font-size: 10pt;
+}
+
+/* 鼠标悬浮时的样式 */
+QSpinBox:hover, QDoubleSpinBox:hover {
+    background-color: rgb(51, 60, 73);
+}
+
+/* ---------- 向上按钮 ---------- */
+QSpinBox::up-button, QDoubleSpinBox::up-button {
+	subcontrol-origin: border;  /* 起始位置 */
+	subcontrol-position: top right; /* 居于右上角 */
+	border: none;
+	width: 12px;
+	margin-top: 2px;
+	margin-right: 1px;
+	margin-bottom: 0px;
+}
+
+QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover {
+	border: none;
+}
+
+/* 向上箭头 */
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
+	image: url(:/icons/spinbox-up-blue);
+}
+
+QSpinBox::up-arrow:hover, QDoubleSpinBox::up-arrow:hover {
+	image: url(:/icons/spinbox-up-blue);
+}
+
+QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off,
+QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off {
+	image: url(:/icons/spinbox-up-blue);
+}
+
+/* ---------- 向下按钮 ---------- */
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+	subcontrol-origin: border;
+	subcontrol-position: bottom right;
+	border: none;
+	width: 12px;
+	margin-top: 0px;
+	margin-right: 1px;
+	margin-bottom: 2px;
+}
+
+QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
+	border: none;
+}
+
+/* ---------- 向下箭头 ---------- */
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+	image: url(:/icons/spinbox-down-blue);
+}
+
+QSpinBox::down-arrow:hover, QDoubleSpinBox::down-arrow:hover {
+	image: url(:/icons/spinbox-down-blue);
+}
+
+QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off,
+QDoubleSpinBox::down-arrow:disabled, QDoubleSpinBox::down-arrow:off {
+	image: url(:/icons/spinbox-down-blue);
+}
+
+/* ========================== 属性编辑器内的 QComboBox ========================== */
+QComboBox {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    padding-right: 15px;
+    border: 1px solid rgb(64,64,64);
+    border-radius: 3px;
+    color: rgb(230, 230, 230);  /* 文字颜色 */
+    background-color: rgb(34,40,49);  /* 背景颜色 */
+    selection-color: rgb(255, 255, 255);  /* 选中文字颜色 */
+    selection-background-color: rgb(83,121,180);  /* 选中背景颜色 */
+    font-family: "Microsoft Yahei";
+    font-size: 12pt;
+}
+
+QComboBox:on {
+    padding-top: 3px;
+    padding-left: 4px;
+}
+/* 鼠标悬浮时的样式 */
+QComboBox:hover {
+    background-color: rgb(51, 60, 73);
+}
+/* 下拉按钮,可以设置按钮的位置、大小、背景图、边框等 */
+QComboBox::drop-down {
+    subcontrol-origin: padding;   /* 子控件在父元素中的原点矩形，如果未指定此属性，则默认为padding */
+    subcontrol-position: top right;   /* 下拉框的位置（右上） */
+    width: 15px;   /* 下拉框的宽度 */
+    border: none;
+}
+/* 下拉箭头样式 */
+QComboBox::down-arrow {
+    width: 15px;   /* 下拉箭头的宽度（建议与下拉框drop-down的宽度一致） */
+    background: transparent;   /* 下拉箭头的的背景色 */
+    padding: 0px 0px 0px 0px;   /* 上内边距、右内边距、下内边距、左内边距 */
+    image: url(:/icons/combobox-arrow-down-blue);   /* 显示下拉箭头 */
+}
+/* 点击下拉箭头 */
+QComboBox::down-arrow:on {
+    top: 1px;
+    left: 1px;
+    image: url(:/icons/combobox-arrow-up-blue);   /* 显示下拉箭头 */
+}
+/* ---------------------- 下拉项样式设置 -------------------- */
+QComboBox QAbstractItemView{
+    outline: 0px;   /* 下拉项去虚线框 */
+    border: 1px solid rgb(57, 52, 57);
+    border-radius: 0px 0px 5px 5px;
+    color: rgb(230, 230, 230);
+	background: rgb(34,40,49);
+    selection-color: rgb(255, 255, 255);
+    selection-background-color: rgb(47, 100, 182);
+    padding-left: 4px;
+	font-size: 19px;
+}

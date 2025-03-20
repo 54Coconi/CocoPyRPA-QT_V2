@@ -1,0 +1,30 @@
+{
+    "task_name": "文字识别",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 3.00 秒",
+                "delay_time": 3.0000000000000004,
+                "is_active": true
+            }
+        },
+        {
+            "type": "image",
+            "action": "imageOcr",
+            "icon": ":/icons/img-ocr",
+            "params": {
+                "name": "文字识别",
+                "text": "EditPlus 3",
+                "match_mode": "完全匹配",
+                "error_retries": 10,
+                "error_retries_time": 1.0,
+                "retries": 0,
+                "is_ignore_case": false,
+                "is_active": true
+            }
+        }
+    ]
+}

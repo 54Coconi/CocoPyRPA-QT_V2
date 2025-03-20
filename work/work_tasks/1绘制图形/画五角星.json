@@ -1,0 +1,112 @@
+{
+    "task_name": "画五角星",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 3.00 秒",
+                "delay_time": 3.0000000000000004,
+                "is_active": true,
+                "status": 0,
+                "id": "97d66207"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragRel",
+            "icon": ":/icons/mouse-rel-drag",
+            "params": {
+                "name": "鼠标相对拖动(300,0)",
+                "offset": [
+                    300,
+                    0
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "4f74144c"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragRel",
+            "icon": ":/icons/mouse-rel-drag",
+            "params": {
+                "name": "鼠标相对拖动(-243,176)",
+                "offset": [
+                    -243,
+                    176
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "8b63ab6c"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragRel",
+            "icon": ":/icons/mouse-rel-drag",
+            "params": {
+                "name": "鼠标相对拖动(93,-285)",
+                "offset": [
+                    93,
+                    -285
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "8b0bfa7b"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragRel",
+            "icon": ":/icons/mouse-rel-drag",
+            "params": {
+                "name": "鼠标相对拖动(93,285)",
+                "offset": [
+                    93,
+                    285
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "e8a9a58a"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragRel",
+            "icon": ":/icons/mouse-rel-drag",
+            "params": {
+                "name": "鼠标相对拖动(-243,-176)",
+                "offset": [
+                    -243,
+                    -176
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "a880c0ba"
+            }
+        }
+    ]
+}

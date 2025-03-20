@@ -1,0 +1,152 @@
+{
+    "task_name": "打开CMD",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": false,
+                "status": 0,
+                "id": "730ed38a"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "hotkey",
+            "icon": ":/icons/key-hotkey",
+            "params": {
+                "name": "热键组合(win+r)",
+                "keys": [
+                    "win",
+                    "r"
+                ],
+                "hold_time": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "8d47c8aa"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "e6f908ff"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyType",
+            "icon": ":/icons/key-type",
+            "params": {
+                "name": "键盘输入文本",
+                "text_str": "cmd",
+                "interval": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "8a2a5bc1"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "854ed9b5"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyTap",
+            "icon": ":/icons/key-tap",
+            "params": {
+                "name": "键盘敲击-enter",
+                "key": "enter",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "af0d595a"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.60 秒",
+                "delay_time": 0.6000000000000001,
+                "is_active": true,
+                "status": 0,
+                "id": "b144cdca"
+            }
+        },
+        {
+            "type": "subtask",
+            "action": "runSubtask",
+            "icon": ":/icons/subtask",
+            "params": {
+                "name": "子任务",
+                "subtask_file": "G:/CocoPyRPA_QT/CocoPyRPA-QT_v2.0/CocoPyRPA_v2.0.0/work/work_tasks/0测试/打开DOS窗口/输入cmd指令.json",
+                "is_active": true
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 4.00 秒",
+                "delay_time": 4.000000000000001,
+                "is_active": true,
+                "status": 0,
+                "id": "c118ff84"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "hotkey",
+            "icon": ":/icons/key-hotkey",
+            "params": {
+                "name": "热键组合(alt+f4)",
+                "keys": [
+                    "alt",
+                    "f4"
+                ],
+                "hold_time": 0.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "85d491d2"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "ee548dc2"
+            }
+        }
+    ]
+}

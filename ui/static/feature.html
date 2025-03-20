@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: #212121;
+            font-family: 'Verdana', sans-serif;
+            margin: 20px;
+            /*text-align: left;*/
+        }
+
+        h2 {
+            /* 文本水平居中 */
+            text-align: center;
+            color: #3eb1fd;
+        }
+
+        h3 {
+            color: #2aece2;
+            font-family: 'Arial', sans-serif;
+        }
+
+        p {
+            color: #f2f2f2;
+        }
+
+        table {
+            background-color: #000000;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            color: #f18d8d;
+            border: 1px solid #f3d7d7;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3d424c;
+        }
+
+        td {
+            background-color: #000000;
+        }
+
+        /* 设置表格第一列表头和单元格不跨行 */
+        /*th:nth-child(1), td:nth-child(1){*/
+        /*    white-space: nowrap;*/
+        /*}*/
+
+        /* 设置单元格内容居中 */
+        .centered-cell {
+            text-align: center;
+            font-weight: bold;
+            color: #2aece2;
+        }
+
+    </style>
+  <title>功能说明</title>
+</head>
+<body>
+    <p>欢迎使用CocoPyRPA桌面自动化程序，以下是一些主要功能及说明：</p>
+    <h2>指令功能说明</h2>
+        <h3>鼠标控制类指令</h3>
+        <table>
+            <tr>
+                <th>指令</th>
+                <th>描述</th>
+            </tr>
+            <tr>
+                <td>鼠标左键点击</td>
+                <td>模拟鼠标左键点击</td>
+            </tr>
+            <tr>
+                <td>鼠标右键点击</td>
+                <td>模拟鼠标右键点击</td>
+            </tr>
+            <tr>
+                <td>鼠标中键点击</td>
+                <td>模拟鼠标中键点击</td>
+            </tr>
+            <tr>
+                <td>鼠标定点移动</td>
+                <td>鼠标移动至屏幕指定坐标处</td>
+            </tr>
+            <tr>
+                <td>鼠标相对移动</td>
+                <td>鼠标相对当前位置移动指定距离</td>
+            </tr>
+            <tr>
+                <td>鼠标定点拖动</td>
+                <td>鼠标从当前位置拖动到屏幕指定位置</td>
+            </tr>
+            <tr>
+                <td>鼠标相对拖动</td>
+                <td>鼠标相对当前位置拖动指定距离</td>
+            </tr>
+            <tr>
+                <td>鼠标竖直滚动</td>
+                <td>模拟鼠标滚轮竖直滚动</td>
+            </tr>
+            <tr>
+                <td>鼠标水平滚动</td>
+                <td>模拟鼠标滚轮水平滚动</td>
+            </tr>
+        </table>
+
+        <h3>键盘控制类指令</h3>
+        <table>
+            <tr>
+                <th>指令</th>
+                <th>描述</th>
+            </tr>
+            <tr>
+                <td>键盘按下</td>
+                <td>模拟键盘单个按键按下</td>
+            </tr>
+            <tr>
+                <td>键盘释放</td>
+                <td>模拟键盘单个按键释放</td>
+            </tr>
+            <tr>
+                <td>键盘敲击</td>
+                <td>模拟键盘单个按键敲击（按下并释放）</td>
+            </tr>
+            <tr>
+                <td>热键组合</td>
+                <td>模拟键盘多个按键同时按下并释放</td>
+            </tr>
+            <tr>
+                <td>键盘输入文本</td>
+                <td>模拟键盘通过按键输入字符串</td>
+            </tr>
+        </table>
+
+        <h3>图像类指令</h3>
+        <table>
+            <tr>
+                <th>指令</th>
+                <th>描述</th>
+            </tr>
+            <tr>
+                <td>图片匹配</td>
+                <td>截取屏幕全屏并将用户提供的模板图片与之匹配，匹配成功返回模板中心坐标</td>
+            </tr>
+            <tr>
+                <td>图片点击</td>
+                <td>先通过图片匹配找到模板图片的中心位置再将鼠标移动到该位置并点击</td>
+            </tr>
+            <tr>
+                <td>文字识别</td>
+                <td>先截取全屏图像，再识别图像中的文字并返回给定文字匹配结果</td>
+            </tr>
+            <tr>
+                <td>文字点击</td>
+                <td>文字识别成功后点击该文字区域的中心位置</td>
+            </tr>
+        </table>
+
+        <h3>流程控制类指令</h3>
+        <table>
+            <tr>
+                <th>指令</th>
+                <th>描述</th>
+            </tr>
+            <tr>
+                <td>等待</td>
+                <td>等待指定时间</td>
+            </tr>
+            <tr>
+                <td>If 判断</td>
+                <td>通过判断当前"if 判断"指令之前某个已经执行的指令的属性值来决定执行"then"分支还是"else"分支</td>
+            </tr>
+            <tr>
+                <td>Loop 循环</td>
+                <td>将多个指令整体循环执行指定次数</td>
+            </tr>
+        </table>
+
+        <h3>脚本控制类指令</h3>
+        <table>
+            <tr>
+                <th>指令</th>
+                <th>描述</th>
+            </tr>
+            <tr>
+                <td>执行 DOS 命令</td>
+                <td>使用subprocess库执行Dos命令，支持Windows和Unix平台（在Unix平台执行的是shell命令）</td>
+            </tr>
+            <tr>
+                <td>执行 Python 脚本</td>
+                <td>在预设的python环境中执行python代码</td>
+            </tr>
+        </table>
+
+        <h3>子任务类指令</h3>
+        <table>
+            <tr>
+                <th>指令</th>
+                <th>描述</th>
+            </tr>
+            <tr>
+                <td>执行子任务</td>
+                <td>用于加载子任务文件的指令到主任务中</td>
+            </tr>
+        </table>
+
+    <h2>菜单项、工具项说明</h2>
+    <table>
+        <tr>
+            <th>操作</th>
+            <th>快捷键</th>
+            <th>描述</th>
+        </tr>
+        <tr>
+            <td class="centered-cell" colspan="3">文件</td>
+        </tr>
+        <tr>
+            <td>新建任务目录</td>
+            <td>Ctrl+Shift+N</td>
+            <td>在任务列表中新建一个任务目录文件夹</td>
+        </tr>
+        <tr>
+            <td>新建任务文件</td>
+            <td>Ctrl+N</td>
+            <td>必须在选中了某个任务目录后才能新建一个任务json文件</td>
+        </tr>
+        <tr>
+            <td>打开任务</td>
+            <td>Ctrl+O</td>
+            <td>打开选择的任务json文件并将任务加载到当前指令编辑区内</td>
+        </tr>
+        <tr>
+            <td>保存任务</td>
+            <td>Ctrl+S</td>
+            <td>保存当前指令编辑区内的指令到选中的任务json文件中</td>
+        </tr>
+        <tr>
+            <td>设置</td>
+            <td>无</td>
+            <td>打开软件设置窗口</td>
+        </tr>
+        <tr>
+            <td class="centered-cell" colspan="3">编辑</td>
+        </tr>
+        <tr>
+            <td>撤销</td>
+            <td>Ctrl+Z</td>
+            <td>撤销指令编辑区内上一步的修改操作</td>
+        </tr>
+        <tr>
+            <td>重做</td>
+            <td>Ctrl+Y</td>
+            <td>重做上一步的撤销动作</td>
+        </tr>
+        <tr>
+            <td>清空</td>
+            <td>Ctrl+Delete</td>
+            <td>清空指令编辑区内的所有指令</td>
+        </tr>
+        <tr>
+            <td class="centered-cell" colspan="3">视图</td>
+        </tr>
+        <tr>
+            <td>属性编辑器</td>
+            <td>无</td>
+            <td>控制是否显示属性编辑器停靠窗口</td>
+        </tr>
+        <tr>
+            <td>指令操作库</td>
+            <td>无</td>
+            <td>控制是否显示指令操作库停靠窗口</td>
+        </tr>
+        <tr>
+            <td class="centered-cell" colspan="3">运行</td>
+        </tr>
+        <tr>
+            <td>运行全部</td>
+            <td>Shift+F5</td>
+            <td>从指令编辑器内的第一条指令开始加载指令并从第一条指令开始运行</td>
+        </tr>
+        <tr>
+            <td>指定运行</td>
+            <td>Shift+F6</td>
+            <td>加载指令编辑器内用户选中的一条指令并运行该指令</td>
+        </tr>
+        <tr>
+            <td>从当前运行</td>
+            <td>Shift+F7</td>
+            <td>从指令编辑器内的第一条指令开始加载指令并从用户选中的一条指令位置开始往下运行</td>
+        </tr>
+        <tr>
+            <td>自动运行</td>
+            <td>无</td>
+            <td>打开自动执行管理器界面</td>
+        </tr>
+        <tr>
+            <td class="centered-cell" colspan="3">工具</td>
+        </tr>
+        <tr>
+            <td>截图</td>
+            <td>Ctrl+Shift+S</td>
+            <td>打开截图工具用于截取图片，单击可以保存该点坐标</td>
+        </tr>
+        <tr>
+            <td>鼠标录制</td>
+            <td>Ctrl+Shift+M</td>
+            <td>检测鼠标的基本操作并记录，生成对应指令</td>
+        </tr>
+        <tr>
+            <td>键盘录制</td>
+            <td>Ctrl+Shift+K</td>
+            <td>检测键盘按键按下和释放事件并记录，生成对应指令</td>
+        </tr>
+        <tr>
+            <td>运行Python脚本</td>
+            <td>无</td>
+            <td>打开Python代码编辑器，在软件预设的执行环境中执行代码</td>
+        </tr>
+        <tr>
+            <td class="centered-cell" colspan="3">主题</td>
+        </tr>
+        <tr>
+            <td>默认</td>
+            <td>无</td>
+            <td>设置软件主题为“默认”主题</td>
+        </tr>
+        <tr>
+            <td>深色</td>
+            <td>无</td>
+            <td>设置软件主题为“深色“主题</td>
+        </tr>
+        <tr>
+            <td>浅色</td>
+            <td>无</td>
+            <td>设置软件主题为”浅色“主题</td>
+        </tr>
+        <tr>
+            <td>护眼</td>
+            <td>无</td>
+            <td>设置软件主题为”护眼“主题</td>
+        </tr>
+        <tr>
+            <td class="centered-cell" colspan="3">帮助</td>
+        </tr>
+        <tr>
+            <td>功能说明</td>
+            <td>无</td>
+            <td>打开软件功能说明窗口</td>
+        </tr>
+        <tr>
+            <td>关于</td>
+            <td>无</td>
+            <td>打开软件关于信息窗口</td>
+        </tr>
+        <tr>
+            <td>检查更新</td>
+            <td>无</td>
+            <td>检查软件版本更新</td>
+        </tr>
+    </table>
+
+    <h2>其它说明</h2>
+    <p>指令 &lt;按键&gt;、&lt;热键组合&gt;支持的按键参数为：</p>
+
+     <table>
+    <tr>
+      <td>'\t'</td>
+      <td>'\n'</td>
+      <td>'\r'</td>
+      <td>' '</td>
+      <td>'!'</td>
+      <td>'"'</td>
+      <td>'#'</td>
+      <td>'$'</td>
+      <td>'%'</td>
+      <td>'&'</td>
+    </tr>
+    <tr>
+      <td>"'"</td>
+      <td>'('</td>
+      <td>')'</td>
+      <td>'*'</td>
+      <td>'+'</td>
+      <td>','</td>
+      <td>'-'</td>
+      <td>'.'</td>
+      <td>'/'</td>
+      <td>'0'</td>
+    </tr>
+    <tr>
+      <td>'1'</td>
+      <td>'2'</td>
+      <td>'3'</td>
+      <td>'4'</td>
+      <td>'5'</td>
+      <td>'6'</td>
+      <td>'7'</td>
+      <td>'8'</td>
+      <td>'9'</td>
+      <td>':'</td>
+    </tr>
+    <tr>
+      <td>';'</td>
+      <td>'&lt;'</td>
+      <td>'='</td>
+      <td>'&gt;'</td>
+      <td>'?'</td>
+      <td>'@'</td>
+      <td>'['</td>
+      <td>'\\'</td>
+      <td>']'</td>
+      <td>'^'</td>
+    </tr>
+    <tr>
+      <td>'_'</td>
+      <td>'`'</td>
+      <td>'a'</td>
+      <td>'b'</td>
+      <td>'c'</td>
+      <td>'d'</td>
+      <td>'e'</td>
+      <td>'f'</td>
+      <td>'g'</td>
+      <td>'h'</td>
+    </tr>
+    <tr>
+      <td>'i'</td>
+      <td>'j'</td>
+      <td>'k'</td>
+      <td>'l'</td>
+      <td>'m'</td>
+      <td>'n'</td>
+      <td>'o'</td>
+      <td>'p'</td>
+      <td>'q'</td>
+      <td>'r'</td>
+    </tr>
+    <tr>
+      <td>'s'</td>
+      <td>'t'</td>
+      <td>'u'</td>
+      <td>'v'</td>
+      <td>'w'</td>
+      <td>'x'</td>
+      <td>'y'</td>
+      <td>'z'</td>
+      <td>'{'</td>
+      <td>'|'</td>
+    </tr>
+     </table>
+    <table>
+    <tr>
+      <td>'}'</td>
+      <td>'~'</td>
+      <td>'accept'</td>
+      <td>'add'</td>
+    </tr>
+    <tr>
+      <td>'alt'</td>
+      <td>'altleft'</td>
+      <td>'altright'</td>
+      <td>'apps'</td>
+    </tr>
+    <tr>
+      <td>'backspace'</td>
+      <td>'browserback'</td>
+      <td>'browserfavorites'</td>
+      <td>'browserforward'</td>
+    </tr>
+    <tr>
+      <td>'browserhome'</td>
+      <td>'browserrefresh'</td>
+      <td>'browsersearch'</td>
+      <td>'browserstop'</td>
+    </tr>
+    <tr>
+      <td>'capslock'</td>
+      <td>'clear'</td>
+      <td>'convert'</td>
+      <td>'ctrl'</td>
+    </tr>
+    <tr>
+      <td>'ctrlleft'</td>
+      <td>'ctrlright'</td>
+      <td>'decimal'</td>
+      <td>'del'</td>
+    </tr>
+    <tr>
+      <td>'delete'</td>
+      <td>'divide'</td>
+      <td>'down'</td>
+      <td>'end'</td>
+    </tr>
+    <tr>
+      <td>'enter'</td>
+      <td>'esc'</td>
+      <td>'escape'</td>
+      <td>'execute'</td>
+    </tr>
+    <tr>
+      <td>'f1'</td>
+      <td>'f10'</td>
+      <td>'f11'</td>
+      <td>'f12'</td>
+    </tr>
+    <tr>
+      <td>'f13'</td>
+      <td>'f14'</td>
+      <td>'f15'</td>
+      <td>'f16'</td>
+    </tr>
+    <tr>
+      <td>'f17'</td>
+      <td>'f18'</td>
+      <td>'f19'</td>
+      <td>'f2'</td>
+    </tr>
+    <tr>
+      <td>'f20'</td>
+      <td>'f21'</td>
+      <td>'f22'</td>
+      <td>'f23'</td>
+    </tr>
+    <tr>
+      <td>'f24'</td>
+      <td>'f3'</td>
+      <td>'f4'</td>
+      <td>'f5'</td>
+    </tr>
+    <tr>
+      <td>'f6'</td>
+      <td>'f7'</td>
+      <td>'f8'</td>
+      <td>'f9'</td>
+    </tr>
+    <tr>
+      <td>'final'</td>
+      <td>'fn'</td>
+      <td>'hanguel'</td>
+      <td>'hangul'</td>
+    </tr>
+    <tr>
+      <td>'hanja'</td>
+      <td>'help'</td>
+      <td>'home'</td>
+      <td>'insert'</td>
+    </tr>
+    <tr>
+      <td>'junja'</td>
+      <td>'kana'</td>
+      <td>'kanji'</td>
+      <td>'launchapp1'</td>
+    </tr>
+    <tr>
+      <td>'launchapp2'</td>
+      <td>'launchmail'</td>
+      <td>'launchmediaselect'</td>
+      <td>'left'</td>
+    </tr>
+    <tr>
+      <td>'modechange'</td>
+      <td>'multiply'</td>
+      <td>'nexttrack'</td>
+      <td>'nonconvert'</td>
+    </tr>
+    <tr>
+      <td>'num0'</td>
+      <td>'num1'</td>
+      <td>'num2'</td>
+      <td>'num3'</td>
+    </tr>
+    <tr>
+      <td>'num4'</td>
+      <td>'num5'</td>
+      <td>'num6'</td>
+      <td>'num7'</td>
+    </tr>
+    <tr>
+      <td>'num8'</td>
+      <td>'num9'</td>
+      <td>'numlock'</td>
+      <td>'pagedown'</td>
+    </tr>
+    <tr>
+      <td>'pageup'</td>
+      <td>'pause'</td>
+      <td>'pgdn'</td>
+      <td>'pgup'</td>
+    </tr>
+    <tr>
+      <td>'playpause'</td>
+      <td>'prevtrack'</td>
+      <td>'print'</td>
+      <td>'printscreen'</td>
+    </tr>
+    <tr>
+      <td>'prntscrn'</td>
+      <td>'prtsc'</td>
+      <td>'prtscr'</td>
+      <td>'return'</td>
+    </tr>
+    <tr>
+      <td>'right'</td>
+      <td>'scrolllock'</td>
+      <td>'select'</td>
+      <td>'separator'</td>
+    </tr>
+    <tr>
+      <td>'shift'</td>
+      <td>'shiftleft'</td>
+      <td>'shiftright'</td>
+      <td>'sleep'</td>
+    </tr>
+    <tr>
+      <td>'space'</td>
+      <td>'stop'</td>
+      <td>'subtract'</td>
+      <td>'tab'</td>
+    </tr>
+    <tr>
+      <td>'up'</td>
+      <td>'volumedown'</td>
+      <td>'volumemute'</td>
+      <td>'volumeup'</td>
+    </tr>
+    <tr>
+      <td>'win'</td>
+      <td>'winleft'</td>
+      <td>'winright'</td>
+      <td>'yen'</td>
+    </tr>
+    <tr>
+      <td>'command'</td>
+      <td>'option'</td>
+      <td>'optionleft'</td>
+      <td>'optionright'</td>
+    </tr>
+    </table>
+
+    <p>如果您在使用过程中有任何问题或建议，请随时联系我。</p>
+</body>
+</html>

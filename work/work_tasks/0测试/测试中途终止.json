@@ -1,0 +1,107 @@
+{
+    "task_name": "测试中途终止",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true
+            }
+        },
+        {
+            "type": "flow",
+            "action": "loop",
+            "icon": ":/icons/loop",
+            "params": {
+                "name": "Loop 循环",
+                "count": 10,
+                "loop_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 1.0,
+                            "is_active": true
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 1.0,
+                            "is_active": true
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 0.9999999999999987,
+                            "is_active": true
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 1.0,
+                            "is_active": true
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 0.9999999999999987,
+                            "is_active": true
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 1.0,
+                            "is_active": true
+                        }
+                    }
+                ],
+                "is_active": true
+            }
+        }
+    ]
+}

@@ -1,0 +1,77 @@
+{
+    "task_name": "绘制正方形",
+    "steps": [
+        {
+            "type": "mouse",
+            "action": "moveRel",
+            "icon": ":/icons/mouse-rel-move",
+            "params": {
+                "name": "鼠标相对移动(300,0)",
+                "offset": [
+                    300,
+                    0
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "12533352"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveRel",
+            "icon": ":/icons/mouse-rel-move",
+            "params": {
+                "name": "鼠标相对移动(0,300)",
+                "offset": [
+                    0,
+                    300
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "ff546428"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveRel",
+            "icon": ":/icons/mouse-rel-move",
+            "params": {
+                "name": "鼠标相对移动(-300,0)",
+                "offset": [
+                    -300,
+                    0
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "d76c22a8"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveRel",
+            "icon": ":/icons/mouse-rel-move",
+            "params": {
+                "name": "鼠标相对移动(0,-300)",
+                "offset": [
+                    0,
+                    -300
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "58ebe118"
+            }
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "task_name": "文字点击",
+    "steps": [
+        {
+            "type": "image",
+            "action": "imageOcrClick",
+            "icon": ":/icons/img-ocr-click",
+            "params": {
+                "name": "文字点击",
+                "text": "自动运行",
+                "match_mode": "部分匹配",
+                "error_retries": 0,
+                "error_retries_time": 0.0,
+                "clicks": 1,
+                "interval": 0.2,
+                "duration": 1.0,
+                "button": "left",
+                "retries": 0,
+                "is_ignore_case": false,
+                "use_regex": false,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "49e97d37"
+            }
+        }
+    ]
+}

@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CodeEditorUI</class>
+ <widget class="QWidget" name="CodeEditorUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>776</width>
+    <height>552</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+    background-color: #313034;
+    color: #f1f1f1;
+    font-size: 16px;
+    border: 0px solid #423f48;
+    font-family: &quot;Microsoft YaHei&quot;;
+    margin: 0px;
+}
+#widget_codeEdit{
+	border: 2px solid #423f48;
+}
+
+/* ============================= QMessageBox ============================= */
+QMessageBox{
+    background-color: rgba(33,33,33, 80);
+}
+QMessageBox &gt; QLabel{
+    font-family: &quot;Microsoft YaHei&quot;;
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+	background-color: rgba(33,33,33, 80);
+}
+
+/* ============================= QPushButton ============================= */
+QPushButton{
+    border: none;
+    width: 35px;
+}
+
+QPushButton:hover{
+    background-color:#423f48;
+}
+
+QPushButton:pressed{
+    background-color:#444444;
+}
+
+
+/* ============================= QLabel ============================= */
+QLabel{
+	font-size: 15px;
+	color: #FFFFFF;
+    background-color: #2A292B;
+    border:none;
+}
+
+
+/* ============================== QToolButton ============================== */
+QToolButton{
+	color: white; /*字体颜色*/
+	background-color: rgb(77,77,77); /*背景色*/ 
+	
+	border-style: outset;
+	border-width: 0px;
+	border-radius: 8px; /*边界圆滑*/
+	border-color: #8B7355;
+	min-width: 2em;
+	
+	font-family: &quot;Microsoft YaHei UI&quot;;
+	font:  16px;
+	padding: 1px;
+}
+
+QToolButton:hover{
+	background-color: #4076B2;
+}
+
+QToolButton:pressed{
+	background-color: #95890D; /*伪状态经过时背景色*/ 
+	border-style: inset;
+}
+
+QToolButton:!enabled{
+	background-color: rgb(120, 120, 120);
+	border-style: inset;
+}
+
+
+/* ===================================== 日志窗口  ===================================== */
+QTextEdit{
+	border: 2px solid rgb(66,63,72);
+	border-top-width: 2px;
+	border-radius: 1px; /* 设置圆角 */
+    background-color: rgb(49,48,52);
+	background-attachment: scroll;
+}
+
+
+/* ====================================  滚动条样式 ==================================== */
+/* ----------------------- 垂直滚动条 ----------------------- */
+QScrollBar:vertical{
+	margin: 16px 0px 16px 0px;
+	background-color: transparent;
+	border: 0px solid rgb(49,48,52);
+	width: 10px;
+}
+
+QScrollBar::handle:vertical{
+	background-color: rgba(147,94,16,255);
+	border-radius: 5px;
+	width: 11px;
+}
+
+QScrollBar::handle:vertical:hover{
+	background-color: rgba(234,149,28,255);
+}
+
+QScrollBar::sub-line:vertical{
+	subcontrol-position: top;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 0px solid transparent;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	height:14px;
+}
+
+QScrollBar::add-line:vertical{
+	subcontrol-position: bottom;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 0px solid transparent;
+	border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+	height:14px;
+}
+
+/* 滚动条上下按钮 */
+QScrollBar::up-arrow:vertical{
+	border-image:url(:/icons/scrollV-up-darkblue);
+	width:11px;
+	height:11px;
+}
+
+QScrollBar::down-arrow:vertical{
+	border-image:url(:/icons/scrollV-down-darkblue);
+	width:11px;
+	height:11px;
+}
+
+QScrollBar::sub-page:vertical,QScrollBar::add-page:vertical{
+	background-color: transparent;
+}
+
+/* ----------------------- 水平滚动条 ----------------------- */
+
+QScrollBar:horizontal{
+	margin: 0px 0px 0px 0px;
+	background-color: transparent;
+	border: none;
+	height: 8px;
+}
+
+QScrollBar::handle:horizontal{
+	background-color: rgba(147,94,16,255);
+	border-radius: 4px;
+	height: 8px;
+}
+
+QScrollBar::handle:horizontal:hover {
+	background-color: rgba(234,149,28,255);
+}
+
+QScrollBar::add-line:horizontal{
+	subcontrol-position: right;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 1px solid transparent;
+	height: 1px;
+	width: 1px;
+}
+
+QScrollBar::sub-line:horizontal{
+	subcontrol-position: left;
+	subcontrol-origin: margin;
+	background-color: transparent;
+	border: 1px solid transparent;
+	height: 1px;
+	width: 1px;
+}
+
+QScrollBar::left-arrow:horizontal{
+	border-image:url(:/icons/);
+	width: 1px;
+	height: 1px;
+}
+
+QScrollBar::right-arrow:horizontal{
+	border-image:url(:/icons/);
+	width: 1px;
+	height: 1px;
+}
+
+QScrollBar::sub-page:horizontal,QScrollBar::add-page:horizontal{
+	background-color: transparent;
+}
+
+
+</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainVerticalLayout" stretch="1,100">
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <property name="leftMargin">
+    <number>3</number>
+   </property>
+   <property name="topMargin">
+    <number>3</number>
+   </property>
+   <property name="rightMargin">
+    <number>3</number>
+   </property>
+   <property name="bottomMargin">
+    <number>3</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <property name="leftMargin">
+      <number>5</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QToolButton" name="toolButton_new">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>新建</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextUnderIcon</enum>
+       </property>
+       <property name="autoRaise">
+        <bool>false</bool>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::NoArrow</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_open">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>打开</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_save">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>保存</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_saveAs">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>另存为</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_run">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>运行</string>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>运行</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../resources.qrc">
+         <normaloff>:/icons/run-all</normaloff>:/icons/run-all</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>30</width>
+         <height>30</height>
+        </size>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::NoArrow</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>100</width>
+         <height>30</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="handleWidth">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="widget_codeEdit" native="true">
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="textEdit_log">
+      <property name="font">
+       <font>
+        <family>Microsoft YaHei</family>
+        <pointsize>-1</pointsize>
+       </font>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::ClickFocus</enum>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="html">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei'; font-size:16px; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="textInteractionFlags">
+       <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+      </property>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

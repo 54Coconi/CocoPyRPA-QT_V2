@@ -1,0 +1,458 @@
+{
+    "鼠标(Mouse)": [
+        {
+            "name": "鼠标左键点击",
+            "icon": ":/icons/mouse-click-left",
+            "data": {
+                "type": "mouse",
+                "action": "click",
+                "icon": ":/icons/mouse-click-left",
+                "params": {
+                    "name": "鼠标左键点击",
+                    "target_pos": [0,0],
+                    "clicks": 1,
+                    "interval": 0.2,
+                    "duration": 0.0,
+                    "retries": 0,
+                    "button": "left",
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标右键点击",
+            "icon": ":/icons/mouse-click-right",
+            "data": {
+                "type": "mouse",
+                "action": "click",
+                "icon": ":/icons/mouse-click-right",
+                "params": {
+                    "name": "鼠标右键点击",
+                    "target_pos": [0,0],
+                    "clicks": 1,
+                    "interval": 0.2,
+                    "duration": 0.0,
+                    "retries": 0,
+                    "button": "right",
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标中键点击",
+            "icon": ":/icons/mouse-click-middle",
+            "data": {
+                "type": "mouse",
+                "action": "click",
+                "icon": ":/icons/mouse-click-middle",
+                "params": {
+                    "name": "鼠标中键点击",
+                    "target_pos": [0,0],
+                    "clicks": 1,
+                    "interval": 0.2,
+                    "duration": 0.0,
+                    "retries": 0,
+                    "button": "middle",
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标定点移动",
+            "icon": ":/icons/mouse-move",
+            "data": {
+                "type": "mouse",
+                "action": "moveTo",
+                "icon": ":/icons/mouse-move",
+                "params": {
+                    "name": "鼠标定点移动",
+                    "target_pos": [0,0],
+                    "duration": 0.0,
+                    "retries": 0,
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标相对移动",
+            "icon": ":/icons/mouse-rel-move",
+            "data": {
+                "type": "mouse",
+                "action": "moveRel",
+                "icon": ":/icons/mouse-rel-move",
+                "params": {
+                    "name": "鼠标相对移动",
+                    "offset": [0,0],
+                    "duration": 0.0,
+                    "retries": 0,
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标定点拖动",
+            "icon": ":/icons/mouse-drag",
+            "data": {
+                "type": "mouse",
+                "action": "dragTo",
+                "icon": ":/icons/mouse-drag",
+                "params": {
+                    "name": "鼠标定点拖动",
+                    "target_pos": [0,0],
+                    "duration": 0.0,
+                    "retries": 0,
+                    "button": "left",
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标相对拖动",
+            "icon": ":/icons/mouse-rel-drag",
+            "data": {
+                "type": "mouse",
+                "action": "dragRel",
+                "icon": ":/icons/mouse-rel-drag",
+                "params": {
+                    "name": "鼠标相对拖动",
+                    "offset": [0,0],
+                    "duration": 0.0,
+                    "retries": 0,
+                    "button": "left",
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标竖直滚动",
+            "icon": ":/icons/wheel-v",
+            "data": {
+                "type": "mouse",
+                "action": "scrollV",
+                "icon": ":/icons/wheel-v",
+                "params": {
+                    "name": "鼠标竖直滚动",
+                    "scroll_units": 0,
+                    "retries": 0,
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "鼠标水平滚动",
+            "icon": ":/icons/wheel-h",
+            "data": {
+                "type": "mouse",
+                "action": "scrollH",
+                "icon": ":/icons/wheel-h",
+                "params": {
+                    "name": "鼠标水平滚动",
+                    "scroll_units": 0,
+                    "retries": 0,
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        }
+    ],
+    "键盘(Keyboard)": [
+        {
+            "name": "键盘按下",
+            "icon": ":/icons/key-press",
+            "data": {
+                "type": "keyboard",
+                "action": "keyPress",
+                "icon": ":/icons/key-press",
+                "params": {
+                    "name": "键盘按下",
+                    "key": "enter",
+                    "retries": 0,
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "键盘释放",
+            "icon": ":/icons/key-release",
+            "data": {
+                "type": "keyboard",
+                "action": "keyRelease",
+                "icon": ":/icons/key-release",
+                "params": {
+                    "name": "键盘释放",
+                    "key": "enter",
+                    "retries": 0,
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "键盘敲击",
+            "icon": ":/icons/key-tap",
+            "data": {
+                "type": "keyboard",
+                "action": "keyTap",
+                "icon": ":/icons/key-tap",
+                "params": {
+                    "name": "键盘敲击",
+                    "key": "enter",
+                    "retries": 0,
+                    "is_active": true,
+                    "use_pynput": false,
+                    "status": 0
+                }
+            }
+        },
+        {
+          "name": "热键组合",
+          "icon": ":/icons/key-hotkey",
+          "data": {
+              "type": "keyboard",
+              "action": "hotkey",
+              "icon": ":/icons/key-hotkey",
+              "params": {
+                  "name": "热键组合",
+                  "keys": ["Alt", "Tab"],
+                  "hold_time": 0.0,
+                  "retries": 0,
+                  "is_active": true,
+                  "use_pynput": false,
+                  "status": 0
+              }
+          }
+      },
+        {
+          "name": "键盘输入文本",
+          "icon": ":/icons/key-type",
+          "data": {
+              "type": "keyboard",
+              "action": "keyType",
+              "icon": ":/icons/key-type",
+              "params": {
+                  "name": "键盘输入文本",
+                  "text_str": "",
+                  "interval": 0.0,
+                  "retries": 0,
+                  "is_active": true,
+                  "use_pynput": false,
+                  "status": 0
+              }
+          }
+      }
+    ],
+    "图片(Image)": [
+        {
+            "name": "图片匹配",
+            "icon": ":/icons/img-match",
+            "data": {
+                "type": "image",
+                "action": "imageMatch",
+                "icon": ":/icons/img-match",
+                "params": {
+                    "name": "图片匹配",
+                    "template_img": "",
+                    "error_retries": 0,
+                    "error_retries_time": 0.0,
+                    "retries": 0,
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "图片点击",
+            "icon": ":/icons/img-click",
+            "data": {
+                "type": "image",
+                "action": "imageClick",
+                "icon": ":/icons/img-click",
+                "params": {
+                    "name": "图片点击",
+                    "template_img": "",
+                    "error_retries": 0,
+                    "error_retries_time": 0.0,
+                    "clicks": 0,
+                    "interval": 0.0,
+                    "duration": 0.0,
+                    "button": "left",
+                    "retries": 0,
+                    "is_active": true,
+                    "use_pynput": true,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "文字识别",
+            "icon": ":/icons/img-ocr",
+            "data": {
+                "type": "image",
+                "action": "imageOcr",
+                "icon": ":/icons/img-ocr",
+                "params": {
+                    "name": "文字识别",
+                    "text": "",
+                    "match_mode": "完全匹配",
+                    "error_retries": 0,
+                    "error_retries_time": 0.0,
+                    "retries": 0,
+                    "is_ignore_case": false,
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "文字点击",
+            "icon": ":/icons/img-ocr-click",
+            "data": {
+                "type": "image",
+                "action": "imageOcrClick",
+                "icon": ":/icons/img-ocr-click",
+                "params": {
+                    "name": "文字点击",
+                    "text": "",
+                    "match_mode": "完全匹配",
+                    "error_retries": 0,
+                    "error_retries_time": 0.0,
+
+                    "clicks": 0,
+                    "interval": 0.0,
+                    "duration": 0.0,
+                    "button": "left",
+
+                    "retries": 0,
+                    "is_ignore_case": false,
+                    "use_regex": false,
+                    "is_active": true,
+                    "use_pynput": true,
+                    "status": 0
+                }
+            }
+        }
+    ],
+    "流程控制(Flow)": [
+        {
+            "name": "等待",
+            "icon": ":/icons/delay",
+            "data": {
+                "type": "flow",
+                "action": "delay",
+                "icon": ":/icons/delay",
+                "params": {
+                    "name": "等待 1.00 秒",
+                    "delay_time": 1.0,
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "If 判断",
+            "icon": ":/icons/if",
+            "data": {
+                "type": "flow",
+                "action": "if",
+                "icon": ":/icons/if",
+                "params": {
+                    "name": "If 判断",
+                    "condition": "true",
+                    "then_commands": [],
+                    "else_commands": [],
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "Loop 循环",
+            "icon": ":/icons/loop",
+            "data": {
+                "type": "flow",
+                "action": "loop",
+                "icon": ":/icons/loop",
+                "params": {
+                    "name": "Loop 循环",
+                    "count": 0,
+                    "loop_commands": [],
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        }
+    ],
+    "脚本(Script)": [
+        {
+            "name": "执行 DOS 命令",
+            "icon": ":/icons/script-dos",
+            "data": {
+                "type": "script",
+                "action": "dos",
+                "icon": ":/icons/script-dos",
+                "params": {
+                    "name": "执行 DOS 命令",
+                    "dos_cmd": "",
+                    "working_dir": null,
+                    "timeout": null,
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        },
+        {
+            "name": "执行 Python 脚本",
+            "icon": ":/icons/script-python",
+            "data": {
+                "type": "script",
+                "action": "python",
+                "icon": ":/icons/script-python",
+                "params": {
+                    "name": "执行 Python 脚本",
+                    "code": "",
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        }
+    ],
+    "加载子任务(Subtask)": [
+        {
+            "name": "子任务",
+            "icon": ":/icons/subtask",
+            "data": {
+                "type": "subtask",
+                "action": "runSubtask",
+                "icon": ":/icons/subtask",
+                "params": {
+                    "name": "子任务",
+                    "subtask_file": "",
+                    "is_active": true,
+                    "status": 0
+                }
+            }
+        }
+    ]
+}
+
+
+

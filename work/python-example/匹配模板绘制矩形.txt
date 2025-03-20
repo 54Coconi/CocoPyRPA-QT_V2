@@ -1,0 +1,13 @@
+import pyautogui
+import numpy as np
+import cv2
+
+img = np.array(pyautogui.screenshot())   # 截取屏幕
+template = r"work/work_images/IMAGE_2024-12-03-195421.png"  # 模板图像
+new_img, threshold = drawRectangle(img, template)  # 在全屏截图上找到匹配的模板并绘制矩形
+
+if new_img is not None:
+    cv2.imwrite("temp_result.png", new_img)
+    print("匹配成功,结果保存在 temp_result.png 中,匹配度为:", threshold)
+else:
+    print("匹配失败，置信度为",threshold) 

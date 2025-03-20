@@ -1,0 +1,8 @@
+for i in range(10):
+    import time
+    time.sleep(0.5)
+    print(i, end='\n')
+
+    
+
+print("执行成功", f"时间为：{[time.time()]}", sep='，')

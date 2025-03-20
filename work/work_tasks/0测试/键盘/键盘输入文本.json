@@ -1,0 +1,72 @@
+{
+    "task_name": "键盘输入文本",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 4.00 秒",
+                "delay_time": 4.000000000000001,
+                "is_active": true,
+                "status": 0,
+                "id": "6e281f16"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "loop",
+            "icon": ":/icons/loop",
+            "params": {
+                "name": "Loop 循环",
+                "count": 5,
+                "loop_commands": [
+                    {
+                        "type": "keyboard",
+                        "action": "keyType",
+                        "icon": ":/icons/key-type",
+                        "params": {
+                            "name": "键盘输入文本",
+                            "text_str": "你好，CocoPyRPA_v2.0",
+                            "interval": 0.2,
+                            "retries": 0,
+                            "is_active": true,
+                            "use_pynput": true,
+                            "status": 0,
+                            "id": "bf32e6e7"
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.00 秒",
+                            "delay_time": 1.0,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "fe969eda"
+                        }
+                    },
+                    {
+                        "type": "keyboard",
+                        "action": "keyTap",
+                        "icon": ":/icons/key-tap",
+                        "params": {
+                            "name": "键盘敲击-enter",
+                            "key": "enter",
+                            "retries": 0,
+                            "is_active": true,
+                            "use_pynput": false,
+                            "status": 0,
+                            "id": "f1b8ccb6"
+                        }
+                    }
+                ],
+                "is_active": true,
+                "status": 0,
+                "id": "499adb21"
+            }
+        }
+    ]
+}

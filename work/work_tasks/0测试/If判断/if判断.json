@@ -1,0 +1,120 @@
+{
+    "task_name": "if判断",
+    "steps": [
+        {
+            "type": "mouse",
+            "action": "click",
+            "icon": ":/icons/mouse-click-left",
+            "params": {
+                "name": "鼠标左键点击(-3,0)",
+                "target_pos": [
+                    -3,
+                    0
+                ],
+                "clicks": 1,
+                "interval": 0.2,
+                "duration": 1.9999999999999998,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "ebc8cb94"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveTo",
+            "icon": ":/icons/mouse-move",
+            "params": {
+                "name": "鼠标定点移动(400,400)",
+                "target_pos": [
+                    400,
+                    400
+                ],
+                "duration": 2.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "2216a221"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "if",
+            "icon": ":/icons/if",
+            "params": {
+                "name": "If 判断",
+                "condition": "results_list['ebc8cb94']['status'] == 3",
+                "then_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 2.00 秒",
+                            "delay_time": 1.9999999999999998,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "489ca14d"
+                        }
+                    },
+                    {
+                        "type": "mouse",
+                        "action": "moveRel",
+                        "icon": ":/icons/mouse-rel-move",
+                        "params": {
+                            "name": "鼠标相对移动(200,0)",
+                            "offset": [
+                                200,
+                                0
+                            ],
+                            "duration": 1.0,
+                            "retries": 0,
+                            "is_active": true,
+                            "use_pynput": true,
+                            "status": 0,
+                            "id": "c5c1fb74"
+                        }
+                    }
+                ],
+                "else_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 2.00 秒",
+                            "delay_time": 1.9999999999999998,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "489ca14d"
+                        }
+                    },
+                    {
+                        "type": "mouse",
+                        "action": "moveRel",
+                        "icon": ":/icons/mouse-rel-move",
+                        "params": {
+                            "name": "鼠标相对移动(0,200)",
+                            "offset": [
+                                0,
+                                200
+                            ],
+                            "duration": 1.0,
+                            "retries": 0,
+                            "is_active": true,
+                            "use_pynput": true,
+                            "status": 0,
+                            "id": "4182464e"
+                        }
+                    }
+                ],
+                "is_active": true,
+                "status": 0,
+                "id": "b505fbd2"
+            }
+        }
+    ]
+}

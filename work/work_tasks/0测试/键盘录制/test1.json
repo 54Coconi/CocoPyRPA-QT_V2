@@ -1,0 +1,1515 @@
+{
+    "task_name": "test1",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 4.00 秒",
+                "delay_time": 4.000000000000001,
+                "is_active": true,
+                "status": 0,
+                "id": "62d143fb"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-n",
+                "key": "n",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "964350d8"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "50be2147"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-n",
+                "key": "n",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "f5688f6d"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "f6c6dcc2"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "975ed901"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "31a9293a"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-h",
+                "key": "h",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "1b7f8f83"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.09 秒",
+                "delay_time": 0.09,
+                "is_active": true,
+                "status": 0,
+                "id": "5cccb6f6"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-h",
+                "key": "h",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "d13165c4"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-a",
+                "key": "a",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "e56d4d15"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.08 秒",
+                "delay_time": 0.08,
+                "is_active": true,
+                "status": 0,
+                "id": "97b19c60"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-a",
+                "key": "a",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "85036bc4"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-o",
+                "key": "o",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "a07802f3"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "2a22736d"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-o",
+                "key": "o",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "de839340"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "c8aa37b5"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.05 秒",
+                "delay_time": 0.05,
+                "is_active": true,
+                "status": 0,
+                "id": "2064ea3a"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "7411da9a"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-s",
+                "key": "s",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "34eaf25b"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "bb978189"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-s",
+                "key": "s",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "f5bf91f5"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-h",
+                "key": "h",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "9b57d680"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "680f8888"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-h",
+                "key": "h",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "8b3a4863"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "f55dbd61"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.05 秒",
+                "delay_time": 0.05,
+                "is_active": true,
+                "status": 0,
+                "id": "ccded0c7"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "ef32e9cf"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-j",
+                "key": "j",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "65423ec1"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.05 秒",
+                "delay_time": 0.05,
+                "is_active": true,
+                "status": 0,
+                "id": "b15aac8c"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-j",
+                "key": "j",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "cab86471"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "d21d4c3f"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "b41c2218"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "bdceee8c"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-e",
+                "key": "e",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "95b408d3"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "ba4f493b"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-e",
+                "key": "e",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "c2970dd2"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "5556ed79"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "bffc9288"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "40c02543"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-,",
+                "key": ",",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "9b7f28a7"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.04 秒",
+                "delay_time": 0.04,
+                "is_active": true,
+                "status": 0,
+                "id": "eca999fe"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-,",
+                "key": ",",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "79386cd0"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-w",
+                "key": "w",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "4252f370"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "d25cdd07"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-w",
+                "key": "w",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "b193312f"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-o",
+                "key": "o",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "4292890c"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.09 秒",
+                "delay_time": 0.09,
+                "is_active": true,
+                "status": 0,
+                "id": "bb85190a"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-o",
+                "key": "o",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "ea8a05af"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-m",
+                "key": "m",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "c647db5c"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "cee7355c"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-m",
+                "key": "m",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "4cd924f0"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "67edcec7"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.08 秒",
+                "delay_time": 0.08,
+                "is_active": true,
+                "status": 0,
+                "id": "3c3ff12c"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "73f58393"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-w",
+                "key": "w",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "d374541c"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-e",
+                "key": "e",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "654f98b7"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.14 秒",
+                "delay_time": 0.14,
+                "is_active": true,
+                "status": 0,
+                "id": "dbee8951"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-w",
+                "key": "w",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "1d08bec5"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-e",
+                "key": "e",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "a969cfc8"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "126babd8"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.08 秒",
+                "delay_time": 0.08,
+                "is_active": true,
+                "status": 0,
+                "id": "f94bb5c0"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "26d3165b"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "7f99227d"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "e0a49fd6"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "6d2c2057"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-a",
+                "key": "a",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "1a4a8497"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.09 秒",
+                "delay_time": 0.09,
+                "is_active": true,
+                "status": 0,
+                "id": "c658abe3"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-a",
+                "key": "a",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "16ec0376"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "820bef4e"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "9fc16b8a"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-i",
+                "key": "i",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "68057fd1"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-down",
+                "key": "down",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "26f13480"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "a64b433e"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-down",
+                "key": "down",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "724bf08e"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-down",
+                "key": "down",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "e35d25b4"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "f0918dbf"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-down",
+                "key": "down",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "f0a05d2d"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "1a645784"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.05 秒",
+                "delay_time": 0.05,
+                "is_active": true,
+                "status": 0,
+                "id": "dcee984c"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "505066e9"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-e",
+                "key": "e",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "afaef054"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-r",
+                "key": "r",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "5b58f604"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.15 秒",
+                "delay_time": 0.15,
+                "is_active": true,
+                "status": 0,
+                "id": "69d1e678"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-e",
+                "key": "e",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "ecd3bbf4"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-r",
+                "key": "r",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "fb8433b3"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "cfe14e28"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-space",
+                "key": "space",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "68514149"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-z",
+                "key": "z",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "843a8173"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.11 秒",
+                "delay_time": 0.11,
+                "is_active": true,
+                "status": 0,
+                "id": "9d6fac81"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-z",
+                "key": "z",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "d802a3a0"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-h",
+                "key": "h",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "cb3b9e8e"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.11 秒",
+                "delay_time": 0.11,
+                "is_active": true,
+                "status": 0,
+                "id": "db644086"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-h",
+                "key": "h",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "da0cdee4"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-a",
+                "key": "a",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "fb5eef3f"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.10 秒",
+                "delay_time": 0.1,
+                "is_active": true,
+                "status": 0,
+                "id": "2b00b092"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-a",
+                "key": "a",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "6e82499a"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-n",
+                "key": "n",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "56bbbc54"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "93578ea6"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-n",
+                "key": "n",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "ab8d4245"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-g",
+                "key": "g",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "982dd65c"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "962f61b4"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-g",
+                "key": "g",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "94b58a75"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-backspace",
+                "key": "backspace",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "48dbcd6e"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.06 秒",
+                "delay_time": 0.06,
+                "is_active": true,
+                "status": 0,
+                "id": "bd0b51e1"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-backspace",
+                "key": "backspace",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "e1a412fe"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-5",
+                "key": "5",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "d29c4961"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.07 秒",
+                "delay_time": 0.07,
+                "is_active": true,
+                "status": 0,
+                "id": "7deeb5ce"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-5",
+                "key": "5",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "8813beab"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-shift",
+                "key": "shift",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "e6346f7c"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyPress",
+            "icon": ":/icons/key-press",
+            "params": {
+                "name": "键盘按下-!",
+                "key": "!",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "3023a41f"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 0.14 秒",
+                "delay_time": 0.14,
+                "is_active": true,
+                "status": 0,
+                "id": "92b00a95"
+            }
+        },
+        {
+            "type": "keyboard",
+            "action": "keyRelease",
+            "icon": ":/icons/key-release",
+            "params": {
+                "name": "键盘释放-shift",
+                "key": "shift",
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": false,
+                "status": 0,
+                "id": "3b06debb"
+            }
+        }
+    ]
+}

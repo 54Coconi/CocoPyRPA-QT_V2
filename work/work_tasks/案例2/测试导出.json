@@ -1,0 +1,56 @@
+{
+    "task_name": "测试导出",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "loop",
+            "icon": ":/icons/loop",
+            "params": {
+                "name": "Loop 循环",
+                "is_active": true,
+                "count": 2,
+                "loop_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待",
+                            "delay_time": 1.9999999999999998,
+                            "is_active": true
+                        }
+                    },
+                    {
+                        "type": "mouse",
+                        "action": "click",
+                        "icon": ":/icons/mouse-click-left",
+                        "params": {
+                            "name": "鼠标左键点击 (1570,250)",
+                            "target_pos": [
+                                1570,
+                                250
+                            ],
+                            "clicks": 1,
+                            "interval": 0.0,
+                            "duration": 2.0,
+                            "retries": 0,
+                            "button": "left",
+                            "is_active": true,
+                            "use_pynput": true
+                        }
+                    },
+                    {
+                        "type": "subtask",
+                        "action": "runSubtask",
+                        "icon": ":/icons/subtask",
+                        "params": {
+                            "name": "子任务",
+                            "subtask_file": "work/work_tasks/1绘制图形/绘制正方形.json",
+                            "is_active": true
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
