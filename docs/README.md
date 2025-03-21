@@ -54,3 +54,30 @@
 
 ### 9. 各个主题
 
+![各个主题.png](https://s2.loli.net/2025/03/21/DW4v26AyzLBlYwI.png)
+
+
+
+##  二、功能演示
+
+[Bilibili视频](https://www.bilibili.com/video/BV1PrkWYHETX/)
+
+
+
+##  三、文件结构
+
+###  1. 源码文件结构
+
+![源码文件结构.png](https://s2.loli.net/2025/03/21/1Nfm9GsHTKb7rvu.png)
+
+
+
+### 2. core模块目录结构
+
+![core模块目录结构.png](https://s2.loli.net/2025/03/21/rZ9DhtjQMmRH3AE.png)
+
+
+
+### 3. ui模块目录结构
+
+![ui模块目录结构.png](https://s2.loli.net/2025/03/21/LQO9KuFcs8MIpGX.png)
