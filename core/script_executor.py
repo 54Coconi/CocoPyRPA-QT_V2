@@ -8,13 +8,20 @@ import operator
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+import keyboard
+from PyQt5.QtCore import QObject, pyqtSignal, QThread, QCoreApplication, QEvent, Qt
+from PyQt5.QtWidgets import QApplication
 
 from core.commands.base_command import BaseCommand
 from core.commands.flow_commands import IfCommand, LoopCommand
 from core.commands.image_commands import ImageOcrCmd, ImageOcrClickCmd, ImageMatchCmd, ImageClickCmd
 from core.commands.subtask_command import SubtaskCommand
+
+from utils.stop_executor import stop_running_thread
+
 from .command_map import COMMAND_MAP
+
+_DEBUG = False
 
 
 class ScriptExecutor(QObject):
@@ -26,53 +33,56 @@ class ScriptExecutor(QObject):
 
     def __init__(self, ocr=None, parent=None):
         super().__init__(parent)
+        self.current_script = None  # 当前执行的脚本文件路径
         self.ocr = ocr
         self.active_scripts: Dict[str, Tuple[QThread, ScriptWorker]] = {}  # 存储脚本运行状态：{script_path: (thread, worker)}
         self.stop_flags: Dict[str, bool] = {}  # 存储停止标志：{script_path: stop_flag}
+        self.thread = None
+        keyboard.add_hotkey('q+esc', self.stop_script)
 
     def execute_script(self, script_path: str):
         """ 执行指定脚本 """
+        self.current_script = script_path
         if script_path in self.active_scripts:
-            self.log_message.emit(f"⚠脚本已在执行中: {script_path}")
+            self.log_message.emit(f"⚠ 脚本已在执行中: {script_path}")
             return
-        # 存储停止标志
+        # 存储停止标志为 False（表示不停止）
         self.stop_flags[script_path] = False
-
+        print(f"🔴 当前 stop_flags 为：{self.stop_flags}") if _DEBUG else None
         # 创建脚本执行工作线程
-        thread = QThread()
+        self.thread = QThread()
         worker = ScriptWorker(script_path, self.ocr)
-        worker.moveToThread(thread)
+        worker.moveToThread(self.thread)
 
         # 信号连接
-        thread.started.connect(lambda: worker.execute())
-        worker.finished.connect(lambda: thread.quit())
+        self.thread.started.connect(lambda: worker.execute())
+        worker.finished.connect(lambda: self.thread.quit())
         worker.progress.connect(self._handle_progress)
         worker.log.connect(self.log_message.emit)
 
         # 存储运行状态
-        self.active_scripts[script_path] = (thread, worker)
+        self.active_scripts[script_path] = (self.thread, worker)
+        print(f"🔴 当前 active_scripts 为：{self.active_scripts}") if _DEBUG else None
 
-        thread.start()
+        self.thread.start()
         self.execution_started.emit(script_path)
 
-    def stop_script(self, script_path: str):
+    def stop_script(self):
         """ 停止执行指定脚本 """
-        # if script_path in self.active_scripts:
-        #     thread, worker = self.active_scripts[script_path]
-        #     thread.quit()  # 停止线程
-        #     worker.stop()  # 停止工作对象
-        #     del self.active_scripts[script_path]
-        if script_path in self.stop_flags:
-            self.stop_flags[script_path] = True
-            self.log_message.emit(f"⏹正在停止脚本: {script_path}")
+        print("(stop_script) -  当前 stop_flags 为：", self.stop_flags) if _DEBUG else None
+        if self.current_script in self.stop_flags:
+            self.log_message.emit(f"🟥 正在停止脚本: {self.current_script}")
+            self.stop_flags[self.current_script] = True
 
     def _handle_progress(self, script_path: str, current: int, total: int):
         """ 处理进度更新 """
         self.progress_updated.emit(script_path, current, total)
         if current == total:
+            self.log_message.emit(f"🎉 脚本所有的 {total} 个指令执行完成")
             self.execution_finished.emit(script_path, True)
             self._cleanup(script_path)
         elif current == -1:
+            self.log_message.emit(f"⛔ 脚本停止执行")
             self.execution_finished.emit(script_path, False)
             self._cleanup(script_path)
 
@@ -106,11 +116,11 @@ class ScriptWorker(QObject):
                 steps = config.get("steps", [])
 
                 self.commands = self._parse_commands(steps)
-                self.log.emit(f"✅成功加载 {len(self.commands)} 个指令（含嵌套指令）")
+                self.log.emit(f"🟢 成功加载 {len(self.commands)} 个指令（含嵌套指令）")
                 return True
 
         except Exception as e:
-            self.log.emit(f"❌脚本加载失败: {str(e)}")
+            self.log.emit(f"❌ 脚本加载失败: {str(e)}")
             return False
 
     def execute(self):
@@ -121,6 +131,7 @@ class ScriptWorker(QObject):
             return
 
         total = len(self.commands)
+        # 初始化执行进度
         self.progress.emit(self.script_path, 0, total)
 
         try:
@@ -130,7 +141,9 @@ class ScriptWorker(QObject):
 
                 self.current_step = idx
                 self._execute_one_command(cmd)
-                self.progress.emit(self.script_path, idx + 1, total)
+                # 执行最后一个指令时，这里不更新进度，防止重复更新
+                if idx + 1 != total:
+                    self.progress.emit(self.script_path, idx + 1, total)
 
             success = not self._should_stop()
         except Exception as e:
@@ -176,7 +189,7 @@ class ScriptWorker(QObject):
                 # 其他指令
                 command = cmd_class(**params)  # **params 将字典转换为关键字参数
 
-            self.log.emit(f"✅成功创建指令: {command.name}")
+            self.log.emit(f"🟢 成功创建指令: {command.name}")
 
             # 处理 If 判断 指令
             if isinstance(command, IfCommand):
@@ -207,7 +220,7 @@ class ScriptWorker(QObject):
     def _execute_one_command(self, command: BaseCommand):
         """ 执行单个指令 """
         try:
-            self.log.emit(f"▶ 执行步骤 {self.current_step + 1}: {command.name}")
+            self.log.emit(f"🔶执行步骤 {self.current_step + 1}: {command.name}")
 
             # 检查指令是否激活
             if command.is_active is False:
@@ -230,7 +243,7 @@ class ScriptWorker(QObject):
                 command.execute()
 
             self.results_list.append(command.model_dump())
-            print(f"[INFO] - 当前指令 <{command.name}> 执行结果: {self.results_list[-1]}")
+            print(f"[INFO] - 当前指令 <{command.name}> 执行结果: {self.results_list[-1]}") if _DEBUG else None
 
         except Exception as e:
             self.log.emit(f"❌步骤 {self.current_step + 1} 执行失败: {str(e)}")
@@ -350,29 +363,3 @@ class ScriptWorker(QObject):
 
 # 全局执行器实例
 executor = ScriptExecutor()
-
-# # ---------------------- 与触发器系统集成 ----------------------
-# class IntegratedTriggerManager(QObject):
-#     def __init__(self):
-#         super().__init__()
-#         self.trigger_manager = TriggerManager()
-#         self.trigger_manager.triggered.connect(self.on_trigger_activated)
-#
-#     def on_trigger_activated(self, script_path: str):
-#         """ 触发器激活时执行脚本 """
-#         executor.execute_script(script_path)
-#
-#     def stop_all(self):
-#         """ 停止所有执行 """
-#         for path in list(executor.active_scripts.keys()):
-#             executor.stop_script(path)
-#
-#
-# # ---------------------- 使用示例 ----------------------
-# if __name__ == "__main__":
-#     # 初始化集成系统
-#     system = IntegratedTriggerManager()
-#
-#     # 模拟触发器触发
-#     test_script = "work/work_tasks/sample_script.json"
-#     system.trigger_manager.triggered.emit(test_script)

@@ -380,7 +380,7 @@ class ConfigManager:
 
 
 class TriggerManager(QObject):
-    """ 触发器管理类（独立配置版本） """
+    """ 触发器管理类"""
     triggered = pyqtSignal(str)  # 参数为脚本路径
     set_item_status = pyqtSignal(str, bool)  # 设置列表项状态，参数为(脚本路径, 状态)
 
@@ -499,19 +499,25 @@ class TriggerManager(QObject):
 
 # -------------------- 主界面 --------------------
 class TriggerManagerGUI(QWidget):
-    """ 触发器管理 GUI 界面（独立配置版本） """
+    """ 触发器管理 GUI 界面"""
 
     def __init__(self, manager: TriggerManager, ocr=None, parent=None):
         super(TriggerManagerGUI, self).__init__(parent)
         self.manager = manager
         self._ocr = ocr
         self.parent = parent
+        self.current_script_path = None  # 当前脚本路径
+        self.is_stop = False  # 是否停止
         self.work_tasks_root = Path(WORK_TASKS_ROOT).absolute()  # 自动化脚本任务的根目录
         self.task_items: Dict[str, QListWidgetItem] = {}  # 任务列表项
 
         self.list_widget = None  # 任务列表
         self.init_ui()
         self.manager.triggered.connect(self.on_triggered)
+
+        # 信号连接
+        executor.log_message.connect(lambda msg: print("【日志】：", msg, sep=''))
+        executor.progress_updated.connect(self.on_progress_updated)
 
     def init_ui(self):
         """ 初始化界面 """
@@ -730,7 +736,7 @@ class TriggerManagerGUI(QWidget):
             QMessageBox.critical(self, "错误", f"打开属性失败: {str(e)}")
 
     def remove_trigger_from_script(self, script_path):
-        """ 移除脚本的触发器 """
+        """ 移除脚本里的触发器 """
         try:
             with open(script_path, 'r+', encoding='utf-8') as f:
                 config = json.load(f)
@@ -756,10 +762,17 @@ class TriggerManagerGUI(QWidget):
 
     def on_triggered(self, script_path: str):
         """ 触发任务执行 """
-        print(f"(on_triggered) -  开始执行任务 ✨{script_path}✨")
+        print(f"(on_triggered) -  开始执行脚本文件： ✨{script_path}✨")
         print("*" * 100)
         # TODO: 调用执行器执行脚本
+        self.current_script_path = script_path
         executor.execute_script(script_path)
+
+    @staticmethod
+    def on_progress_updated(script_path: str, current_step: int, total_steps: int):
+        """ 更新任务进度 """
+        print(f"🔄当前进度：{current_step}/{total_steps},"
+              f" stop_flag: {executor.stop_flags[script_path]}")
 
 
 class AutoExecutorManager(QDialog):

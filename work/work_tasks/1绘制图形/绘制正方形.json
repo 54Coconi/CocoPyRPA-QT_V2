@@ -2,6 +2,16 @@
     "task_name": "绘制正方形",
     "steps": [
         {
+            "type": "trigger",
+            "action": "processTrigger",
+            "icon": ":/icons/trigger-process",
+            "params": {
+                "name": "进程状态监控",
+                "process_name": "notepad.exe",
+                "trigger_type": "start"
+            }
+        },
+        {
             "type": "mouse",
             "action": "moveRel",
             "icon": ":/icons/mouse-rel-move",
@@ -11,7 +21,7 @@
                     300,
                     0
                 ],
-                "duration": 1.0,
+                "duration": 1.9999999999999998,
                 "retries": 0,
                 "is_active": true,
                 "use_pynput": true,
@@ -29,7 +39,7 @@
                     0,
                     300
                 ],
-                "duration": 1.0,
+                "duration": 1.9999999999999998,
                 "retries": 0,
                 "is_active": true,
                 "use_pynput": true,
@@ -47,7 +57,7 @@
                     -300,
                     0
                 ],
-                "duration": 1.0,
+                "duration": 1.9999999999999998,
                 "retries": 0,
                 "is_active": true,
                 "use_pynput": true,
@@ -65,7 +75,7 @@
                     0,
                     -300
                 ],
-                "duration": 1.0,
+                "duration": 1.9999999999999998,
                 "retries": 0,
                 "is_active": true,
                 "use_pynput": true,

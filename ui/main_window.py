@@ -29,6 +29,7 @@ from PyQt5.QtWidgets import QMainWindow, QFileSystemModel, QMessageBox, QTreeWid
     QInputDialog, QLineEdit, QMenu, QFileDialog, QTreeWidgetItemIterator, QDialog, QVBoxLayout, QHBoxLayout, \
     QPushButton, QTableWidgetItem, QSystemTrayIcon, QApplication, QAction, QAbstractItemView
 
+
 from .CocoPyRPA_v2_ui import Ui_MainWindow
 from .widgets.BindPropertyDialog import BindPropertyDialog
 from .widgets.CocoHtmlDialog import CocoDialog
@@ -48,6 +49,7 @@ from utils.debug import print_func_time
 from utils.check_input import validate_input
 from utils.screen_capture import CaptureScreen
 from utils.QSSLoader import QSSLoader as QL
+from utils.stop_executor import stop_running_thread
 
 from core.cmd_executor import CommandExecutor
 from core.auto_executor_manager import AutoExecutorManager
@@ -135,8 +137,8 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             lambda new_config: update_global_config(self, new_config))  # 连接配置改变信号
 
         # 监听 "Q+Esc" 组合键
-        self.stop_running_thread = StopRunningThread(self)
-        self.stop_running_thread.stopSignal.connect(self.stop_executor_thread)
+        self.stop_running_thread = stop_running_thread
+        self.stop_running_thread.stopSignal.connect(self.stop_executor_thread)  # 停止指令前台执行线程
         self.stop_running_thread.start()  # 启动线程
 
         # 加载 ocr 模型(PaddleOCR)
@@ -1474,17 +1476,16 @@ class StopRunningThread(QThread):
     stopSignal = pyqtSignal()
 
     def run(self):
-        # 监听全局的 "q + Esc" 组合键
+        # 监听全局的 "Q + Esc" 组合键
         keyboard.add_hotkey('q+esc', self.on_combination_pressed)
         # 进入线程的主循环
         self.exec_()
 
     def on_combination_pressed(self):
-        """Alt + Esc 组合键被按下 """
+        """Q + Esc 组合键被按下 """
         # 发出停止信号
         self.stopSignal.emit()
-        # 退出线程
-        # self.quit()
+        print("Q + Esc 组合键被按下")
 
 
 class FileSystemModel(QFileSystemModel):
