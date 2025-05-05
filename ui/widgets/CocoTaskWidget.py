@@ -28,7 +28,7 @@ import resources_rc
 
 _DEBUG = True
 
-KEY_CAPTURE_BUTTON_CSS = {
+KEY_CAPTURE_BUTTON_STYLE = {
     "默认": """
            KeyCaptureButton {
                 border: 1px solid rgb(64,64,64);
@@ -95,7 +95,7 @@ KEY_CAPTURE_BUTTON_CSS = {
 def load_key_capture_button_theme() -> str:
     """ 加载 `键盘捕捉按钮` 组件的主题 """
     theme = config_manager.config.get("General", {}).get("Theme", "深色")
-    return KEY_CAPTURE_BUTTON_CSS[theme]
+    return KEY_CAPTURE_BUTTON_STYLE[theme]
 
 
 def load_edit_mode() -> set:
@@ -139,7 +139,7 @@ def simulate_mouse_move(tree_widget):
 
 class CustomTaskWidget(QWidget):
     """
-    自定义指令编辑器树型控件、属性表格控件、指令库树型控件之间的业务逻辑
+    指令编辑器树型控件、属性表格控件、指令库树型控件之间的业务逻辑
 
     """
     # 属性名称 英文->中文 映射字典
@@ -555,11 +555,13 @@ class CustomTaskWidget(QWidget):
         # 菜单项 - 粘贴任务节点
         paste_action = menu.addAction("粘贴指令节点")
         paste_action.setIcon(QIcon(":/icons/paste-item"))
-        if current_item.text(0) in ["成立", "不成立"] or "重复" in current_item.text(0):
-            paste_action.setEnabled(True)  # 仅当当前节点是 “成立/不成立/重复“ 时启用
+        if self.copied_node_data is None:
+            paste_action.setEnabled(False)  # 仅当有复制数据时启用
         else:
-            paste_action.setEnabled(False)
-        paste_action.setEnabled(self.copied_node_data is not None)  # 仅当有复制数据时启用
+            if current_item.text(0) in ["成立", "不成立"] or "重复" in current_item.text(0):
+                paste_action.setEnabled(True)  # 仅当当前节点是 “成立/不成立/重复“ 时启用
+            else:
+                paste_action.setEnabled(False)
         paste_action.triggered.connect(lambda: self.paste_task_node(current_item))
 
         # 添加分割线

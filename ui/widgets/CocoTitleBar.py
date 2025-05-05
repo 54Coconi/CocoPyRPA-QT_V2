@@ -173,8 +173,8 @@ class TitleBar(QWidget):
 
 
 # 测试
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    win = TitleBar(None)
-    win.show()
-    sys.exit(app.exec_())
+# if __name__ == '__main__':
+#     app = QApplication(sys.argv)
+#     win = TitleBar(None)
+#     win.show()
+#     sys.exit(app.exec_())

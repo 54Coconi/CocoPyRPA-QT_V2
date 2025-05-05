@@ -24,8 +24,8 @@ QMenu::item {
 
 /* 使用鼠标或键盘选择项时 */
 QMenu::item:selected {
-    border-color: rgba(23,108,106,255);  /* 边框色 */
-    background: rgba(23,108,106,255);   /* 背景色 */
+    border-color: #9398BF;  /* 边框色 */
+    background: #9398BF;   /* 背景色 */
 }
 
 /* 出现“选中”图标 */

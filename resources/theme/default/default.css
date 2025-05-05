@@ -22,10 +22,10 @@ QMenu::item {
     border: 1px solid transparent;   /*为选择边框预留空间*/
 }
 
-/* 使用鼠标或键盘选择项时 */
+/* 选中菜单项时 */
 QMenu::item:selected {
-    border-color: rgb(41, 161, 158);  /* 边框色 */
-    background: rgb(75, 161, 182);   /* 背景色 */
+    border-color: #a64512;  /* 边框色 */
+    background: #a64512;   /* 背景色 */
 }
 
 /* 出现“选中”图标 */

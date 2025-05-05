@@ -1461,7 +1461,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
                 QMessageBox.information(self, "更新", "下载完成后，请解压后覆盖整个软件根目录")
                 # 让用户跳转到浏览器下载链接
                 webbrowser.open("https://github.com/54Coconi/CocoPyRPA-QT/releases/")
-                # 这里可以添加下载更新文件和安装更新的代码
+                # TODO: 这里可以添加下载更新文件和安装更新的代码
                 ...
         elif version is not None and version <= __version__:
             msg = f"获取的版本为 '{version}'\n当前已是最新版本。"
