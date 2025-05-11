@@ -110,7 +110,7 @@ class ImageMatchCmd(RetryCmd):
         tool = ScreenshotTool()
         try:
             if not os.path.exists(self.template_img):
-                raise FileNotFoundError(f"模板图片 {self.template_img} 不存在")
+                raise FileNotFoundError(f"模板图片 ‘{self.template_img}’ 不存在")
             tool.full_screen()  # 获取全屏截图
             img_array = tool.get_image_as_numpy_array()  # 获取截图的 numpy 数组
 

@@ -1,29 +1,24 @@
 """
 指令执行引擎模块（基于GUI界面）
 """
-import operator
 import os
-import time
+import operator
 
-from enum import Enum
 from pubsub import pub
-from dataclasses import dataclass
-from typing import List, Optional, Callable
+from enum import Enum
+from typing import List, Optional
 
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QMessageBox, QTreeWidgetItemIterator, QAbstractItemView
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator
 
-from utils.ocr_tools import OCRTool
 from ui.widgets.CocoSettingWidget import config_manager
-from .commands.base_command import BaseCommand, CommandRunningException
-from .commands.mouse_commands import *
-from .commands.keyboard_commands import *
-from .commands.image_commands import ImageMatchCmd, ImageClickCmd, ImageOcrCmd, ImageOcrClickCmd
-from .commands.flow_commands import DelayCmd, LoopCommand, IfCommand
-from .commands.script_commands import ExecuteDosCmd, ExecutePyCmd
-from .commands.subtask_command import SubtaskCommand
+from utils.ocr_tools import OCRTool
 from .command_map import COMMAND_MAP
-
+from .commands.base_command import BaseCommand
+from .commands.flow_commands import LoopCommand, IfCommand
+from .commands.image_commands import ImageMatchCmd, ImageOcrCmd, ImageOcrClickCmd
+from .commands.keyboard_commands import *
+from .commands.subtask_command import SubtaskCommand
 
 _DEBUG = True
 
@@ -162,7 +157,7 @@ class CommandExecutor(QThread):
     # ===================================== 加载任务 =====================================
 
     def extract_commands_from_tree(self) -> list:
-        """从树控件中提取命令并实例化"""
+        """从树控件中提取指令并实例化"""
         self.all_tasks_cmd.clear()
         self.task_name = self.tree_widget.headerItem().text(0) or "未命名任务"
 
@@ -184,7 +179,11 @@ class CommandExecutor(QThread):
             action = node_data.get("action")  # 当前指令动作
             params = node_data.get("params", {})  # 当前指令参数
 
+            if step_type == "trigger":
+                return None
+
             command_class = self.command_map.get(step_type, {}).get(action)  # 获取指令类型
+
             if not command_class:
                 self._log(LogLevel.WARN, f"(extract_node_commands) 未知的指令类型或动作: {step_type}, {action}")
                 return None
@@ -258,6 +257,7 @@ class CommandExecutor(QThread):
                     for _ in range(subtask_cmd_count):
                         extracted_command = extract_node_commands(subtask_item.child(_))
                         subtask_steps.append(extracted_command)
+                        # print("🔴🔴 子任务的步骤:", subtask_steps)
                     command.subtask_steps = subtask_steps
                 return command
             except Exception as e:
@@ -307,7 +307,11 @@ class CommandExecutor(QThread):
         item_params = item_data.get("params", {})
 
         if item_type == "subtask" or (item_type == "flow" and item_action in ["if", "loop"]):
-            self._log(LogLevel.ERROR, "❌(execute_selected_normal_command) 无法指定运行子任务或If、Loop指令")
+            self._log(LogLevel.WARN, "⚠ 无法指定运行子任务或If、Loop指令")
+            return
+
+        if item_type == "trigger":
+            self._log(LogLevel.WARN, "⚠ 无法指定运行触发器指令")
             return
 
         command_class = self.command_map.get(item_type, {}).get(item_action)  # 获取指令类型
@@ -385,11 +389,14 @@ class CommandExecutor(QThread):
             while self.current_index < len(self.all_tasks_cmd):
                 if self.stop_flag:
                     return
-                command = self.all_tasks_cmd[self.current_index]  # 获取当前指令
-                # if command.is_active is False:
-                #     self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
-                #     self.current_index += 1  # 更新当前索引
-                #     continue
+                command = self.all_tasks_cmd[self.current_index]  # 从总指令列表中获取指定索引的指令
+
+                # 如果指令不存在（触发器指令默认为None），则跳过
+                if command is None:
+                    self.current_index += 1  # 更新当前索引
+                    continue
+
+                # 如果模板图片路径不存在，则跳过
                 if isinstance(command, ImageMatchCmd) and \
                         os.path.exists(command.template_img) is False:
                     self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 模板图片路径错误, 跳过执行")
@@ -441,13 +448,18 @@ class CommandExecutor(QThread):
 
     def execute_one_command(self, command: BaseCommand, current_idx: int) -> None:
         """执行单个命令"""
+        # 如果任务已停止，则不执行
         if self.stop_flag:
+            return
+        # 如果指令不存在（触发器指令默认为None），则不执行
+        if command is None:
+            return
+        # 如果指令未激活，则不执行
+        if command.is_active is False:
+            self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
             return
 
         try:
-            if command.is_active is False:
-                self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
-                return
             # 获取当前节点
             current_node = getattr(command, "tree_item", None)
 

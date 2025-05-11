@@ -1,13 +1,29 @@
-# -*- coding: utf-8 -*-
 """
 @author: 54Coconi
-@data: 2024-11-1
+@data: 2024-11-18
 @version: 2.0.0
 @path: ui/main_window.py
 @software: PyCharm 2023.1.2
 @officialWebsite: https://github.com/54Coconi
 @description:
-    - CocoPyRPA_v2 全新版本，完全重写
+    CocoPyRPA_v2 全新版本，完全重写
+
+    该模块是 CocoPyRPA-QT 应用程序的主窗口实现，模块主要承担了应用程序的核心界面布局、任务管理、事件绑定和系统集成等职责。
+    模块初始化时加载配置文件并根据配置设置全局样式主题，支持深色、浅色、默认和护眼四种主题风格切换，并通过信号机制与配置管理器联动实时更新 UI 样式。
+    它还负责创建和初始化多个核心组件，如任务编辑器、指令库、属性表格、截图工具、OCR 模型加载器等。
+
+    模块包括但不限于以下用户操作功能：
+        - 支持新建、打开、保存任务文件（JSON 格式），具备撤销/重做机制，可对任务树结构进行回退或恢复。
+        - 提供右键菜单支持的任务目录管理功能，包括新建、重命名、复制、粘贴、删除等操作。
+        - 任务编辑采用拖拽方式，支持多种类型的指令节点（鼠标操作、键盘操作、图片识别、脚本执行、流程控制等），并通过属性表格动态展示和修改节点参数。
+        - 内置 OCR 引擎（PaddleOCR）、图像识别、屏幕截图、鼠标及键盘录制工具，增强了自动化任务的构建能力。
+        - 支持运行当前选中节点、从指定节点开始运行、运行全部指令等多种运行模式，并提供日志输出和节点高亮功能，便于调试。
+        - 实现了系统托盘图标与菜单，允许最小化运行并提供快捷入口用于触发录制操作。
+        - 提供条件逻辑构建器，方便用户为 if 判断节点编写复杂的判断表达式。
+        - 集成版本检查功能，能够自动连接 GitHub 获取最新发布版本号，并提示用户是否前往下载页面升级。
+        - 允许执行自定义 Python 脚本，拓展了 RPA 的灵活性和功能性。
+
+    此外，模块中使用了多线程技术来处理耗时操作，例如 OCR 模型加载、GitHub 版本检测等，保证了主界面的流畅响应。同时，模块内实现了良好的异常处理机制和用户交互设计，提升了整体的稳定性和用户体验。
 """
 
 import sys
@@ -23,19 +39,19 @@ from typing import Optional
 from datetime import datetime
 
 from PyQt5 import QtGui
-from PyQt5.QtCore import QDir, QModelIndex, Qt, QLocale, pyqtSignal, QThread, QTimer, QPoint
+from PyQt5.QtCore import QDir, QModelIndex, Qt, QLocale, pyqtSignal, QThread, QPoint
 from PyQt5.QtGui import QIcon, QStandardItemModel, QFont, QWheelEvent
 from PyQt5.QtWidgets import QMainWindow, QFileSystemModel, QMessageBox, QTreeWidgetItem, \
     QInputDialog, QLineEdit, QMenu, QFileDialog, QTreeWidgetItemIterator, QDialog, QVBoxLayout, QHBoxLayout, \
-    QPushButton, QTableWidgetItem, QSystemTrayIcon, QApplication, QAction, QAbstractItemView
-
+    QPushButton, QTableWidgetItem, QSystemTrayIcon, QApplication, QAction
 
 from .CocoPyRPA_v2_ui import Ui_MainWindow
+from .task_editor_controller import TaskEditorCore
+
 from .widgets.BindPropertyDialog import BindPropertyDialog
 from .widgets.CocoHtmlDialog import CocoDialog
 from .widgets.CocoJsonView import JSONHighlighter
 from .widgets.CocoPlainTextEdit import CoPlainTextEdit
-from .widgets.CocoTaskWidget import CustomTaskWidget
 from .widgets.CocoCmdLibWidget import CmdLibAndSearchBar
 from .widgets.CocoIndicator import CustomTreeIndicatorStyle
 from .widgets.CocoSettingWidget import SettingsWindow as SettingDialog, config_manager
@@ -51,13 +67,13 @@ from utils.screen_capture import CaptureScreen
 from utils.QSSLoader import QSSLoader as QL
 from utils.stop_executor import stop_running_thread
 
+from core.script_executor import executor
 from core.cmd_executor import CommandExecutor
 from core.auto_executor_manager import AutoExecutorManager
 
-import resources_rc
-
 _DEBUG = False
 
+# 控制台LOGO
 LOGO1 = "      ______                 ____       ____   ____  ___                        "
 LOGO2 = "     / ____/___  _________  / __ \__ __/ __ \ / __ \/   |       _      __ ___   "
 LOGO3 = "    / /   / __ \/ ___/ __ \/ /_/ / / / / /_/ / /_/ / /| |      | |    / / ___ \\"
@@ -72,11 +88,11 @@ __copyright__ = 'Copyright 2024-present 54Coconi'
 __license__ = 'MIT'
 __status__ = 'Development'
 
-# 配置文件
+# 配置文件（用于设置功能）
 CONFIG_FILE = 'config.ini'
-# 指令库配置
+# 指令库配置（用于加载预设的指令）
 CMD_LIB_JSON_FILE = 'config/CocoCmdLib.json'
-# 工作空间
+# 工作空间根目录
 WORK_SPACE = './work'
 TASK_HOME = WORK_SPACE + '/work_tasks'
 # HTML文件
@@ -88,6 +104,7 @@ DET_MODEL_DIR = './models/det/ch/ch_PP-OCRv4_det_infer'
 REC_MODEL_DIR = './models/rec/ch/ch_PP-OCRv4_rec_infer'
 CLS_MODEL_DIR = './models/cls/ch/ch_PP-OCRv4_cls_infer'
 
+# 全局配置（用于保存config.ini文件配置）
 GLOBAL_CONFIG = {}
 
 
@@ -165,10 +182,10 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.file_model.setRootPath(self._task_home)  # 设置根路径
 
         # 设置自定义的任务加载、编辑、属性编辑组件
-        self.coco_task_widget = CustomTaskWidget(self.cmd_treeWidget,
-                                                 self.attr_edit_tableWidget,
-                                                 self.tasks_view_treeView,
-                                                 self.op_view_treeWidget)
+        self.coco_task_widget = TaskEditorCore(self.cmd_treeWidget,
+                                               self.attr_edit_tableWidget,
+                                               self.tasks_view_treeView,
+                                               self.op_view_treeWidget)
         # 连接任务组件发送的信号
         self.coco_task_widget.screenshot_signal.connect(self.screen_shot)  # 截图信号
         self.coco_task_widget.node_inserted_signal.connect(self.on_tree_row_inserted)  # 节点插入信号
@@ -187,10 +204,15 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.cmd_list = []  # 指令列表
         self.is_running = False  # 是否正在运行
 
+        # executor.log_message.connect(lambda msg: print("【日志】：", msg, sep=''))
+        executor.log_message.connect(self.log_textEdit.append)
+        executor.progress_updated.connect(self.on_progress_updated)
+
         # 指令执行器
         self.executor_thread = None
         # 脚本自动执行管理器
         self.auto_executor_manager = AutoExecutorManager(parent=self)
+        self.auto_executor_manager.script_executor_trigger.connect(self.start_script_executor)
         # If 判断条件 ”condition“ 的构建器
         self.condition_builder = None
         # Python 编辑器
@@ -474,7 +496,6 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         :param ocr: OCR 模型对象
         """
         self._ocr = ocr
-        from core.script_executor import executor
         executor.ocr = ocr
         print("加载 OCR 模型成功") if _DEBUG else None
 
@@ -1285,6 +1306,11 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         # 恢复菜单项状态
         self.executor_thread.finished.connect(self.on_executor_finished)
 
+    # 菜单 - 运行 - 自动运行
+    def run_auto(self):
+        """ 自动运行  """
+        self.auto_executor_manager.show()
+
     def stop_executor_thread(self):
         """
         强制终止当前运行的线程
@@ -1326,9 +1352,21 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.action_menu_runNow.setEnabled(True)
         self.executor_thread = None
 
-    def run_auto(self):
-        """ 自动运行  """
-        self.auto_executor_manager.exec_()
+    def start_script_executor(self, script_path: str):
+        """ 启动脚本执行器 """
+        print(f"(start_script_executor) -  开始执行脚本文件： ✨{script_path}✨")
+        print("*" * 150)
+        self.log_textEdit.clear()  # 清空日志
+        # self.hide()  # 隐藏主窗口
+
+        executor.current_script = script_path
+        executor.start()
+
+    @staticmethod
+    def on_progress_updated(script_path: str, current_step: int, total_steps: int):
+        """ 更新任务进度 """
+        print(f"🔄当前进度：{current_step}/{total_steps},"
+              f" stop_flag: {executor.stop_flags[script_path]}")
 
     # 菜单 - 工具 1 - 截图
     def screen_shot(self):

@@ -221,6 +221,7 @@ class DateTimeTriggerCmd(BaseCommand):
         target = datetime.strptime(self.target_time, "%Y-%m-%d %H:%M:%S")
 
         while not self._stop_event.is_set():
+            time.sleep(1)  # 每秒检查一次
             if target <= datetime.now() < target + timedelta(seconds=1):
                 self.set_status(STATUS_COMPLETED)
                 break
@@ -229,7 +230,6 @@ class DateTimeTriggerCmd(BaseCommand):
                 self.set_status(STATUS_PENDING)
                 print(f"(DateTimeTriggerCmd) - 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} "
                       f"已经完全超过目标时间: {target}")
-            time.sleep(1)  # 每秒检查一次
 
     def stop(self):
         """停止监控"""

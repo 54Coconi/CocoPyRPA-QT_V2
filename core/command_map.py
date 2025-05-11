@@ -1,6 +1,7 @@
 """
 指令映射模块
 """
+from core.commands.trigger_commands import *
 from core.commands.mouse_commands import *
 from core.commands.keyboard_commands import *
 from core.commands.image_commands import *
@@ -8,7 +9,13 @@ from core.commands.flow_commands import *
 from core.commands.script_commands import *
 from core.commands.subtask_command import *
 
+
 COMMAND_MAP = {
+    "trigger": {
+        "processTrigger": ProcessTriggerCmd,
+        "networkTrigger": NetworkConnectionTriggerCmd,
+        "timeTrigger": DateTimeTriggerCmd
+    },
     "mouse": {
         "click": MouseClickCmd,
         "moveTo": MouseMoveToCmd,

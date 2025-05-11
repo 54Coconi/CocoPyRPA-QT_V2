@@ -1,5 +1,23 @@
 """
-指令编辑器模块
+@author: 54Coconi
+@date: 2024-11-19
+@version: 1.0.1
+@path: ui/task_editor_controller.py
+@software: PyCharm 2023.1.2
+@officialWebsite: https://github.com/54Coconi
+@description:
+    该模块实现了任务编辑器的核心交互逻辑，提供了一个基于 PyQt5 的图形化界面组件，用于创建、编辑和管理自动化任务流程。
+    支持通过拖拽方式构建任务树，并可视化编辑每个节点的参数属性。
+
+    主要功能包括：
+        - 任务节点管理：支持多种类型的任务节点（鼠标操作、键盘操作、图片识别、脚本执行、流程控制等），可通过拖放进行添加、移动、删除。
+        - 属性编辑：根据节点类型动态生成属性表格，支持多种控件（`QSpinBox`, `QComboBox`, 自定义坐标控件、按键捕获按钮等）。
+        - 撤销/重做机制：提供对任务结构修改的历史记录与恢复能力。
+        - JSON 数据导入导出：可从 JSON 文件加载任务结构，也可将当前任务保存为 JSON 文件。
+        - 子任务嵌套支持：允许在任务中嵌入其他任务文件作为子任务。
+        - 节点校验机制：对 If、Loop 等流程控制节点的结构合法性进行检查，确保任务逻辑正确。
+        - 右键菜单操作：支持复制、粘贴、删除、选择子任务文件、查看节点数据等功能。
+        - 主题样式适配：根据配置切换不同 UI 主题样式（默认、深色、浅色、护眼模式）。
 """
 
 import copy
@@ -17,12 +35,12 @@ from PyQt5.QtWidgets import QTreeWidget, QTableWidget, QWidget, QTreeWidgetItem,
 
 from core.register import registry
 
-from .CocoPositionXY import PositionXY  # 导入自定义坐标控件
-from .CocoJsonView import JSONHighlighter  # 导入 JSON 数据高亮器
-from .CocoPlainTextEdit import CoPlainTextEdit  # 导入自定义文本编辑器
-from .CocoSettingWidget import config_manager  # 导入配置管理器单例
-from .CocoTableItemShowImg import ImageWidget  # 导入图片显示控件
-from .KeyListenerButton import KeyCaptureButton  # 导入自定义按键捕获按钮
+from ui.widgets.CocoPositionXY import PositionXY  # 导入自定义坐标控件
+from ui.widgets.CocoJsonView import JSONHighlighter  # 导入 JSON 数据高亮器
+from ui.widgets.CocoPlainTextEdit import CoPlainTextEdit  # 导入自定义文本编辑器
+from ui.widgets.CocoSettingWidget import config_manager  # 导入配置管理器单例
+from ui.widgets.CocoTableItemShowImg import ImageWidget  # 导入图片显示控件
+from ui.widgets.KeyListenerButton import KeyCaptureButton  # 导入自定义按键捕获按钮
 
 import resources_rc
 
@@ -137,7 +155,7 @@ def simulate_mouse_move(tree_widget):
     tree_widget.mouseMoveEvent(mouse_event)
 
 
-class CustomTaskWidget(QWidget):
+class TaskEditorCore(QWidget):
     """
     指令编辑器树型控件、属性表格控件、指令库树型控件之间的业务逻辑
 
@@ -1432,7 +1450,7 @@ class CustomTaskWidget(QWidget):
                         spinbox_int.setPrefix("点击 ")  # 设置前缀为 "点击 "
                         spinbox_int.setSuffix(" 次")  # 设置后缀为 "次"
                     elif key == "retries":
-                        spinbox_int.setPrefix("重试 ")  # 设置前缀为 "重试 "
+                        spinbox_int.setPrefix("重复 ")  # 设置前缀为 "重试 "
                         spinbox_int.setSuffix(" 次")  # 设置后缀为 "次"
                     elif key == "error_retries":
                         spinbox_int.setPrefix("错误重试 ")  # 设置前缀为 "错误重试 "

@@ -19,7 +19,7 @@ from mss.screenshot import ScreenShot
 from utils.debug import print_func_time
 
 
-_DEBUG = True
+_DEBUG = False
 
 
 class ScreenshotTool:

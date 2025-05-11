@@ -22,7 +22,6 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QL
                              QListWidgetItem, QTableWidget, QTableWidgetItem, QHeaderView,
                              QDialog, QDialogButtonBox, QMessageBox, QMenu, QDateTimeEdit, QSpinBox)
 
-from core.script_executor import executor
 from core.commands.base_command import STATUS_COMPLETED, STATUS_PENDING
 from core.commands.trigger_commands import ProcessTriggerCmd, NetworkConnectionTriggerCmd, DateTimeTriggerCmd
 
@@ -500,6 +499,7 @@ class TriggerManager(QObject):
 # -------------------- 主界面 --------------------
 class TriggerManagerGUI(QWidget):
     """ 触发器管理 GUI 界面"""
+    script_executor_on_triggered_signal = pyqtSignal(str)
 
     def __init__(self, manager: TriggerManager, ocr=None, parent=None):
         super(TriggerManagerGUI, self).__init__(parent)
@@ -514,10 +514,6 @@ class TriggerManagerGUI(QWidget):
         self.list_widget = None  # 任务列表
         self.init_ui()
         self.manager.triggered.connect(self.on_triggered)
-
-        # 信号连接
-        executor.log_message.connect(lambda msg: print("【日志】：", msg, sep=''))
-        executor.progress_updated.connect(self.on_progress_updated)
 
     def init_ui(self):
         """ 初始化界面 """
@@ -762,21 +758,14 @@ class TriggerManagerGUI(QWidget):
 
     def on_triggered(self, script_path: str):
         """ 触发任务执行 """
-        print(f"(on_triggered) -  开始执行脚本文件： ✨{script_path}✨")
-        print("*" * 100)
-        # TODO: 调用执行器执行脚本
         self.current_script_path = script_path
-        executor.execute_script(script_path)
-
-    @staticmethod
-    def on_progress_updated(script_path: str, current_step: int, total_steps: int):
-        """ 更新任务进度 """
-        print(f"🔄当前进度：{current_step}/{total_steps},"
-              f" stop_flag: {executor.stop_flags[script_path]}")
+        # 发送脚本执行器触发信号给主界面(main_window.py)
+        self.script_executor_on_triggered_signal.emit(script_path)
 
 
 class AutoExecutorManager(QDialog):
-    """ 主窗口 """
+    """ 自动执行管理器主界面 """
+    script_executor_trigger = pyqtSignal(str)
 
     def __init__(self, ocr=None, parent=None):
         super(AutoExecutorManager, self).__init__(parent)
@@ -786,6 +775,9 @@ class AutoExecutorManager(QDialog):
         self.manager = TriggerManager(self.parent)  # 触发器管理器
         self.gui = TriggerManagerGUI(self.manager, self.ocr, self.parent)  # 触发器管理界面
         self.manager.set_item_status.connect(self.gui.change_item_status)
+
+        # 信号传递给主界面(main_window.py)
+        self.gui.script_executor_on_triggered_signal.connect(self.script_executor_trigger.emit)
 
         self.init_ui()
 

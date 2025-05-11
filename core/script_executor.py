@@ -3,28 +3,26 @@ script_executor.py
 
 指令执行引擎（基于脚本文件）
 """
+
+import os
 import json
 import operator
-from pathlib import Path
-from typing import List, Dict, Tuple, Optional
-
 import keyboard
-from PyQt5.QtCore import QObject, pyqtSignal, QThread, QCoreApplication, QEvent, Qt
-from PyQt5.QtWidgets import QApplication
+
+from pathlib import Path
+from typing import List, Dict, Optional
+from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
 from core.commands.base_command import BaseCommand
 from core.commands.flow_commands import IfCommand, LoopCommand
 from core.commands.image_commands import ImageOcrCmd, ImageOcrClickCmd, ImageMatchCmd, ImageClickCmd
 from core.commands.subtask_command import SubtaskCommand
-
-from utils.stop_executor import stop_running_thread
-
 from .command_map import COMMAND_MAP
 
 _DEBUG = False
 
 
-class ScriptExecutor(QObject):
+class ScriptExecutor(QThread):
     """ 自动化脚本执行器 """
     execution_started = pyqtSignal(str)  # 执行器启动信号，传入脚本路径
     execution_finished = pyqtSignal(str, bool)  # 执行器结束信号，传入(脚本路径, 是否成功)
@@ -35,7 +33,7 @@ class ScriptExecutor(QObject):
         super().__init__(parent)
         self.current_script = None  # 当前执行的脚本文件路径
         self.ocr = ocr
-        self.active_scripts: Dict[str, Tuple[QThread, ScriptWorker]] = {}  # 存储脚本运行状态：{script_path: (thread, worker)}
+        self.active_scripts: Dict[str, ScriptWorker] = {}  # 存储脚本运行状态：{script_path: worker}
         self.stop_flags: Dict[str, bool] = {}  # 存储停止标志：{script_path: stop_flag}
         self.thread = None
         keyboard.add_hotkey('q+esc', self.stop_script)
@@ -49,22 +47,20 @@ class ScriptExecutor(QObject):
         # 存储停止标志为 False（表示不停止）
         self.stop_flags[script_path] = False
         print(f"🔴 当前 stop_flags 为：{self.stop_flags}") if _DEBUG else None
-        # 创建脚本执行工作线程
-        self.thread = QThread()
+
+        # 创建脚本执行工作流
         worker = ScriptWorker(script_path, self.ocr)
-        worker.moveToThread(self.thread)
 
         # 信号连接
-        self.thread.started.connect(lambda: worker.execute())
-        worker.finished.connect(lambda: self.thread.quit())
         worker.progress.connect(self._handle_progress)
         worker.log.connect(self.log_message.emit)
 
         # 存储运行状态
-        self.active_scripts[script_path] = (self.thread, worker)
+        self.active_scripts[script_path] = worker
         print(f"🔴 当前 active_scripts 为：{self.active_scripts}") if _DEBUG else None
 
-        self.thread.start()
+        # 执行工作流
+        worker.execute()
         self.execution_started.emit(script_path)
 
     def stop_script(self):
@@ -92,6 +88,13 @@ class ScriptExecutor(QObject):
             del self.active_scripts[script_path]
         if script_path in self.stop_flags:
             del self.stop_flags[script_path]
+
+    def run(self):
+        """ 线程入口 """
+        try:
+            self.execute_script(self.current_script)
+        except Exception as e:
+            print(f"❌ 脚本执行出错：{e}")
 
 
 class ScriptWorker(QObject):
@@ -147,7 +150,7 @@ class ScriptWorker(QObject):
 
             success = not self._should_stop()
         except Exception as e:
-            self.log.emit(f"❌执行出错: {str(e)}")
+            self.log.emit(f"❌ 执行出错: {str(e)}")
             success = False
 
         self.progress.emit(self.script_path, total if success else -1, total)
@@ -220,7 +223,8 @@ class ScriptWorker(QObject):
     def _execute_one_command(self, command: BaseCommand):
         """ 执行单个指令 """
         try:
-            self.log.emit(f"🔶执行步骤 {self.current_step + 1}: {command.name}")
+            # self.log.emit("\n")
+            self.log.emit(f"\n🔶 执行步骤 {self.current_step + 1}: {command.name}")
 
             # 检查指令是否激活
             if command.is_active is False:
@@ -229,8 +233,8 @@ class ScriptWorker(QObject):
 
             # 检查图片匹配指令
             if isinstance(command, ImageMatchCmd) or isinstance(command, ImageClickCmd):
-                if not Path(command.template_img).exists():
-                    raise FileNotFoundError(f"模板图片不存在: {command.template_img}")
+                if not os.path.exists(command.template_img):
+                    raise FileNotFoundError(f"模板图片 ‘{command.template_img}’ 不存在")
 
             # 执行指令
             if isinstance(command, IfCommand):
@@ -245,9 +249,10 @@ class ScriptWorker(QObject):
             self.results_list.append(command.model_dump())
             print(f"[INFO] - 当前指令 <{command.name}> 执行结果: {self.results_list[-1]}") if _DEBUG else None
 
+        except FileNotFoundError as e:
+            self.log.emit(f"❌ 步骤 {self.current_step + 1} 执行失败: {str(e)}")  # 不向上抛出异常
         except Exception as e:
-            self.log.emit(f"❌步骤 {self.current_step + 1} 执行失败: {str(e)}")
-            raise
+            raise e  # 向上抛出异常以中断执行
 
     def _execute_if_command(self, command: IfCommand):
         """ 执行 If 命令 """
