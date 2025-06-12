@@ -7,7 +7,7 @@
             "icon": ":/icons/script-python",
             "params": {
                 "name": "执行 Python 脚本",
-                "code": "import pyautogui\nimport numpy as np\nimport cv2\n\nimg = np.array(pyautogui.screenshot())\nnew_img, threshold = drawRectangle(img, r\"work/work_images/IMAGE_2024-12-03-195421.png\")\nif new_img is not None:\n    cv2.imwrite(\"temp_result.png\", new_img)\n    print(\"匹配成功,结果保存在 temp_result.png 中,匹配度为:\", threshold)\nelse:\n    print(\"匹配失败，置信度为\",threshold) ",
+                "code": "import pyautogui\r\nimport numpy as np\r\nimport cv2\r\n\r\n# 模板图片路径（可以为相对路径）\r\ntemplate = r\"work/work_images/IMAGE_2025-06-08-010053.png\"\r\n# 截取全屏图片\r\nimg = np.array(pyautogui.screenshot())\r\n# 在全屏截图上找到模板图片并绘制矩形框\r\nnew_img, threshold = drawRectangle(img, template)\r\nif new_img is not None:\r\n    cv2.imwrite(\"temp_result.png\", new_img)\r\n    print(\"匹配成功,结果保存在 temp_result.png 中,匹配度为:\", threshold)\r\nelse:\r\n    print(\"匹配失败，置信度为\",threshold) ",
                 "is_active": true,
                 "status": 0,
                 "id": "a3588d63"

@@ -46,7 +46,7 @@ class BackupDirCmd(RetryCmd):
     def run_command(self, **kwargs):
         """ 备份源目录到目标目录的逻辑 """
         if not self.source_dir.exists() or not self.source_dir.is_dir():
-            raise CommandRunningException(f"源目录 {self.source_dir} 不存在或不是一个目录")
+            raise CommandRunningException(f"源目录 [{self.source_dir}] 不存在或不是一个目录")
 
         if self.target_dir == "" or self.target_dir is None:
             raise CommandRunningException(f"目标目录 [{self.target_dir}] 为空或不是一个目录")

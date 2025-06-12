@@ -1,11 +1,11 @@
 <RCC>
-  <qresource lang="theme" prefix="theme">
+  <qresource prefix="theme" lang="theme">
     <file alias="default">resources/theme/default/default.css</file>
     <file alias="dark">resources/theme/dark/dark.css</file>
     <file alias="light">resources/theme/light/light.css</file>
     <file alias="eye">resources/theme/eye/eye.css</file>
   </qresource>
-  <qresource lang="icons" prefix="icons">
+  <qresource prefix="icons" lang="icons">
     <file alias="new-task">resources/icons/new-work.svg</file>
     <file alias="new-file">resources/icons/new-file.svg</file>
     <file alias="open-task">resources/icons/open_task.svg</file>
@@ -48,6 +48,7 @@
     <file alias="keys-record">resources/icons/keys-record.svg</file>
     <file alias="python">resources/icons/python.svg</file>
     <file alias="update">resources/icons/update.svg</file>
+    <file alias="mouse-press-release">resources/icons/mouse-press-release.svg</file>
     <file alias="mouse-click-left">resources/icons/click-left.svg</file>
     <file alias="mouse-click-middle">resources/icons/click-middle.svg</file>
     <file alias="mouse-click-right">resources/icons/click-right.svg</file>

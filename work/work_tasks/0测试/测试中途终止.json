@@ -2,13 +2,13 @@
     "task_name": "测试中途终止",
     "steps": [
         {
-            "type": "flow",
-            "action": "delay",
-            "icon": ":/icons/delay",
+            "type": "trigger",
+            "action": "processTrigger",
+            "icon": ":/icons/trigger-process",
             "params": {
-                "name": "等待 1.00 秒",
-                "delay_time": 1.0,
-                "is_active": true
+                "name": "进程状态监控",
+                "process_name": "notepad.exe",
+                "trigger_type": "start"
             }
         },
         {
@@ -18,7 +18,9 @@
             "params": {
                 "name": "等待 1.00 秒",
                 "delay_time": 1.0,
-                "is_active": true
+                "is_active": true,
+                "status": 0,
+                "id": "94879a78"
             }
         },
         {
@@ -28,7 +30,9 @@
             "params": {
                 "name": "等待 1.00 秒",
                 "delay_time": 1.0,
-                "is_active": true
+                "is_active": true,
+                "status": 0,
+                "id": "9d19bca8"
             }
         },
         {
@@ -37,16 +41,18 @@
             "icon": ":/icons/loop",
             "params": {
                 "name": "Loop 循环",
-                "count": 10,
+                "count": 5,
                 "loop_commands": [
                     {
                         "type": "flow",
                         "action": "delay",
                         "icon": ":/icons/delay",
                         "params": {
-                            "name": "等待 1.00 秒",
-                            "delay_time": 1.0,
-                            "is_active": true
+                            "name": "等待 0.60 秒",
+                            "delay_time": 0.6000000000000001,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "3e4d8dcd"
                         }
                     },
                     {
@@ -54,9 +60,11 @@
                         "action": "delay",
                         "icon": ":/icons/delay",
                         "params": {
-                            "name": "等待 1.00 秒",
-                            "delay_time": 1.0,
-                            "is_active": true
+                            "name": "等待 0.60 秒",
+                            "delay_time": 0.6000000000000001,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "77aa8539"
                         }
                     },
                     {
@@ -64,9 +72,11 @@
                         "action": "delay",
                         "icon": ":/icons/delay",
                         "params": {
-                            "name": "等待 1.00 秒",
-                            "delay_time": 0.9999999999999987,
-                            "is_active": true
+                            "name": "等待 0.60 秒",
+                            "delay_time": 0.6000000000000001,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "1199f2f3"
                         }
                     },
                     {
@@ -74,9 +84,11 @@
                         "action": "delay",
                         "icon": ":/icons/delay",
                         "params": {
-                            "name": "等待 1.00 秒",
-                            "delay_time": 1.0,
-                            "is_active": true
+                            "name": "等待 0.60 秒",
+                            "delay_time": 0.6000000000000001,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "95027dc8"
                         }
                     },
                     {
@@ -84,23 +96,57 @@
                         "action": "delay",
                         "icon": ":/icons/delay",
                         "params": {
-                            "name": "等待 1.00 秒",
-                            "delay_time": 0.9999999999999987,
-                            "is_active": true
-                        }
-                    },
-                    {
-                        "type": "flow",
-                        "action": "delay",
-                        "icon": ":/icons/delay",
-                        "params": {
-                            "name": "等待 1.00 秒",
-                            "delay_time": 1.0,
-                            "is_active": true
+                            "name": "等待 0.60 秒",
+                            "delay_time": 0.6000000000000001,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "fa24bfdb"
                         }
                     }
                 ],
-                "is_active": true
+                "is_active": true,
+                "status": 0,
+                "id": "df9a3448"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "if",
+            "icon": ":/icons/if",
+            "params": {
+                "name": "If 判断",
+                "condition": "results_list['df9a3448']['status'] == 2",
+                "then_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 1.20 秒",
+                            "delay_time": 1.2,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "9eb42268"
+                        }
+                    }
+                ],
+                "else_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 0.60 秒",
+                            "delay_time": 0.6000000000000001,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "cf8b2686"
+                        }
+                    }
+                ],
+                "is_active": true,
+                "status": 0,
+                "id": "fa54417e"
             }
         }
     ]

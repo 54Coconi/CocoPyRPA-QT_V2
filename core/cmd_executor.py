@@ -22,7 +22,6 @@ from .commands.subtask_command import SubtaskCommand
 
 _DEBUG = True
 
-
 LOG_COLORS = {
     "默认": {
         "INFO": "#C4E791",
@@ -70,7 +69,7 @@ class CommandExecutor(QThread):
     progress_update = pyqtSignal(str)  # 进度更新信号
     log_message = pyqtSignal(str)  # 日志消息信号
 
-    select_node = pyqtSignal(QTreeWidgetItem or None)   # 选中节点信号
+    select_node = pyqtSignal(QTreeWidgetItem or None)  # 选中节点信号
 
     def __init__(self,
                  tree_widget: QTreeWidget, run_action: str,
@@ -85,18 +84,18 @@ class CommandExecutor(QThread):
         :param parent: 父类
         """
         super().__init__(parent)
-        self.tree_widget = tree_widget          # 使用主程序中的 QTreeWidget
-        self.run_action = run_action            # 运行动作种类（run_all、run_one、run_now）
+        self.tree_widget = tree_widget  # 使用主程序中的 QTreeWidget
+        self.run_action = run_action  # 运行动作种类（run_all、run_one、run_now）
         self._ocr = ocr
         self.all_tasks_cmd: List[BaseCommand] = all_tasks_cmd or []  # 存储指令对象列表
         self.parent = parent
 
-        self.stop_flag = False              # 停止标志
-        self.current_node = None            # 当前正在执行的节点
-        self.task_name = ""                 # 当前任务名称
+        self.stop_flag = False  # 停止标志
+        self.current_node = None  # 当前正在执行的节点
+        self.task_name = ""  # 当前任务名称
         self.results_list: List[dict] = []  # 存储每个指令的执行结果
-        self.current_index = 0              # 当前执行的指令索引
-        self.bindings = {}                  # 绑定关系
+        self.current_index = 0  # 当前执行的指令索引
+        self.bindings = {}  # 绑定关系
 
         # TODO: 订阅运行异常信号
         pub.subscribe(self.cmd_running_exception, "command_running_exception")
@@ -253,7 +252,7 @@ class CommandExecutor(QThread):
                     # 提取 subtask_steps 节点, 并将其子节点转换为命令对象
                     subtask_steps = []
                     subtask_item = item.child(0)
-                    subtask_cmd_count = subtask_item.childCount()
+                    subtask_cmd_count = subtask_item.childCount() if subtask_item else 0
                     for _ in range(subtask_cmd_count):
                         extracted_command = extract_node_commands(subtask_item.child(_))
                         subtask_steps.append(extracted_command)
@@ -543,8 +542,8 @@ class CommandExecutor(QThread):
         """
 
         def get_command_by_id(_cmd_id):
-            """通过指令 id 获取对应的指令执行结果"""
-            for result in self.results_list:
+            """通过指令 id 获取对应的指令执行结果，从后往前查找以确保获取最新的执行结果"""
+            for result in reversed(self.results_list):
                 if result.get("id") == _cmd_id:
                     return result
             return None

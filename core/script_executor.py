@@ -7,6 +7,8 @@ script_executor.py
 import os
 import json
 import operator
+import time
+
 import keyboard
 
 from pathlib import Path
@@ -74,7 +76,7 @@ class ScriptExecutor(QThread):
         """ 处理进度更新 """
         self.progress_updated.emit(script_path, current, total)
         if current == total:
-            self.log_message.emit(f"🎉 脚本所有的 {total} 个指令执行完成")
+            self.log_message.emit(f"🎉 脚本所有的 {total} 个顶层指令执行完成")
             self.execution_finished.emit(script_path, True)
             self._cleanup(script_path)
         elif current == -1:
@@ -109,22 +111,33 @@ class ScriptWorker(QObject):
         self._ocr = ocr
         self.commands: List[BaseCommand] = []
         self.results_list: List[dict] = []  # 存储每个指令的执行结果
-        self.current_step = 0
+        self.current_top_step = 0
 
     def load_script(self) -> bool:
         """脚本加载（支持嵌套指令）"""
+        # 初始化加载栈用于循环检测
+        if not hasattr(self, '_loading_stack'):
+            self._loading_stack = set()
+
+        if self.script_path in self._loading_stack:
+            self.log.emit(f"❌ 检测到循环引用: {self.script_path}")
+            return False
+
+        self._loading_stack.add(self.script_path)
         try:
             with open(self.script_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
                 steps = config.get("steps", [])
 
                 self.commands = self._parse_commands(steps)
-                self.log.emit(f"🟢 成功加载 {len(self.commands)} 个指令（含嵌套指令）")
+                self.log.emit(f"🟢 成功加载 {len(self.commands)} 个顶层指令（含嵌套指令）")
                 return True
 
         except Exception as e:
             self.log.emit(f"❌ 脚本加载失败: {str(e)}")
             return False
+        finally:
+            self._loading_stack.discard(self.script_path)
 
     def execute(self):
         """ 执行入口 """
@@ -138,16 +151,17 @@ class ScriptWorker(QObject):
         self.progress.emit(self.script_path, 0, total)
 
         try:
-            for idx, cmd in enumerate(self.commands):
+            start_time = time.time()
+            for idx, cmd in enumerate(self.commands, start=1):
                 if self._should_stop():
                     break
 
-                self.current_step = idx
-                self._execute_one_command(cmd)
+                self.current_top_step = idx
+                self._execute_one_command(cmd, current_step=idx)
                 # 执行最后一个指令时，这里不更新进度，防止重复更新
-                if idx + 1 != total:
-                    self.progress.emit(self.script_path, idx + 1, total)
-
+                if idx != total:
+                    self.progress.emit(self.script_path, idx, total)
+            self.log.emit(f"\n⏰ 脚本执行完成，耗时 {time.time() - start_time:.2f} 秒")
             success = not self._should_stop()
         except Exception as e:
             self.log.emit(f"❌ 执行出错: {str(e)}")
@@ -159,23 +173,38 @@ class ScriptWorker(QObject):
     def _parse_commands(self, steps: List[dict]) -> List[BaseCommand]:
         """递归解析指令列表"""
         commands = []
-        for step in steps:
-            cmd = self._create_command(step)
-            if cmd:
-                commands.append(cmd)
-        return commands
+        for idx, step in enumerate(steps, start=1):
+            cmd_type = step.get("type")
+            action = step.get("action")
+            params = step.get("params", {})
 
-    def _create_command(self, step: dict) -> Optional[BaseCommand]:
-        """创建单个指令对象（支持嵌套）"""
-        cmd_type = step.get("type")
-        action = step.get("action")
-        params = step.get("params", {})
-
-        try:
             # 跳过触发器指令
             if cmd_type == "trigger":
-                return None
+                continue
+            elif cmd_type == "subtask":
+                subtask_file = params.get('subtask_file', '')
+                print(f"🟡 解析子任务：{subtask_file}")
 
+                if subtask_file in self._loading_stack:
+                    self.log.emit(f"❌ 检测到循环引用: {subtask_file}")
+                    continue
+                else:
+                    self._loading_stack.add(subtask_file)
+                    cmd = self._create_command(cmd_type, action, params)
+                    if cmd:
+                        commands.append(cmd)
+                    self._loading_stack.discard(subtask_file)
+            else:
+                cmd = self._create_command(cmd_type, action, params)
+                if cmd:
+                    commands.append(cmd)
+        print(f"😀子任务 loading stack: {self._loading_stack}")
+        return commands
+
+    def _create_command(self, cmd_type: str, action: str, params: dict) -> Optional[BaseCommand]:
+        """创建单个指令对象（支持嵌套）"""
+
+        try:
             # 获取指令类
             cmd_class = COMMAND_MAP.get(cmd_type, {}).get(action)
             if not cmd_class:
@@ -204,7 +233,7 @@ class ScriptWorker(QObject):
             elif isinstance(command, LoopCommand):
                 loop_commands = self._parse_commands(params.get("loop_commands", []))
                 command.loop_commands = loop_commands
-            # 处理子任务指令
+            # 处理子任务指令（支持循环检测）
             elif isinstance(command, SubtaskCommand):
                 subtask_path = Path(params.get("subtask_file", ""))
                 if not subtask_path.exists():
@@ -220,12 +249,12 @@ class ScriptWorker(QObject):
             self.log.emit(f"❌指令创建失败: {str(e)}")
             return None
 
-    def _execute_one_command(self, command: BaseCommand):
-        """ 执行单个指令 """
+    def _execute_one_command(self, command: BaseCommand, is_top_level=True, current_step=0):
+        """ 执行单个指令
+        is_top_level: 是否是顶层指令
+        current_step: 当前步骤
+        """
         try:
-            # self.log.emit("\n")
-            self.log.emit(f"\n🔶 执行步骤 {self.current_step + 1}: {command.name}")
-
             # 检查指令是否激活
             if command.is_active is False:
                 self.log.emit(f"⚠ 指令: {command.name} 未激活, 跳过执行")
@@ -235,6 +264,12 @@ class ScriptWorker(QObject):
             if isinstance(command, ImageMatchCmd) or isinstance(command, ImageClickCmd):
                 if not os.path.exists(command.template_img):
                     raise FileNotFoundError(f"模板图片 ‘{command.template_img}’ 不存在")
+
+            # 判断是否顶层指令
+            if is_top_level:
+                self.log.emit(f"\n🔶 执行步骤 {current_step}：{command.name}")
+            else:
+                self.log.emit(f"🔸 执行步骤 {current_step}：{command.name}")
 
             # 执行指令
             if isinstance(command, IfCommand):
@@ -250,7 +285,7 @@ class ScriptWorker(QObject):
             print(f"[INFO] - 当前指令 <{command.name}> 执行结果: {self.results_list[-1]}") if _DEBUG else None
 
         except FileNotFoundError as e:
-            self.log.emit(f"❌ 步骤 {self.current_step + 1} 执行失败: {str(e)}")  # 不向上抛出异常
+            self.log.emit(f"❌ 步骤 {self.current_top_step + 1} 执行失败: {str(e)}")  # 不向上抛出异常
         except Exception as e:
             raise e  # 向上抛出异常以中断执行
 
@@ -266,11 +301,11 @@ class ScriptWorker(QObject):
         block = command.then_commands if condition_result else command.else_commands
 
         # 打印日志，表明条件是否成立
-        self.log.emit(f"{'✅ 条件成立' if condition_result else '❎ 条件不成立'}，执行对应代码块")
+        self.log.emit(f"\n{'✅ 条件成立' if condition_result else '❎ 条件不成立'}，开始执行对应代码块")
 
         # 遍历并执行选中的代码块中的子命令
-        for subcommand in block:
-            self._execute_one_command(subcommand)
+        for idx, subcommand in enumerate(block, start=1):
+            self._execute_one_command(subcommand, is_top_level=False, current_step=idx)
 
     def _execute_loop_command(self, command: LoopCommand):
         """ 执行 Loop 命令 """
@@ -278,17 +313,18 @@ class ScriptWorker(QObject):
             self.log.emit(f"⚠ 指令: {command.name} 未激活, 跳过执行")
             return
         for i in range(command.count):
-            self.log.emit(f"开始执行循环体 (第 {i + 1} 次)")
-            for subcommand in command.loop_commands:
-                self._execute_one_command(subcommand)
+            self.log.emit(f"\n🔁 开始执行循环体（第 {i + 1} 次）")
+            for idx, subcommand in enumerate(command.loop_commands, start=1):
+                self._execute_one_command(subcommand, is_top_level=False, current_step=idx)
 
     def _execute_subtask_command(self, command: SubtaskCommand):
         """ 执行子任务命令 """
         if command.is_active is False:
             self.log.emit(f"⚠ 指令: {command.name} 未激活, 跳过执行")
             return
-        for subcommand in command.subtask_steps:
-            self._execute_one_command(subcommand)
+        self.log.emit(f"\n🔗 开始执行子任务：{Path(command.subtask_file).name}")
+        for idx, subcommand in enumerate(command.subtask_steps, start=1):
+            self._execute_one_command(subcommand, is_top_level=False, current_step=idx)
 
     def _should_stop(self):
         """ 检查停止标志 """

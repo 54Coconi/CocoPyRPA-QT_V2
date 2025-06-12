@@ -25,7 +25,7 @@ class SubtaskCommand(BaseCommand):
 
     subtask_file: Path = Field(..., description="子任务文件路径")
 
-    _subtask_steps: List[BaseCommand] = []  # 子任务步骤对象,私有属性，任务json文件不需要保存
+    _subtask_steps: List[BaseCommand] = []  # 子任务步骤对象,私有属性
 
     def execute(self, **kwargs):
         pass
@@ -33,10 +33,7 @@ class SubtaskCommand(BaseCommand):
     # 获取私有属性子任务步骤
     @property
     def subtask_steps(self):
-        """
-        子任务步骤
-        :return: 返回一个 :class:`List` [:class:`BaseCommand`]
-        """
+        """子任务步骤"""
         return self._subtask_steps
 
     # 设置私有属性子任务步骤

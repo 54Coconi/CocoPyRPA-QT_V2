@@ -1,4 +1,44 @@
 {
     "task_name": "鼠标滚动",
-    "steps": []
+    "steps": [
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 2.00 秒",
+                "delay_time": 1.9999999999999998,
+                "is_active": true,
+                "status": 0,
+                "id": "aabf6030"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "scrollV",
+            "icon": ":/icons/wheel-v",
+            "params": {
+                "name": "鼠标竖直滚动(-5)",
+                "scroll_units": -5,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "bef28d69"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "scrollH",
+            "icon": ":/icons/wheel-h",
+            "params": {
+                "name": "鼠标水平滚动(5)",
+                "scroll_units": 5,
+                "retries": 0,
+                "is_active": true,
+                "status": 0,
+                "id": "1af0906d"
+            }
+        }
+    ]
 }

@@ -6,8 +6,7 @@
 @software: PyCharm 2023.1.2
 @officialWebsite: https://github.com/54Coconi
 @description:
-    - 用于管理 Python 代码执行环境中的
-    安全全局变量
+    - 用于管理 Python 代码执行环境中的安全全局变量
 """
 
 from typing import Dict, Any, Optional
@@ -140,6 +139,7 @@ class SafeGlobalsManager:
         "re": ["search", "findall", "sub", "split", "match", "fullmatch", "finditer"],
         "numpy": None,
         "cv2": None,
+        "pynput": None,
         "pyautogui": None,
     }
 

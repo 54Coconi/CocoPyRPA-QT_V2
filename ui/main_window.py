@@ -182,14 +182,14 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.file_model.setRootPath(self._task_home)  # 设置根路径
 
         # 设置自定义的任务加载、编辑、属性编辑组件
-        self.coco_task_widget = TaskEditorCore(self.cmd_treeWidget,
+        self.task_editor_ctrl = TaskEditorCore(self.cmd_treeWidget,
                                                self.attr_edit_tableWidget,
                                                self.tasks_view_treeView,
                                                self.op_view_treeWidget)
         # 连接任务组件发送的信号
-        self.coco_task_widget.screenshot_signal.connect(self.screen_shot)  # 截图信号
-        self.coco_task_widget.node_inserted_signal.connect(self.on_tree_row_inserted)  # 节点插入信号
-        self.coco_task_widget.node_removed_signal.connect(self.on_tree_row_removed)  # 节点删除信号
+        self.task_editor_ctrl.screenshot_signal.connect(self.screen_shot)  # 截图信号
+        self.task_editor_ctrl.node_inserted_signal.connect(self.on_tree_row_inserted)  # 节点插入信号
+        self.task_editor_ctrl.node_removed_signal.connect(self.on_tree_row_removed)  # 节点删除信号
 
         # 设置自定义的指令库组件
         self.coco_op_view = CmdLibAndSearchBar(self.op_search_line, self.op_view_treeWidget,
@@ -395,15 +395,15 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     def exit_application(self):
         """退出程序"""
-        if not self.coco_task_widget.is_save:
+        if not self.task_editor_ctrl.is_save:
             self.restore_window()  # 恢复主窗口
             num = self.show_maybe_save_msg_box()  # 显示是否保存消息框
             print(f"用户选择的按钮为：{num}") if _DEBUG else None
             if num == 0:  # 用户选择保存
                 # 将当前任务保存到当前打开的 json 文件
-                if self.coco_task_widget.current_json_path:
-                    print(f"保存当前任务到当前打开的 json 文件 '{self.coco_task_widget.current_json_path}' ")
-                    self.save_task(self.coco_task_widget.current_json_path)
+                if self.task_editor_ctrl.current_json_path:
+                    print(f"保存当前任务到当前打开的 json 文件 '{self.task_editor_ctrl.current_json_path}' ")
+                    self.save_task(self.task_editor_ctrl.current_json_path)
                 else:
                     # 构建 json 文件路径，获取当前任务列表项的父节点路径
                     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -427,6 +427,8 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             self.tray_icon.hide()
             QApplication.quit()
 
+    # ========================================= 主窗口事件 =================================== #
+
     def showEvent(self, a0: QtGui.QShowEvent) -> None:
         """ 重写显示事件 """
         super().showEvent(a0)
@@ -445,15 +447,15 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             self.hide()
             return
 
-        if not self.coco_task_widget.is_save:
+        if not self.task_editor_ctrl.is_save:
             num = self.show_maybe_save_msg_box()
             print(f"用户选择的按钮为：{num}") if _DEBUG else None
             if num == 0:  # 用户选择保存
                 # 将当前任务保存到当前打开的 json 文件
-                if self.coco_task_widget.current_json_path:
+                if self.task_editor_ctrl.current_json_path:
                     print(
-                        f"保存当前任务到当前打开的 json 文件 '{self.coco_task_widget.current_json_path}' ") if _DEBUG else None
-                    self.save_task(self.coco_task_widget.current_json_path)
+                        f"保存当前任务到当前打开的 json 文件 '{self.task_editor_ctrl.current_json_path}' ") if _DEBUG else None
+                    self.save_task(self.task_editor_ctrl.current_json_path)
                 else:
                     # 构建 json 文件路径，获取当前任务列表项的父节点路径
                     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -555,7 +557,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def on_tasks_item_doubleClicked(self, index: QModelIndex):
         """双击任务列表项目时触发"""
         # 先判断是否已经保存了当前的任务
-        if not self.coco_task_widget.is_save and \
+        if not self.task_editor_ctrl.is_save and \
                 os.path.isfile(self.file_model.filePath(index)):
             msg_box = QMessageBox(self)
             msg_box.setIcon(QMessageBox.Question)
@@ -569,10 +571,10 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
             if msg_box.clickedButton().text() == "保存":
                 # 将当前任务保存到当前打开的 json 文件
-                if self.coco_task_widget.current_json_path:
+                if self.task_editor_ctrl.current_json_path:
                     print(f"(on_tasks_item_doubleClicked) - 保存当前任务到当前打开的 json 文件 "
-                          f"'{self.coco_task_widget.current_json_path}' ") if _DEBUG else None
-                    self.save_task(self.coco_task_widget.current_json_path)
+                          f"'{self.task_editor_ctrl.current_json_path}' ") if _DEBUG else None
+                    self.save_task(self.task_editor_ctrl.current_json_path)
                 else:
                     # 构建 json 文件路径，获取当前任务列表项的父节点路径
                     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -582,11 +584,11 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             elif msg_box.clickedButton().text() == "取消":
                 return
             else:  # 用户选择不保存
-                self.coco_task_widget.is_save = True  # 设置任务为已保存
+                self.task_editor_ctrl.is_save = True  # 设置任务为已保存
 
         # 清除撤销栈、重做栈
-        self.coco_task_widget.undo_stack.clear()
-        self.coco_task_widget.redo_stack.clear()
+        self.task_editor_ctrl.undo_stack.clear()
+        self.task_editor_ctrl.redo_stack.clear()
         # 设置撤销、重做按钮状态
         self.change_undo_redo_state()
 
@@ -602,7 +604,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
                 self.attr_edit_tableWidget.clearContents()
                 # 加载 JSON 文件并显示
                 try:
-                    self.coco_task_widget.load_from_json(file_path)
+                    self.task_editor_ctrl.load_from_json(file_path)
                 except Exception as e:
                     QMessageBox.critical(self, "错误", f"加载任务 JSON 文件失败: \n{e}")
 
@@ -685,7 +687,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     def open_condition_builder(self, tree_item):
         """
-        打开条件编辑器
+        打开条件构建器
         :param tree_item: 当前选中的 if 判断指令
         """
         node_data = tree_item.data(0, Qt.UserRole)
@@ -719,15 +721,17 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             if item == selected_item:
                 break
 
-            # 获取节点的 data 数据
-            node_data = item.data(0, Qt.UserRole)
+            node_data = item.data(0, Qt.UserRole)  # 获取节点数据
+
             if node_data:  # 只添加有数据的节点
+                node_type = node_data.get("type")  # 获取节点类型
+                if node_type == "trigger":  # 跳过触发器节点
+                    continue
                 params = node_data.get('params')
                 if params:  # 只添加有 params 参数字典的节点
                     all_commands_data.append(node_data)
 
-            # 移动到下一个节点
-            iterator += 1
+            iterator += 1  # 移动到下一个节点
 
         return all_commands_data
 
@@ -824,8 +828,8 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
                     item_data["params"] = params  # 更新节点数据
                     current_item.setData(0, Qt.UserRole, item_data)
 
-                self.coco_task_widget.show_params_window(current_item, item_data)
-                self.coco_task_widget.is_save = False
+                self.task_editor_ctrl.show_params_window(current_item, item_data)
+                self.task_editor_ctrl.is_save = False
             else:
                 print("(get_template_img) - 当前节点为空")
 
@@ -865,14 +869,14 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         """
         print("(change_undo_redo_state) - 撤销、重做按钮状态切换") if _DEBUG else None
 
-        if self.coco_task_widget.undo_stack:
+        if self.task_editor_ctrl.undo_stack:
             # 设置撤销按钮可用
             self.action_menu_undo.setEnabled(True)
         else:
             # 设置撤销按钮不可用
             self.action_menu_undo.setEnabled(False)
 
-        if self.coco_task_widget.redo_stack:
+        if self.task_editor_ctrl.redo_stack:
             # 设置重做按钮可用
             self.action_menu_redo.setEnabled(True)
         else:
@@ -1078,7 +1082,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             with open(file_path, "r", encoding="utf-8") as f:
                 task_data = json.load(f)
             # 将任务数据加载到窗口（这里假设用 cmd_treeWidget 显示任务）
-            self.coco_task_widget.load_from_json(file_path)
+            self.task_editor_ctrl.load_from_json(file_path)
             QMessageBox.information(self, "成功", f"任务文件\n'{file_path}'\n已加载：")
         except Exception as e:
             QMessageBox.critical(self, "错误", f"无法加载文件：\n{e}")
@@ -1089,7 +1093,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         保存任务到 json 文件
         """
         if json_path:
-            self.coco_task_widget.save_to_json(json_path)
+            self.task_editor_ctrl.save_to_json(json_path)
         else:
             index = self.tasks_view_treeView.currentIndex()
             _json_path = self.file_model.filePath(index)
@@ -1098,7 +1102,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
                 with open(_json_path, 'r', encoding='utf-8') as f:
                     json_data = json.load(f)
                     # 如果json文件的steps不为空且不是当前打开的json文件则提示用户
-                    if json_data.get('steps') and _json_path != self.coco_task_widget.current_json_path:
+                    if json_data.get('steps') and _json_path != self.task_editor_ctrl.current_json_path:
                         json_name = os.path.basename(_json_path)
                         confirm = QMessageBox.question(self,
                                                        "保存确认", f"任务文件 '{json_name}' 不为空，是否覆盖？",
@@ -1106,9 +1110,9 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
                         if confirm == QMessageBox.No:  # 用户取消了保存
                             return
                         else:  # 用户确认覆盖
-                            self.coco_task_widget.save_to_json(_json_path)
+                            self.task_editor_ctrl.save_to_json(_json_path)
                     else:
-                        self.coco_task_widget.save_to_json(_json_path)
+                        self.task_editor_ctrl.save_to_json(_json_path)
             else:
                 QMessageBox.warning(self, "错误", "请在左侧任务列表中选择一个任务文件后再进行保存操作！", QMessageBox.Ok)
 
@@ -1123,7 +1127,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def undo(self):
         """撤销上一步操作"""
         self.change_undo_redo_state()  # 撤销前更新撤销、重做按钮状态
-        if not self.coco_task_widget.undo_stack:
+        if not self.task_editor_ctrl.undo_stack:
             message = "[WARN] - 没有可以撤销的操作"
             formatted_message = f"<p align='left'><font color='#ffb700' size='3'>" \
                                 f"{message}" \
@@ -1131,7 +1135,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             self.log_textEdit.append(formatted_message)
             return
 
-        self.coco_task_widget.undo()
+        self.task_editor_ctrl.undo()
         self.cmd_treeWidget.expandAll()
         self.change_undo_redo_state()  # 撤销后更新撤销、重做按钮状态
 
@@ -1139,7 +1143,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def redo(self):
         """重做上一步操作"""
         self.change_undo_redo_state()  # 重做前更新撤销、重做按钮状态
-        if not self.coco_task_widget.redo_stack:
+        if not self.task_editor_ctrl.redo_stack:
             message = "[WARN] - 没有可以重做的操作"
             formatted_message = f"<p align='left'><font color='#ffb700' size='3'>" \
                                 f"{message}" \
@@ -1147,7 +1151,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             self.log_textEdit.append(formatted_message)
             return
 
-        self.coco_task_widget.redo()
+        self.task_editor_ctrl.redo()
         self.cmd_treeWidget.expandAll()
         self.change_undo_redo_state()  # 重做后更新撤销、重做按钮状态
 
@@ -1168,9 +1172,9 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.cmd_treeWidget.clear()  # 清空任务
         if self.attr_edit_tableWidget.rowCount() > 0:
             self.attr_edit_tableWidget.clearContents()  # 清空属性编辑表格
-        self.coco_task_widget.undo_stack.clear()  # 清空撤销栈
-        self.coco_task_widget.redo_stack.clear()  # 清空重做栈
-        self.coco_task_widget.is_save = False  # 设置是否保存标志为 False
+        self.task_editor_ctrl.undo_stack.clear()  # 清空撤销栈
+        self.task_editor_ctrl.redo_stack.clear()  # 清空重做栈
+        self.task_editor_ctrl.is_save = False  # 设置是否保存标志为 False
 
     # 菜单 - 视图 - 是否显示属性编辑器
     def is_attr_editor(self):
@@ -1358,7 +1362,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         print("*" * 150)
         self.log_textEdit.clear()  # 清空日志
         # self.hide()  # 隐藏主窗口
-
+        self.log_textEdit.append(f"开始执行脚本文件：✨{os.path.basename(script_path)}✨")
         executor.current_script = script_path
         executor.start()
 
@@ -1388,7 +1392,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.keys_record_action.setEnabled(False)
 
         # 先保存当前树的状态，以便撤销
-        self.coco_task_widget.whether_save_tree_state()
+        self.task_editor_ctrl.whether_save_tree_state()
 
     # 菜单 - 工具 3 - 键盘录制
     def keys_record(self):
@@ -1406,7 +1410,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.keys_record_action.setEnabled(False)
 
         # 先保存当前树的状态，以便撤销
-        self.coco_task_widget.whether_save_tree_state()
+        self.task_editor_ctrl.whether_save_tree_state()
 
     def recover_recorder_status(self):
         """ 恢复鼠标、键盘录制器菜单项状态 """

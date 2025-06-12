@@ -19,6 +19,7 @@ from pynput.mouse import Controller, Button
 from pytweening import linear, easeInQuad, easeInOutQuad, easeOutQuad
 
 from utils.debug import print_func_time
+from utils.mouse_move_pynput import move_with_duration_pynput, move_with_duration_pynput_dynamic
 
 from .base_command import RetryCmd, CommandRunningException
 
@@ -32,69 +33,13 @@ pyautogui.FAILSAFE = True
 
 # 获取当前屏幕分辨率
 SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
+
 # 设置 pynput 鼠标按键映射
 PYNPUT_BUTTON = {
     'left': Button.left,
     'right': Button.right,
     'middle': Button.middle
 }
-
-
-# 绘图时建议采用该方法，保证鼠标不会跳跃
-def move_with_duration_pynput(duration: float | int, position: Tuple[int, int], mouse: Controller):
-    """
-    使用 pynput 缓慢移动鼠标到目标位置，受 duration 控制。
-    """
-    start_pos = mouse.position  # 记录初始位置
-    steps = int(duration * 40)  # 分为 100 * duration 个小步
-    interval = duration / steps  # 每一步的时间间隔
-
-    for step in range(steps):
-        # 计算每一步的位置，避免累积误差
-        new_x = start_pos[0] + (position[0] - start_pos[0]) * (step + 1) / steps
-        new_y = start_pos[1] + (position[1] - start_pos[1]) * (step + 1) / steps
-        mouse.position = (int(new_x), int(new_y))  # 移动鼠标到当前步的目标位置
-        time.sleep(interval)
-
-    # 确保最终位置精确到达目标位置
-    mouse.position = position
-
-
-# 对于时间敏感的操作，建议使用该方法，保证在最短时间内到达目标位置
-@print_func_time(debug=_DEBUG)
-def move_with_duration_pynput_dynamic(duration: float | int, position: Tuple[int, int], mouse: Controller):
-    """
-    使用 pynput 缓慢移动鼠标到目标位置，受 duration 控制
-    使用动态时间调整以减少误差
-    :param duration: (float|int): 移动持续时间(秒)
-    :param position: (Tuple[int, int]): 移动目标位置 (x, y)
-    :param mouse: (Controller): pynput 鼠标控制器
-    """
-    start_pos = mouse.position  # 记录初始位置
-    steps = int(duration * 50)  # 使用更高的步数来减少时间片误差
-    interval = duration / steps  # 每一步的目标间隔时间
-    target_time = time.time() + duration  # 记录目标结束时间
-    print(f"steps: {steps}, interval: {interval}" if _DEBUG else "", end="")
-
-    # 逐步移动鼠标位置
-    for step in range(steps):
-        # 计算当前步的目标位置, 避免累积误差
-        new_x = start_pos[0] + (position[0] - start_pos[0]) * (step + 1) / steps
-        new_y = start_pos[1] + (position[1] - start_pos[1]) * (step + 1) / steps
-        mouse.position = (int(new_x), int(new_y))  # 移动鼠标到当前步的目标位置
-
-        # 动态调整休眠时间，基于当前时间和目标时间的差值
-        remaining_time = target_time - time.time()
-        if remaining_time <= interval * 0.1:
-            break  # 如果已到达目标时间，直接结束
-        # 使用动态时间调整，避免时间片误差
-        sleep_time = min(interval, remaining_time / (steps - step))
-        # if sleep_time <= interval * 0.1:
-        #     break
-        time.sleep(sleep_time)
-
-    # 最终确保到达目标位置
-    mouse.position = position
 
 
 @print_func_time(debug=_DEBUG)
@@ -123,6 +68,89 @@ def _is_within_screen_bounds(x: int, y: int) -> bool:
         return False
 
 
+# @ <鼠标按下释放> 指令
+class MousePressReleaseCmd(RetryCmd):
+    """
+    <鼠标按下释放> 指令
+    用于模拟鼠标按下和释放，支持 pyautogui 和 pynput,
+    如果指定了 x 和 y 坐标，且点击位置不同于当前鼠标位置，则 duration 参数用于控制移动到目标位置的持续时间
+    Attributes:
+        name:(str): 指令名称, 默认为 "<鼠标按下释放>"
+        is_active:(bool): 指令是否生效, 默认为 True
+        retries:(int): 指令重复执行次数, 默认为 0
+
+        target_pos:(tuple): 需要按下的目标位置 (x, y)，当且仅当为(-1，-1)时，表示目标位置为当前鼠标位置
+        press_times:(int): 鼠标按下次数, 默认为 1
+        hold_time:(float|int): 鼠标按下持续时间(秒), 默认为 0s
+        duration:(float|int): 移动持续时间(秒), 默认为 0s
+        button:(str): 鼠标按键, 默认为 "left"
+        is_release:(bool): 是否自动释放鼠标, 默认为 True
+        use_pynput:(bool): 是否使用 pynput 进行鼠标操作, 默认为 True
+    """
+    name: str = Field(f"鼠标按下释放", description="指令名称")
+    is_active: bool = Field(True, description="指令是否生效")
+    retries: int = Field(0, description="指令重复执行次数")
+
+    target_pos: Tuple[int, int] = Field((-1, -1), description="需要按下的目标位置 (x, y)")
+    press_times: int = Field(1, description="鼠标按下次数")
+    hold_time: float | int = Field(0, description="鼠标按下持续时间(秒)")
+    duration: float | int = Field(0, description="移动持续时间(秒)")
+    button: str = Field("left", description="鼠标按键")
+    is_release: bool = Field(True, description="是否自动释放鼠标")
+    use_pynput: bool = Field(True, description="是否使用 pynput 进行鼠标操作")
+
+    def run_command(self, **kwargs):
+        """ 执行鼠标按下释放操作，支持 pyautogui 和 pynput """
+        _msg = ["[INFO] - (MousePressReleaseCmd)",
+                f"成功在坐标 {self.target_pos} 处按下'{self.button}'键 {self.press_times} 次"]
+        _error = f"鼠标按下的目标位置 {self.target_pos} 不在屏幕分辨率 {SCREEN_WIDTH}x{SCREEN_HEIGHT} 以内"
+        if self.target_pos != (-1, -1) and not _is_within_screen_bounds(self.target_pos[0], self.target_pos[1]):
+            raise CommandRunningException(_error)
+        mouse = Controller()
+
+        if self.use_pynput:
+            for _ in range(self.press_times):
+                if self.target_pos == (-1, -1):  # 当目标位置为 (-1, -1) 时，表示目标位置为当前鼠标位置
+                    # 按下鼠标
+                    self._press_release_pynput(self.hold_time, self.button, self.is_release, mouse)
+                else:
+                    if self.duration > 0:
+                        if mouse.position != self.target_pos:  # 当目标位置不同于当前鼠标位置时，移动到目标位置
+                            move_with_duration_pynput_dynamic(self.duration, self.target_pos, mouse)
+                        # 按下鼠标
+                        self._press_release_pynput(self.hold_time, self.button, self.is_release, mouse)
+                    else:
+                        mouse.position = self.target_pos
+                        # 按下鼠标
+                        self._press_release_pynput(self.hold_time, self.button, self.is_release, mouse)
+            print(_msg[0] + "[pynput] " + _msg[1])
+        else:
+            for _ in range(self.press_times):
+                if self.target_pos == (-1, -1):
+                    # 在当前位置按下时，强制 duration 为 0
+                    self._press_release_pyautogui(mouse.position, self.button, 0, self.hold_time, self.is_release)
+                else:
+                    self._press_release_pyautogui(self.target_pos, self.button, self.duration, self.hold_time,
+                                                  self.is_release)
+            print(_msg[0] + "[pyautogui] " + _msg[1])
+
+    @staticmethod
+    def _press_release_pynput(hold_time: float | int, button: str, is_release: bool, mouse: Controller):
+        """ 使用 pynput 进行鼠标按下释放操作 """
+        mouse.press(PYNPUT_BUTTON.get(button, Button.left))  # 鼠标按下
+        time.sleep(hold_time)  # 等待持续时间
+        mouse.release(PYNPUT_BUTTON.get(button, Button.left)) if is_release else None  # 鼠标释放
+
+    @staticmethod
+    def _press_release_pyautogui(target_pos: Tuple[int, int], button: str, duration: float | int,
+                                 hold_time: float | int, is_release: bool):
+        """ 使用 pyautogui 进行鼠标按下释放操作 """
+        pyautogui.moveTo(target_pos[0], target_pos[1], duration)
+        pyautogui.mouseDown(button=button)  # 鼠标按下
+        time.sleep(hold_time)  # 等待持续时间
+        pyautogui.mouseUp(target_pos[0], target_pos[1], button) if is_release else None  # 鼠标释放
+
+
 # @ <鼠标点击> 指令
 class MouseClickCmd(RetryCmd):
     """
@@ -135,10 +163,10 @@ class MouseClickCmd(RetryCmd):
         retries:(int): 指令重复执行次数, 默认为 0
 
         target_pos:(tuple): 需要点击的目标位置(x, y)
-        clicks:(int): 点击次数, 默认为1
-        interval:(float|int): 点击间隔(秒), 默认为0.2s
+        clicks:(int): 点击次数, 默认为 1
+        interval:(float|int): 点击间隔(秒), 默认为 0.2s
         button:(str): 鼠标按键类型('left', 'right', 'middle'), 默认为 'left'
-        duration:(float|int): 移动持续时间(秒), 默认为0
+        duration:(float|int): 移动持续时间(秒), 默认为 0s
         use_pynput:(bool): 是否使用 pynput 库, 默认为 False
     """
     name: str = Field(f"鼠标点击", description="指令名称")
@@ -165,7 +193,7 @@ class MouseClickCmd(RetryCmd):
                 mouse = Controller()
                 current_position = mouse.position  # 获取当前鼠标位置
                 if current_position != self.target_pos and self.duration > 0:
-                    move_with_duration_pynput(self.duration, self.target_pos, mouse)  # 移动到目标位置
+                    move_with_duration_pynput_dynamic(self.duration, self.target_pos, mouse)  # 移动到目标位置
                 click_pynput(self.clicks, self.button, self.interval, mouse, self.target_pos)  # 点击
                 print(_msg[0] + "[pynput] " + _msg[1])
             # 使用 pyautogui 库进行点击操作
@@ -230,7 +258,7 @@ class MouseMoveToCmd(RetryCmd):
                 # 使用 pynput 进行移动操作
                 mouse = Controller()
                 if self.duration > 0:
-                    move_with_duration_pynput(self.duration, self.target_pos, mouse)  # 移动到目标位置
+                    move_with_duration_pynput_dynamic(self.duration, self.target_pos, mouse)  # 移动到目标位置
                 else:
                     mouse.position = self.target_pos
                 print(f"[INFO] - (MouseMoveCmd)[pynput] 成功定点移动到坐标:{self.target_pos}")
@@ -458,7 +486,7 @@ class MouseScrollCmd(RetryCmd):
             raise CommandRunningException(e)
 
 
-# @ <鼠标横向滚动> 指令
+# @ <鼠标水平滚动> 指令
 class MouseScrollHCmd(MouseScrollCmd):
     """  <鼠标横向滚动> 指令
 
@@ -470,7 +498,7 @@ class MouseScrollHCmd(MouseScrollCmd):
         scroll_units:(int): 滚动的单位数量 (正数表示向右，负数表示向左)
         use_pynput:(bool): 是否使用 pynput 库
     """
-    name: str = Field("鼠标横向滚动", description="指令名称")
+    name: str = Field("鼠标水平滚动", description="指令名称")
     is_active: bool = Field(True, description="指令是否生效")
     retries: int = Field(0, description="指令重复执行次数")
 

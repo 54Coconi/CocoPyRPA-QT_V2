@@ -1,6 +1,28 @@
 {
     "鼠标(Mouse)": [
         {
+            "name": "鼠标按下释放",
+            "icon": ":/icons/mouse-press-release",
+            "data": {
+                "type": "mouse",
+                "action": "pressRelease",
+                "icon": ":/icons/mouse-press-release",
+                "params": {
+                    "name": "鼠标按下释放",
+                    "target_pos": [-1,-1],
+                    "hold_time": 0.0,
+                    "press_times": 1,
+                    "duration": 0.0,
+                    "retries": 0,
+                    "button": "left",
+                    "is_release": true,
+                    "is_active": true,
+                    "use_pynput": true,
+                    "status": 0
+                }
+            }
+        },
+        {
             "name": "鼠标左键点击",
             "icon": ":/icons/mouse-click-left",
             "data": {
@@ -233,7 +255,6 @@
               "params": {
                   "name": "热键组合",
                   "keys": ["Alt", "Tab"],
-                  "hold_time": 0.0,
                   "retries": 0,
                   "is_active": true,
                   "use_pynput": false,

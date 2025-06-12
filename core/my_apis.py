@@ -12,6 +12,13 @@
 
 # 所有自定义类及其属性和方法
 CUSTOM_APIS = {
+    'MousePressReleaseCmd': {
+        'type': 'class',
+        'methods': ['execute()'],
+        'attributes': ['name', 'is_active', 'retries',
+                       'target_pos', 'press_times', 'hold_time', 'is_release',
+                       'button', 'duration', 'use_pynput']
+    },
     'MouseClickCmd': {
         'type': 'class',
         'methods': ['execute()'],

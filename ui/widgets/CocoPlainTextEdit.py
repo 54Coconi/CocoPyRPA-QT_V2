@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QPlainTextEdit
 
 class CoPlainTextEdit(QPlainTextEdit):
     """
-    自定义 :class:`QPlainTextEdit` 类，继承自 :class:`QPlainTextEdit`，
+    自定义 QPlainTextEdit 类，继承自 QPlainTextEdit，
     支持通过鼠标滚轮调整字体大小
     """
     def __init__(self, parent=None):

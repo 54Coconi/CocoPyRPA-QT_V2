@@ -122,11 +122,11 @@ def load_edit_mode() -> set:
     if edit_mode == "advanced":
         print("高级编辑模式") if _DEBUG else None
         # 高级编辑模式排除的字段
-        return {"type", "action", "icon", "cmd_id", "hold_time"}
+        return {"type", "action", "icon"}
     else:
         print("普通编辑模式") if _DEBUG else None
         # 普通编辑模式排除的字段
-        return {"type", "action", "icon", "cmd_id", "hold_time", "id", "status", "is_ignore_case", "use_regex"}
+        return {"type", "action", "icon", "id", "status", "is_ignore_case", "use_regex"}
 
 
 def load_json_with_order(file_path) -> OrderedDict:
@@ -173,6 +173,9 @@ class TaskEditorCore(QWidget):
         "target_pos": "目标坐标",
         "offset": "相对坐标",
         "clicks": "点击次数",
+        "press_times": "按下次数",
+        "hold_time": "按下持续时间",
+        "is_release": "是否自动释放",
         "interval": "点击间隔",
         "button": "鼠标按键",
         "duration": "持续时间",
@@ -276,6 +279,7 @@ class TaskEditorCore(QWidget):
         # 添加指令节点图标的映射字典
         self.icon_mapping = {
             'mouse': {
+                'pressRelease': ':/icons/mouse-press-release',
                 'clickL': ':/icons/mouse-click-left',
                 'clickR': ':/icons/mouse-click-right',
                 'clickM': ':/icons/mouse-click-middle',
@@ -534,91 +538,80 @@ class TaskEditorCore(QWidget):
             target_item.addChild(dragged_item)
             target_item.setExpanded(True)
 
-    # ====================================== 节点右键菜单 ===================================== #
+    # ==================================== 指令编辑器右键菜单 =================================== #
 
     def on_context_menu(self, position):
         """
-        右键菜单事件
+        指令编辑器右键菜单事件
         """
+        print(f"(on_context_menu) - 右键点击位置为：{position}")
+        menu = QMenu(self.treeWidget)  # 创建右键菜单
+
         # 获取右键点击的节点
         current_item = self.treeWidget.itemAt(position)
-        if not current_item:
-            return
-        # 获取节点数据
-        current_item_data = current_item.data(0, Qt.UserRole)
-
-        print(f"(on_context_menu) - 右键点击的节点为：{current_item.text(0)}")
-
-        # 创建右键菜单
-        menu = QMenu(self.treeWidget)
-
-        # 菜单项 - 删除任务节点
-        delete_action = menu.addAction("删除指令节点")
-        delete_action.setIcon(QIcon(":/icons/delete-item"))
-        if current_item_data:
-            delete_action.setEnabled(True)  # 仅当有数据时启用
-        else:
-            delete_action.setEnabled(False)
-        delete_action.triggered.connect(lambda: self.delete_task_node(current_item))
-
-        # 菜单项 - 复制任务节点
-        copy_action = menu.addAction("复制指令节点")
-        copy_action.setIcon(QIcon(":/icons/copy-item"))
-        if current_item_data:  # 仅当有数据时启用
-            copy_action.setEnabled(True)
-        else:
-            copy_action.setEnabled(False)
-        copy_action.triggered.connect(lambda: self.copy_task_node(current_item))
 
         # 菜单项 - 粘贴任务节点
         paste_action = menu.addAction("粘贴指令节点")
         paste_action.setIcon(QIcon(":/icons/paste-item"))
-        if self.copied_node_data is None:
-            paste_action.setEnabled(False)  # 仅当有复制数据时启用
-        else:
-            if current_item.text(0) in ["成立", "不成立"] or "重复" in current_item.text(0):
+        paste_action.triggered.connect(lambda: self.paste_task_node(current_item))
+        paste_action.setEnabled(bool(self.copied_node_data))  # 仅当有复制数据时启用
+
+        if current_item:  # 如果点击的是节点
+            current_item_data = current_item.data(0, Qt.UserRole)  # 获取节点数据
+            print(f"(on_context_menu) - 右键点击的节点为：{current_item.text(0)}")
+
+            if (current_item.text(0) in ["成立", "不成立"] or "重复" in current_item.text(0)) \
+                    and self.copied_node_data is not None:
                 paste_action.setEnabled(True)  # 仅当当前节点是 “成立/不成立/重复“ 时启用
             else:
                 paste_action.setEnabled(False)
-        paste_action.triggered.connect(lambda: self.paste_task_node(current_item))
 
-        # 添加分割线
-        menu.addSeparator()
+            # 菜单项 - 删除任务节点
+            delete_action = menu.addAction("删除指令节点")
+            delete_action.setIcon(QIcon(":/icons/delete-item"))
+            delete_action.triggered.connect(lambda: self.delete_task_node(current_item))
+            delete_action.setEnabled(bool(current_item_data))  # 仅当有数据时启用
 
-        # 菜单项 - 选择子任务文件
-        # 检查当前节点是否是子任务节点，如果是，添加选择子任务文件的菜单项
-        if current_item_data and current_item_data.get('type', '') == 'subtask':
-            # print("当前节点是子任务节点")
-            choose_subtask_action = menu.addAction("选择子任务文件")
-            choose_subtask_action.setIcon(QIcon(":/icons/import-subtask"))
-            choose_subtask_action.triggered.connect(lambda: self.choose_subtask_file(current_item))
+            # 菜单项 - 复制任务节点
+            copy_action = menu.addAction("复制指令节点")
+            copy_action.setIcon(QIcon(":/icons/copy-item"))
+            copy_action.triggered.connect(lambda: self.copy_task_node(current_item))
+            copy_action.setEnabled(bool(current_item_data))  # 仅当有数据时启用
 
-        # 菜单项 - 选择图片文件 、菜单项 - 截图
-        # 检查当前节点是否是图片类型节点
-        if current_item_data and current_item_data.get('type', '') == 'image' \
-                and current_item_data.get('action', '') in ['imageMatch', 'imageClick']:
-            # 创建选择图片文件的菜单项
-            choose_image_action = menu.addAction("选择图片文件")
-            choose_image_action.setIcon(QIcon(":/icons/import-image"))
-            choose_image_action.triggered.connect(lambda: self.choose_image_file(current_item))
-            # 创建截图的菜单项
-            screen_shot_action = menu.addAction("截图")
-            screen_shot_action.setIcon(QIcon(":/icons/screen-shot"))
-            screen_shot_action.triggered.connect(self.screen_shot)
+            menu.addSeparator()  # 添加分割线
 
-        # 添加分割线
-        menu.addSeparator()
+            # 菜单项 - 选择子任务文件
+            # 检查当前节点是否是子任务节点，如果是，添加选择子任务文件的菜单项
+            if current_item_data and current_item_data.get('type', '') == 'subtask':
+                choose_subtask_action = menu.addAction("选择子任务文件")
+                choose_subtask_action.setIcon(QIcon(":/icons/import-subtask"))
+                choose_subtask_action.triggered.connect(lambda: self.choose_subtask_file(current_item))
 
-        # 菜单项 - 查看节点数据
-        view_data_action = menu.addAction("查看节点数据")
-        view_data_action.setIcon(QIcon(":/icons/view-item"))
-        view_data_action.triggered.connect(lambda: self.view_task_node_data(current_item))
+            # 菜单项 - 选择图片文件 、菜单项 - 截图
+            # 检查当前节点是否是图片类型节点
+            if current_item_data and current_item_data.get('type', '') == 'image' \
+                    and current_item_data.get('action', '') in ['imageMatch', 'imageClick']:
+                # 创建选择图片文件的菜单项
+                choose_image_action = menu.addAction("选择图片文件")
+                choose_image_action.setIcon(QIcon(":/icons/import-image"))
+                choose_image_action.triggered.connect(lambda: self.choose_image_file(current_item))
+                # 创建截图的菜单项
+                screen_shot_action = menu.addAction("截图")
+                screen_shot_action.setIcon(QIcon(":/icons/screen-shot"))
+                screen_shot_action.triggered.connect(self.screen_shot)
 
-        # 检查当前节点是否是触发器
-        if current_item_data and current_item_data.get('type', '') == 'trigger':
-            delete_action.setVisible(False)  # 不显示删除菜单
-            copy_action.setVisible(False)  # 不显示复制菜单
-            paste_action.setVisible(False)  # 不显示粘贴菜单
+            menu.addSeparator()  # 添加分割线
+
+            # 菜单项 - 查看节点数据
+            view_data_action = menu.addAction("查看节点数据")
+            view_data_action.setIcon(QIcon(":/icons/view-item"))
+            view_data_action.triggered.connect(lambda: self.view_task_node_data(current_item))
+
+            # 检查当前节点是否是触发器
+            if current_item_data and current_item_data.get('type', '') == 'trigger':
+                delete_action.setVisible(False)  # 不显示删除菜单
+                copy_action.setVisible(False)  # 不显示复制菜单
+                paste_action.setVisible(False)  # 不显示粘贴菜单
 
         # 显示菜单
         menu.exec(self.treeWidget.viewport().mapToGlobal(position))
@@ -672,10 +665,13 @@ class TaskEditorCore(QWidget):
         # 先保存当前树的状态，以便撤销
         self.whether_save_tree_state()
 
-        # 粘贴复制的数据为子节点
         new_node = self.import_single_node(self.copied_node_data)
-        item.addChild(new_node)
-        QMessageBox.information(self.treeWidget, "粘贴成功", f"已将复制的任务节点粘贴到 '{item.text(0)}'")
+        if item is None:  # 如果粘贴到根节点
+            self.treeWidget.addTopLevelItem(new_node)
+            QMessageBox.information(self.treeWidget, "粘贴成功", "已将复制的任务节点粘贴到根节点")
+        else:
+            item.addChild(new_node)  # 粘贴复制的数据为子节点
+            QMessageBox.information(self.treeWidget, "粘贴成功", f"已将复制的任务节点粘贴到 '{item.text(0)}'")
 
     # 菜单项 - 查看节点数据
     def view_task_node_data(self, item):
@@ -698,14 +694,17 @@ class TaskEditorCore(QWidget):
 
         # 创建对话框
         dialog = QDialog(self.treeWidget)
-        dialog.setWindowTitle(f"查看节点 {item.text(0)} 的数据")
+        dialog.setWindowTitle(f"查看节点【{item.text(0)}】的数据")
         dialog.resize(500, 600)  # 默认大小
+
+        # 移除默认帮助按钮
+        dialog.setWindowFlags(dialog.windowFlags() & ~Qt.WindowContextHelpButtonHint)
 
         # 布局
         layout = QVBoxLayout(dialog)
 
         # 创建文本编辑器
-        json_text_edit = CoPlainTextEdit(dialog)
+        json_text_edit = CoPlainTextEdit(parent=dialog)
         # 将排序好的数据转换为 JSON 格式
         json_text = json.dumps(ordered_data, ensure_ascii=False, indent=4)
         # print("查看节点数据 json_text: ",json_text)
@@ -719,16 +718,34 @@ class TaskEditorCore(QWidget):
         font = QFont("Courier New")  # 设置字体为等宽字体
         # font.setPixelSize(11)  # 设置字体大小
         json_text_edit.setFont(font)  # 应用字体样式
+        button_layout = QHBoxLayout()  # 按钮布局
+        # 添加帮助按钮
+        help_button = QPushButton("帮助", dialog)
+        help_button.clicked.connect(lambda: self.show_help_message(dialog))
         # 添加关闭按钮
-        button_layout = QHBoxLayout()
-        close_button = QPushButton("关闭(close)", dialog)
+        close_button = QPushButton("关闭", dialog)
         close_button.clicked.connect(dialog.close)
+        button_layout.addWidget(help_button)
         button_layout.addStretch()
         button_layout.addWidget(close_button)
         layout.addLayout(button_layout)
 
         # 显示对话框
         dialog.exec()
+
+    @staticmethod
+    def show_help_message(parent_dialog):
+        """ 显示帮助信息 """
+        QMessageBox.information(
+            parent_dialog,
+            "节点数据说明",
+            "此窗口显示当前任务节点的原始数据，用于调试和确认节点状态。\n\n"
+            "注意事项：\n"
+            "- type: 节点类型（如 mouse、keyboard 等）\n"
+            "- action: 动作类型（如 clickL、keyPress 等）\n"
+            "- params: 包含节点的具体参数配置\n"
+            "- 子节点会以嵌套结构展示"
+        )
 
     # TODO: 导出单个任务节点
     def export_single_node(self, item):
@@ -762,7 +779,7 @@ class TaskEditorCore(QWidget):
         """
         导入任务节点数据并创建对应的节点
         :param node_data: 节点数据
-        :return: 创建的单个节点
+        :return: :class:`QTreeWidgetItem` 创建的单个节点
         """
         _node_name = node_data.get("name", "未命名节点")
         _node_icon = node_data.get("icon", "")
@@ -806,10 +823,16 @@ class TaskEditorCore(QWidget):
         :param item: 当前任务节点
         """
         subtask_file_path = self.get_subtask_file_path()
+        # 判断子任务文件与 当前任务文件是否一致
+        if subtask_file_path == self.current_json_path:
+            QMessageBox.warning(self.treeWidget, "错误", "子任务文件与当前任务文件一致，请选择其他文件")
+            return
         if subtask_file_path:
+            self.whether_save_tree_state()  # 保存当前任务树状态
+
             # 删除子节点
             if item.childCount() > 0:
-                # 删除所有子节点
+                # 逆序删除所有子节点（当删除子节点时，后续节点的索引会自动前移）
                 for i in range(item.childCount() - 1, -1, -1):
                     item.removeChild(item.child(i))
             # 设置子任务文件路径
@@ -818,7 +841,8 @@ class TaskEditorCore(QWidget):
             params["subtask_file"] = subtask_file_path  # 设置子任务文件路径
             item_data["params"] = params  # 更新节点数据
             item.setData(0, Qt.UserRole, item_data)
-            # 读取子任务文件
+
+            # 读取子任务文件，并添加子任务节点
             self.add_subtask(item, {"subtask_file": subtask_file_path})
 
     def get_subtask_file_path(self):
@@ -950,10 +974,10 @@ class TaskEditorCore(QWidget):
         if not key_item or not value_item:  # 如果键或值不存在
             return
 
-        # 提取英文键名（括号中的内容）,通过切片操作 [start:end] 提取括号内的内容
+        # 提取英文键名
         key_text = key_item.text()
-        key = key_text[key_text.find('(') + 1:key_text.rfind(')')]  # 提取括号中的英文名
-        # key = next((k for k, v in self.ATTRIBUTE_MAPPING.items() if v == key_item.text().split('(')[0]), key_item.text())
+        # key = key_text[key_text.find('(') + 1:key_text.rfind(')')]  # 提取括号中的英文名
+        key = list(self.ATTRIBUTE_MAPPING.keys())[list(self.ATTRIBUTE_MAPPING.values()).index(key_text)]
 
         # 获取新值
         new_value = value_item.text()
@@ -1197,24 +1221,33 @@ class TaskEditorCore(QWidget):
 
     def load_from_json(self, json_path: str):
         """ 从 JSON 文件加载任务 """
-        # TODO: 加载任务时清空已复制的节点数据和撤销栈，并保存当前选中的 JSON 文件路径
-        self.copied_node_data = None  # 清空已复制的节点数据
-        self.undo_stack.clear()  # 清空撤销栈
-        self.current_json_path = json_path  # 保存当前选中的 JSON 文件路径
-        task_data = load_json_with_order(json_path)
+        # 新增循环检测集合
+        if not hasattr(self, '_loading_stack'):
+            self._loading_stack = set()  # 跟踪正在加载的文件路径
 
-        # 清空现有树
-        self.treeWidget.clear()
+        if json_path in self._loading_stack:
+            QMessageBox.critical(self.treeWidget, "循环依赖",
+                                 f"检测到循环引用: {json_path} 已在加载链中！")
+            return
 
-        # 添加任务步骤到树形控件
-        self.add_steps(None, task_data.get('steps', []))
+        self._loading_stack.add(json_path)
 
-        # 展开所有节点
-        self.treeWidget.expandAll()
+        # 原有初始化逻辑
+        self.copied_node_data = None
+        self.undo_stack.clear()
+        self.current_json_path = json_path
 
-        # 保存树状态
-        self.previous_tree_state = self.export_tree_to_list()
-        # self.treeWidget.itemChanged.connect(self.validate_tree)
+        try:
+            task_data = load_json_with_order(json_path)
+            self.treeWidget.clear()
+
+            # 添加任务步骤时传递当前加载栈
+            self.add_steps(None, task_data.get('steps', []))
+
+            self.treeWidget.expandAll()
+            self.previous_tree_state = self.export_tree_to_list()
+        finally:
+            self._loading_stack.remove(json_path)  # 确保始终移除路径
 
     # ================================== 添加任务步骤到树形控件 =================================== #
 
@@ -1325,11 +1358,19 @@ class TaskEditorCore(QWidget):
 
     def add_subtask(self, parent: QTreeWidgetItem, params: dict):
         """
-        添加子任务
+        添加子任务（带循环检测）
         :param parent: 父节点
         :param params: 子任务参数
         """
         subtask_file = params.get('subtask_file', None)  # 获取子任务文件路径
+
+        # 检查循环引用
+        if subtask_file in self._loading_stack:
+            QMessageBox.critical(self.treeWidget, "循环依赖",
+                                 f"子任务 “{os.path.basename(subtask_file)}” 与当前任务形成循环引用！\n"
+                                 f"请检查子任务配置，避免循环依赖。", QMessageBox.Ok)
+            return
+
         if subtask_file:
             subtask_name = os.path.basename(subtask_file)  # 获取子任务名
             subtask_item = QTreeWidgetItem(parent, [f"子任务文件: {subtask_name}"])  # 创建子任务子节点,parent为父节点
@@ -1340,12 +1381,16 @@ class TaskEditorCore(QWidget):
 
             # 加载子任务并添加其步骤
             try:
+                # 递归加载时保持加载栈状态
+                self._loading_stack.add(subtask_file)
                 subtask_data = load_json_with_order(subtask_file)
                 subtask_steps = subtask_data.get('steps', [])
                 self.add_steps(subtask_item, subtask_steps)
             except Exception as e:
                 QMessageBox.critical(self.treeWidget, "错误", f"加载子任务文件\n'{subtask_file}'\n时出错: {e}")
                 print(f"加载子任务文件 {subtask_file} 时出错: {e}")
+            finally:
+                self._loading_stack.discard(subtask_file)  # 确保清除加载状态
 
     def get_icon_path(self, step_type: str, action: str, params: dict) -> str:
         """根据指令类型和动作获取图标路径"""
@@ -1398,7 +1443,7 @@ class TaskEditorCore(QWidget):
         # 填充属性表格
         for row, (key, value) in enumerate(filtered_attributes.items()):
             # 获取映射后的中文属性名
-            display_key = self.ATTRIBUTE_MAPPING.get(key, key) + f"\n({key})"
+            display_key = self.ATTRIBUTE_MAPPING.get(key, key)  # + f"\n({key})"
             name_item = QTableWidgetItem(display_key)
             name_item.setFlags(Qt.ItemIsEnabled)  # 禁止编辑属性列
             self.attr_edit_table.insertRow(row)
@@ -1430,8 +1475,8 @@ class TaskEditorCore(QWidget):
 
             # retries、error_retries、clicks、count、scroll_units 使用 QSpinBox
             elif isinstance(value, int) and \
-                    (key == "retries" or key == "error_retries" or
-                     key == "clicks" or key == "count" or key == "scroll_units"):
+                    (key == "retries" or key == "error_retries" or key == "clicks"
+                     or key == "count" or key == "scroll_units" or key == "press_times"):
                 spinbox_int = QSpinBox()  # 创建一个 QSpinBox
                 spinbox_int.setCursor(Qt.ArrowCursor)  # 设置鼠标样式为指针
                 spinbox_int.setFocusPolicy(Qt.ClickFocus)  # 设置聚焦策略
@@ -1447,13 +1492,16 @@ class TaskEditorCore(QWidget):
                         spinbox_int.setPrefix("重复 ")  # 设置前缀为 "重复"
                         spinbox_int.setSuffix(" 次")  # 设置后缀为 "次"
                     elif key == "clicks":
-                        spinbox_int.setPrefix("点击 ")  # 设置前缀为 "点击 "
+                        spinbox_int.setPrefix("点击 ")  # 设置前缀为 "点击"
+                        spinbox_int.setSuffix(" 次")  # 设置后缀为 "次"
+                    elif key == "press_times":
+                        spinbox_int.setPrefix("按下 ")  # 设置前缀为 "按下"
                         spinbox_int.setSuffix(" 次")  # 设置后缀为 "次"
                     elif key == "retries":
-                        spinbox_int.setPrefix("重复 ")  # 设置前缀为 "重试 "
+                        spinbox_int.setPrefix("重复 ")  # 设置前缀为 "重复"
                         spinbox_int.setSuffix(" 次")  # 设置后缀为 "次"
                     elif key == "error_retries":
-                        spinbox_int.setPrefix("错误重试 ")  # 设置前缀为 "错误重试 "
+                        spinbox_int.setPrefix("错误重试 ")  # 设置前缀为 "错误重试"
                         spinbox_int.setSuffix(" 次")  # 设置后缀为 "次"
 
                     spinbox_int.setMinimum(0)  # 设置最小值
@@ -1469,7 +1517,7 @@ class TaskEditorCore(QWidget):
 
             # 时间变量 duration、delay_time、interval 使用 QDoubleSpinBox
             elif isinstance(value, float) and \
-                    (key == "duration" or key == "delay_time"
+                    (key == "duration" or key == "delay_time" or key == "hold_time"
                      or key == "interval" or key == "error_retries_time"):
                 spinbox = QDoubleSpinBox()  # 创建一个 QDoubleSpinBox
                 spinbox.setDecimals(2)  # 设置小数位数为 2

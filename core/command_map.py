@@ -17,6 +17,7 @@ COMMAND_MAP = {
         "timeTrigger": DateTimeTriggerCmd
     },
     "mouse": {
+        "pressRelease": MousePressReleaseCmd,
         "click": MouseClickCmd,
         "moveTo": MouseMoveToCmd,
         "moveRel": MouseMoveRelCmd,

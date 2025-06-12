@@ -597,6 +597,7 @@ class CodeExecutorThread(QThread):
         """ 注册所有可用的自动化指令类 """
         command_classes = {
             # 鼠标操作
+            "MousePressReleaseCmd": MousePressReleaseCmd,
             "MouseClickCmd": MouseClickCmd,
             "MouseMoveToCmd": MouseMoveToCmd,
             "MouseMoveRelCmd": MouseMoveRelCmd,
