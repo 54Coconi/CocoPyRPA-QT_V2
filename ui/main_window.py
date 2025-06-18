@@ -1360,9 +1360,11 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         """ 启动脚本执行器 """
         print(f"(start_script_executor) -  开始执行脚本文件： ✨{script_path}✨")
         print("*" * 150)
-        self.log_textEdit.clear()  # 清空日志
+        # 如果不是排队执行模式，则清空日志
+        if not self.auto_executor_manager.gui.chk_queue_exec.isChecked():
+            self.log_textEdit.clear()
         # self.hide()  # 隐藏主窗口
-        self.log_textEdit.append(f"开始执行脚本文件：✨{os.path.basename(script_path)}✨")
+        self.log_textEdit.append(f"\n开始执行脚本文件：✨{os.path.basename(script_path)}✨")
         executor.current_script = script_path
         executor.start()
 

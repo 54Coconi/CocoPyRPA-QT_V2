@@ -65,6 +65,9 @@ TRIGGER_DEFAULT_PARAMS = {
     }
 }
 
+# 同时触发的判断延时(ms)
+SIMULTANEOUS_TRIGGER_CHECK_DELAY = 1000
+
 # 样式
 STYLESHEET = """
 QPushButton {
@@ -509,7 +512,8 @@ class TriggerManagerGUI(QWidget):
         self.work_tasks_root = Path(WORK_TASKS_ROOT).absolute()  # 自动化脚本任务的根目录
         self.task_items: Dict[str, QListWidgetItem] = {}  # 任务列表项
         # ---------------- 新增队列执行相关属性 ----------------
-        self.exec_queues: Dict[str, list] = {}  # {trigger_key: [script_path, ...]}
+        self.exec_queues: Dict[str, list] = {}  # 执行队列 {trigger_key: [script_path, ...]}
+        self.pending_trigger_events: Dict[str, tuple[list, QTimer]] = {}  # 待处理触发事件 {trigger_key: ([script_paths], timer)}
         self.executor = executor  # 全局脚本执行器实例
 
         self.list_widget = None  # 任务列表
@@ -530,8 +534,7 @@ class TriggerManagerGUI(QWidget):
         control_layout.setContentsMargins(0, 0, 0, 0)
         self.btn_add = QPushButton("添加脚本")
         self.btn_remove = QPushButton("移除脚本")
-        # 新增：排队执行复选框
-        self.chk_queue_exec = QCheckBox("排队执行")
+        self.chk_queue_exec = QCheckBox("排队执行") # 排队执行复选框
 
         control_layout.addWidget(self.btn_add)
         control_layout.addWidget(self.btn_remove)
@@ -770,8 +773,7 @@ class TriggerManagerGUI(QWidget):
         """ 触发任务执行 """
         # 如果未勾选排队执行，则有脚本正在执行时直接失败
         if not self.chk_queue_exec.isChecked():
-            # 已有脚本在执行
-            if self.executor.active_scripts:
+            if self.executor.active_scripts:  # 已有脚本在执行
                 active_script = os.path.basename(list(self.executor.active_scripts.keys())[0])
                 QMessageBox.warning(self, "触发执行失败", f"已有脚本 '{active_script}' 正在执行中，且未勾选【排队执行】！")
                 return
@@ -779,21 +781,54 @@ class TriggerManagerGUI(QWidget):
             self.script_executor_on_triggered_signal.emit(script_path)
             return
 
-        # ---- 以下为排队执行逻辑 ----
+        # 如果勾选排队执行
         trigger_cfg = self.manager.active_tasks.get(script_path, {}).get("config")
         trigger_key = self._make_trigger_key(trigger_cfg)
-        queue = self.exec_queues.setdefault(trigger_key, [])  # 获取或创建队列
-        # 避免重复加入同一队列
-        if script_path not in queue:
-            queue.append(script_path)
+        
+        # 如果当前的触发器不在待处理触发事件中，则添加
+        if trigger_key not in self.pending_trigger_events:
+            # 新建一个延迟执行定时器
+            timer = QTimer(self)
+            timer.setSingleShot(True)
+            timer.timeout.connect(lambda: self._process_trigger_events(trigger_key))  # 延迟执行
+            timer.start(SIMULTANEOUS_TRIGGER_CHECK_DELAY)  # 1000ms 的延迟窗口
+            self.pending_trigger_events[trigger_key] = ([script_path], timer)
+        else:
+            # 将当前脚本添加到现有的触发器待执行列表
+            scripts, _ = self.pending_trigger_events[trigger_key]
+            if script_path not in scripts:  # 避免重复添加
+                scripts.append(script_path)
 
-        print(f"\n(on_triggered) -- 触发器触发\n"
-              f"  - 【trigger_cfg】: {trigger_cfg} \n"
-              f"  - 【trigger_key】: {trigger_key} \n"
-              f"  - 【queue】: {queue}\n"
-              f"  - 【self.exec_queues】: {self.exec_queues}\n")
+        print(f"\n😎(on_triggered) -- 触发器触发\n"
+              f"    - 当前触发脚本(script_path): {os.path.basename(script_path)}\n"              
+              f"    - 触发器键(trigger_key): {trigger_key} \n"
+              f"    - 待处理触发事件(pending_trigger_events): {self.pending_trigger_events}\n")
 
-        # 如果当前没有脚本在执行，则立即启动队列中的下一个脚本
+    def _process_trigger_events(self, trigger_key: str):
+        """ 处理延迟窗口内收集到的所有触发事件 """
+        # 如果当前的触发器不在待处理触发事件中则返回
+        if trigger_key not in self.pending_trigger_events:
+            return
+            
+        scripts, timer = self.pending_trigger_events.pop(trigger_key)
+        timer.deleteLater()  # 清理定时器
+        
+        if not scripts:
+            return
+            
+        # 按界面列表顺序排序
+        scripts.sort(key=self._get_script_row)
+        
+        # 添加到执行队列
+        queue = self.exec_queues.setdefault(trigger_key, [])
+        queue.extend(scripts)
+        
+        print(f"\n🚩(process_trigger_events) -- 处理延迟事件\n"
+              f"    - 触发器键(trigger_key): {trigger_key}\n"
+              f"    - 待执行脚本(scripts): {scripts}\n"
+              f"    - 执行队列(exec_queue): {self.exec_queues}\n")
+        
+        # 如果没有脚本在执行，则开始执行队列
         if not self.executor.active_scripts:
             self._start_next_in_queue()
 
@@ -805,22 +840,17 @@ class TriggerManagerGUI(QWidget):
         return self.list_widget.row(item)
 
     def _start_next_in_queue(self):
-        """ 从队列中启动下一个脚本（按脚本列表顺序） """
-        # 遍历各个触发器队列
+        """ 从队列中启动下一个脚本 """
+        # 遍历队列字典，找到有待执行脚本的队列
         for key in list(self.exec_queues.keys()):
             queue = self.exec_queues[key]
-            # 清理空队列
-            if not queue:
-                self.exec_queues.pop(key, None)
-                continue
-            # 按列表顺序排序
-            queue.sort(key=self._get_script_row)
-            next_script = queue.pop(0)  # 取出列表序最靠前的脚本
-            self.script_executor_on_triggered_signal.emit(next_script)
-            # 队列为空则移除
-            if not queue:
-                self.exec_queues.pop(key, None)
-            break
+            if queue:
+                next_script = queue.pop(0)  # 取出下一个脚本
+                self.script_executor_on_triggered_signal.emit(next_script)
+                # 清理空队列
+                if not queue:
+                    self.exec_queues.pop(key, None)
+                break
 
     @staticmethod
     def _make_trigger_key(cfg: Optional[Dict]) -> str:
