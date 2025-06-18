@@ -2,16 +2,6 @@
     "task_name": "测试中途终止",
     "steps": [
         {
-            "type": "trigger",
-            "action": "processTrigger",
-            "icon": ":/icons/trigger-process",
-            "params": {
-                "name": "进程状态监控",
-                "process_name": "notepad.exe",
-                "trigger_type": "start"
-            }
-        },
-        {
             "type": "flow",
             "action": "delay",
             "icon": ":/icons/delay",

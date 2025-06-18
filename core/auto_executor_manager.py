@@ -11,19 +11,17 @@
 import os
 import json
 import logging
-
-from pathlib import Path
 from typing import Dict, Optional, Any
-
+from pathlib import Path
 from PyQt5 import QtGui
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QDateTime
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QDateTime, QTimer
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QComboBox, QCheckBox, QFileDialog, QListWidget,
                              QListWidgetItem, QTableWidget, QTableWidgetItem, QHeaderView,
                              QDialog, QDialogButtonBox, QMessageBox, QMenu, QDateTimeEdit, QSpinBox)
-
 from core.commands.base_command import STATUS_COMPLETED, STATUS_PENDING
 from core.commands.trigger_commands import ProcessTriggerCmd, NetworkConnectionTriggerCmd, DateTimeTriggerCmd
+from core.script_executor import executor  # 引入全局脚本执行器实例
 
 # 配置常量
 WORK_TASKS_ROOT = Path(os.path.abspath("work/work_tasks"))
@@ -385,7 +383,7 @@ class TriggerManager(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.active_tasks: Dict[str, Any] = {}  # {script_path: {trigger, thread}}
+        self.active_tasks: Dict[str, Any] = {}  # {script_path: {trigger: Trigger, thread: QThread, config: Dict}}
         self.load_tasks()
 
     def load_tasks(self):
@@ -510,10 +508,15 @@ class TriggerManagerGUI(QWidget):
         self.is_stop = False  # 是否停止
         self.work_tasks_root = Path(WORK_TASKS_ROOT).absolute()  # 自动化脚本任务的根目录
         self.task_items: Dict[str, QListWidgetItem] = {}  # 任务列表项
+        # ---------------- 新增队列执行相关属性 ----------------
+        self.exec_queues: Dict[str, list] = {}  # {trigger_key: [script_path, ...]}
+        self.executor = executor  # 全局脚本执行器实例
 
         self.list_widget = None  # 任务列表
         self.init_ui()
         self.manager.triggered.connect(self.on_triggered)
+        # 连接脚本执行器信号以便在脚本结束后继续队列
+        self.executor.execution_finished.connect(self.on_execution_finished)
 
     def init_ui(self):
         """ 初始化界面 """
@@ -527,9 +530,12 @@ class TriggerManagerGUI(QWidget):
         control_layout.setContentsMargins(0, 0, 0, 0)
         self.btn_add = QPushButton("添加脚本")
         self.btn_remove = QPushButton("移除脚本")
+        # 新增：排队执行复选框
+        self.chk_queue_exec = QCheckBox("排队执行")
 
         control_layout.addWidget(self.btn_add)
         control_layout.addWidget(self.btn_remove)
+        control_layout.addWidget(self.chk_queue_exec)
         control_layout.addStretch()
 
         # 任务列表
@@ -560,7 +566,7 @@ class TriggerManagerGUI(QWidget):
             abs_path = Path(file_path).absolute().as_posix()
 
             # 检查是否已存在
-            existing_paths = [item.data(Qt.UserRole) for item in self.task_items.values()]
+            existing_paths = self.task_items.keys()
             if abs_path in existing_paths:
                 QMessageBox.warning(self, "提示", "该脚本已存在于任务列表中！")
                 return
@@ -602,8 +608,12 @@ class TriggerManagerGUI(QWidget):
             self.list_widget.takeItem(self.list_widget.row(current_item))
             # 从内存中移除
             del self.task_items[script_path]
-            # 移除脚本内的触发器
+            # 同步移除脚本文件内的触发器指令
             self.remove_trigger_from_script(widget.script_path)
+            # --------------- 新增：从队列中移除 ---------------
+            for q in self.exec_queues.values():
+                if script_path in q:
+                    q.remove(script_path)
 
     def _add_list_item(self, script_path: str, enabled: bool):
         """ 添加列表项 """
@@ -758,11 +768,77 @@ class TriggerManagerGUI(QWidget):
 
     def on_triggered(self, script_path: str):
         """ 触发任务执行 """
-        self.current_script_path = script_path
-        # 发送脚本执行器触发信号给主界面(main_window.py)
-        self.script_executor_on_triggered_signal.emit(script_path)
+        # 如果未勾选排队执行，则有脚本正在执行时直接失败
+        if not self.chk_queue_exec.isChecked():
+            # 已有脚本在执行
+            if self.executor.active_scripts:
+                active_script = os.path.basename(list(self.executor.active_scripts.keys())[0])
+                QMessageBox.warning(self, "触发执行失败", f"已有脚本 '{active_script}' 正在执行中，且未勾选【排队执行】！")
+                return
+            # 无脚本执行，直接触发
+            self.script_executor_on_triggered_signal.emit(script_path)
+            return
+
+        # ---- 以下为排队执行逻辑 ----
+        trigger_cfg = self.manager.active_tasks.get(script_path, {}).get("config")
+        trigger_key = self._make_trigger_key(trigger_cfg)
+        queue = self.exec_queues.setdefault(trigger_key, [])  # 获取或创建队列
+        # 避免重复加入同一队列
+        if script_path not in queue:
+            queue.append(script_path)
+
+        print(f"\n(on_triggered) -- 触发器触发\n"
+              f"  - 【trigger_cfg】: {trigger_cfg} \n"
+              f"  - 【trigger_key】: {trigger_key} \n"
+              f"  - 【queue】: {queue}\n"
+              f"  - 【self.exec_queues】: {self.exec_queues}\n")
+
+        # 如果当前没有脚本在执行，则立即启动队列中的下一个脚本
+        if not self.executor.active_scripts:
+            self._start_next_in_queue()
+
+    def _get_script_row(self, script_path: str) -> int:
+        """ 获取脚本在列表中的行号，用于排序，若不存在返回一个较大值 """
+        item = self.task_items.get(script_path)
+        if item is None:
+            return 10 ** 6  # 放在最后
+        return self.list_widget.row(item)
+
+    def _start_next_in_queue(self):
+        """ 从队列中启动下一个脚本（按脚本列表顺序） """
+        # 遍历各个触发器队列
+        for key in list(self.exec_queues.keys()):
+            queue = self.exec_queues[key]
+            # 清理空队列
+            if not queue:
+                self.exec_queues.pop(key, None)
+                continue
+            # 按列表顺序排序
+            queue.sort(key=self._get_script_row)
+            next_script = queue.pop(0)  # 取出列表序最靠前的脚本
+            self.script_executor_on_triggered_signal.emit(next_script)
+            # 队列为空则移除
+            if not queue:
+                self.exec_queues.pop(key, None)
+            break
+
+    @staticmethod
+    def _make_trigger_key(cfg: Optional[Dict]) -> str:
+        """ 根据触发器配置生成唯一键 """
+        if not cfg:
+            return "unknown"
+        cls_name = getattr(cfg.get("class"), "__name__", "unknown")
+        return f"{cls_name}:{json.dumps(cfg.get('params', {}), ensure_ascii=False, sort_keys=True)}"
+
+    def on_execution_finished(self, script_path: str, success: bool):
+        """ 脚本执行结束后处理队列 """
+        # 如果排队执行已启用，则继续下一项
+        if self.chk_queue_exec.isChecked():
+            # 延迟调用以确保执行器状态已更新
+            QTimer.singleShot(100, self._start_next_in_queue)
 
 
+# -------------------- 主界面 --------------------
 class AutoExecutorManager(QDialog):
     """ 自动执行管理器主界面 """
     script_executor_trigger = pyqtSignal(str)

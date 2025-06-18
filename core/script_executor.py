@@ -174,7 +174,7 @@ class ScriptWorker(QObject):
         """递归解析指令列表"""
         commands = []
         for idx, step in enumerate(steps, start=1):
-            cmd_type = step.get("type")
+            cmd_type = step.get("type", "unknown_command")
             action = step.get("action")
             params = step.get("params", {})
 
@@ -198,7 +198,7 @@ class ScriptWorker(QObject):
                 cmd = self._create_command(cmd_type, action, params)
                 if cmd:
                     commands.append(cmd)
-        print(f"😀子任务 loading stack: {self._loading_stack}")
+        print(f"😀子任务 loading stack: {self._loading_stack}") if _DEBUG else None
         return commands
 
     def _create_command(self, cmd_type: str, action: str, params: dict) -> Optional[BaseCommand]:
