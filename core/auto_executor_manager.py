@@ -534,7 +534,7 @@ class TriggerManagerGUI(QWidget):
         control_layout.setContentsMargins(0, 0, 0, 0)
         self.btn_add = QPushButton("添加脚本")
         self.btn_remove = QPushButton("移除脚本")
-        self.chk_queue_exec = QCheckBox("排队执行") # 排队执行复选框
+        self.chk_queue_exec = QCheckBox("排队执行")  # 排队执行复选框
 
         control_layout.addWidget(self.btn_add)
         control_layout.addWidget(self.btn_remove)
@@ -784,7 +784,7 @@ class TriggerManagerGUI(QWidget):
         # 如果勾选排队执行
         trigger_cfg = self.manager.active_tasks.get(script_path, {}).get("config")
         trigger_key = self._make_trigger_key(trigger_cfg)
-        
+
         # 如果当前的触发器不在待处理触发事件中，则添加
         if trigger_key not in self.pending_trigger_events:
             # 新建一个延迟执行定时器
@@ -800,7 +800,7 @@ class TriggerManagerGUI(QWidget):
                 scripts.append(script_path)
 
         print(f"\n😎(on_triggered) -- 触发器触发\n"
-              f"    - 当前触发脚本(script_path): {os.path.basename(script_path)}\n"              
+              f"    - 当前触发脚本(script_path): {os.path.basename(script_path)}\n"
               f"    - 触发器键(trigger_key): {trigger_key} \n"
               f"    - 待处理触发事件(pending_trigger_events): {self.pending_trigger_events}\n")
 
@@ -809,25 +809,25 @@ class TriggerManagerGUI(QWidget):
         # 如果当前的触发器不在待处理触发事件中则返回
         if trigger_key not in self.pending_trigger_events:
             return
-            
+
         scripts, timer = self.pending_trigger_events.pop(trigger_key)
         timer.deleteLater()  # 清理定时器
-        
+
         if not scripts:
             return
-            
+
         # 按界面列表顺序排序
         scripts.sort(key=self._get_script_row)
-        
+
         # 添加到执行队列
         queue = self.exec_queues.setdefault(trigger_key, [])
         queue.extend(scripts)
-        
+
         print(f"\n🚩(process_trigger_events) -- 处理延迟事件\n"
               f"    - 触发器键(trigger_key): {trigger_key}\n"
               f"    - 待执行脚本(scripts): {scripts}\n"
               f"    - 执行队列(exec_queue): {self.exec_queues}\n")
-        
+
         # 如果没有脚本在执行，则开始执行队列
         if not self.executor.active_scripts:
             self._start_next_in_queue()

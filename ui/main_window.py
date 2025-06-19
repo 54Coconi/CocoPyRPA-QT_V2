@@ -201,6 +201,10 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.screenshot.screen_shot_finish_signal.connect(self.get_template_img)  # 截图结束
         self.screenshot.screen_window_close_signal.connect(self.screenshot_window_close)  # 截图窗口关闭
 
+        # 设置日志文本框的上下文菜单
+        self.log_textEdit.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.log_textEdit.customContextMenuRequested.connect(self.show_log_context_menu)
+
         self.cmd_list = []  # 指令列表
         self.is_running = False  # 是否正在运行
 
@@ -738,7 +742,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     # ===============================  选中当前正在运行的节点  =============================== #
 
     def on_select_node(self, node: Optional[QTreeWidgetItem]):
-        """选中当前节点"""
+        """ 选中当前节点 """
 
         # 清除之前选中的节点
         iterator = QTreeWidgetItemIterator(self.cmd_treeWidget)
@@ -834,26 +838,20 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
                 print("(get_template_img) - 当前节点为空")
 
     def screenshot_window_close(self):
-        """
-        截图窗口关闭
-        """
+        """ 截图窗口关闭 """
         # 如果主窗口处于隐藏则显示
         if not self.isVisible():
             self.show()
         print("(screenshot_window_close) - 截图窗口关闭")
 
     def on_tree_row_inserted(self):
-        """
-        节点插入事件
-        """
+        """ 节点插入事件 """
         print("(on_tree_row_inserted) - 节点插入事件") if _DEBUG else None
 
         self.change_undo_redo_state()
 
     def on_tree_row_removed(self):
-        """
-        节点移除事件
-        """
+        """ 节点移除事件 """
         print("(on_tree_row_removed) - 节点移除事件") if _DEBUG else None
 
         self.change_undo_redo_state()
@@ -1478,6 +1476,58 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def show_cmd_desc(self):
         """ 功能介绍 """
         self.cmd_introduction_dialog.show()
+
+    # 日志窗口右键菜单
+    def show_log_context_menu(self, position):
+        """
+        显示日志文本框的上下文菜单
+        :param position: 鼠标位置
+        """
+        # 创建菜单
+        menu = QMenu(self)
+
+        # 添加菜单项
+        copy_action = menu.addAction("复制")
+        export_action = menu.addAction("导出日志")
+        clear_action = menu.addAction("清空日志")
+
+        # 如果没有选中文本，禁用复制选项
+        copy_action.setEnabled(self.log_textEdit.textCursor().hasSelection())
+
+        # 显示菜单并获取用户选择
+        action = menu.exec_(self.log_textEdit.mapToGlobal(position))
+
+        # 处理菜单项点击
+        if action == copy_action:
+            self.log_textEdit.copy()
+        elif action == export_action:
+            self.export_log()
+        elif action == clear_action:
+            self.log_textEdit.clear()
+
+    def export_log(self):
+        """导出日志到文件"""
+        # 获取日志内容
+        log_content = self.log_textEdit.toPlainText()
+        if not log_content.strip():
+            QMessageBox.information(self, "提示", "日志内容为空，无需导出！")
+            return
+
+        # 获取保存路径
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "导出日志",
+            f"log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+            "Text Files (*.txt);;All Files (*)"
+        )
+
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(log_content)
+                QMessageBox.information(self, "成功", f"日志已成功导出到：\n{file_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"导出日志时出错：{str(e)}")
 
     # 菜单 - 帮助 - 关于
     def show_about(self):
