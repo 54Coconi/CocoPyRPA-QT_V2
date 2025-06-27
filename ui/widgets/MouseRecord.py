@@ -100,11 +100,24 @@ def normalize_coordinates_decorator(func):
 
 
 class MouseListenerThread(QThread):
-    """鼠标监听线程"""
+    """鼠标监听线程
+
+    Attributes:
+        label (QLabel): 标签控件
+        last_click_time (float): 记录上次点击的时间
+        is_dragging (bool): 标记是否正在拖拽
+        start_pos (tuple): 初始化拖拽起点
+        screen_w (int): 获取屏幕分辨率
+        screen_h (int): 获取屏幕分辨率
+        is_top_left (bool): 标记标签是否在左上角
+        listener (mouse.Listener): 初始化鼠标监听器
+        running (bool): 标记线程是否运行
+    """
 
     def __init__(self, label: QLabel, parent=None):
         super().__init__(parent)
         self.label = label  # 标签控件
+        self.parent = parent
         self.last_click_time = 0  # 记录上次点击的时间
         self.is_dragging = False  # 标记是否正在拖拽
         self.start_pos = (0, 0)  # 初始化拖拽起点
@@ -202,7 +215,7 @@ class MouseListenerThread(QThread):
         :param action_type: 操作类型
         :param pos: 当前坐标(x,y)
         :param start_pos: 拖拽开始坐标
-        :param scroll: 滚轮数值
+        :param scroll: 滚轮方向
         :param duration: 拖动间隔
         """
         color = pyautogui.screenshot().getpixel(pos)
@@ -243,7 +256,11 @@ class MouseListenerThread(QThread):
         self.label.setText(text)
 
     def move_label(self, x, y):
-        """ 移动标签 """
+        """ 移动标签位置，避免标签被遮挡
+        主要是判断当前鼠标是否在标签的外边界50像素范围内
+        :param x: 当前横坐标
+        :param y: 当前纵坐标
+        """
         # 判断当前鼠标是否在标签的外边界50像素范围内
         if self.is_top_left and \
                 (x < self.label.width() + 50 and y < self.label.height() + 50):
@@ -258,7 +275,19 @@ class MouseListenerThread(QThread):
 
 
 class KeyboardListenerThread(QThread):
-    """键盘监听线程"""
+    """
+    键盘监听线程
+
+    Attributes:
+        create_cmd_signal: 创建指令信号
+        stop_signal: 停止指令信号
+        translation_dict: 中文到英文的映射字典
+
+    Methods:
+        __init__(self, label: QLabel, parent=None): 初始化方法
+        run(self): 运行方法，处理键盘事件（Enter 创建指令和 Esc 停止）
+        stop(self): 停止方法
+    """
     create_cmd_signal = pyqtSignal(dict)  # 发送创建信号,参数为字典
     stop_signal = pyqtSignal()  # 发送停止信号
 
@@ -313,12 +342,9 @@ class KeyboardListenerThread(QThread):
                 action = self.create_cmd(action)
                 self.cmd_list.append(action)
                 self.create_cmd_signal.emit(action)
-                print('\n------------------------')
+                print('\n'+'-'*100)
                 print(f"[1 次操作]：{action}")
-                print('------------------------\n')
-                print("[所有操作]：")
-                for i in self.cmd_list:
-                    print(i)
+                print('\n'+'-'*100)
         else:
             print(f"时间间隔太短：{current_time - self.last_enter_time}s")
 
@@ -489,7 +515,10 @@ class MouseRecorder(QMainWindow):
 
     def parse_and_add_commands(self):
         """解析操作记录并生成树控件节点"""
-        # 判断当前指令编辑器内容是否为空
+        # 如操作列表为空不创建指令
+        if not self.operation_list:
+            return
+        # 如果当前指令编辑器内容不为空
         if self.cmd_treeWidget.topLevelItemCount() > 0:
             msg_box = QMessageBox(self.cmd_treeWidget)
 

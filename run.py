@@ -23,9 +23,9 @@ import resources_rc
 
 
 MAIN_THEME = {
-    "默认": "resources/theme/default/default.css",
-    "深色": "resources/theme/dark/dark.css",
-    "浅色": "resources/theme/light/light_0.css",
+    "默认": "resources/theme/default/main.css",
+    "深色": "resources/theme/dark/main.css",
+    "浅色": "resources/theme/light/main.css",
     "护眼": "resources/theme/eye/eye.css"
 }
 

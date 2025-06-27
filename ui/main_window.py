@@ -1,7 +1,7 @@
 """
 @author: 54Coconi
 @data: 2024-11-18
-@version: 2.0.0
+@version: 2.0.2
 @path: ui/main_window.py
 @software: PyCharm 2023.1.2
 @officialWebsite: https://github.com/54Coconi
@@ -71,7 +71,7 @@ from core.script_executor import executor
 from core.cmd_executor import CommandExecutor
 from core.auto_executor_manager import AutoExecutorManager
 
-_DEBUG = False
+_DEBUG = True
 
 # 控制台LOGO
 LOGO1 = "      ______                 ____       ____   ____  ___                        "
@@ -82,7 +82,7 @@ LOGO5 = "   \____/\____/\___/\____/_/    \__, /_/ |_/_/   /_/  |_|      | |  / /
 LOGO6 = "                               /____/                          | ___ / /_____/  "
 
 # 版本信息
-__version__ = '2.0.0'
+__version__ = '2.0.2'
 __author__ = '54Coconi'
 __copyright__ = 'Copyright 2024-present 54Coconi'
 __license__ = 'MIT'
@@ -121,13 +121,13 @@ def update_global_config(self, new_config):
     #     self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
     if theme == "深色":
-        self.setStyleSheet(QL.read_qss_file('resources/theme/dark/dark.css'))
+        self.setStyleSheet(QL.read_qss_file('resources/theme/dark/main.css'))
     elif theme == "浅色":
-        self.setStyleSheet(QL.read_qss_file('resources/theme/light/light_0.css'))
+        self.setStyleSheet(QL.read_qss_file('resources/theme/light/main.css'))
     elif theme == "护眼":
         self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     else:
-        self.setStyleSheet(QL.read_qss_file('resources/theme/default/default.css'))
+        self.setStyleSheet(QL.read_qss_file('resources/theme/default/main.css'))
 
 
 class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
@@ -327,7 +327,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         print(' ' * 30, "作者: %s" % __author__)
         print('-' * 80, end='\n\n\n')
 
-    # =================================== 系统托盘  =================================== #
+    # ====================================== 系统托盘  ====================================== #
 
     def setup_system_tray(self):
         """设置系统托盘"""
@@ -389,12 +389,12 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     def mouse_record_action_triggered(self):
         """ 录制动作触发 """
-        QMessageBox.information(self, "鼠标录制", "开始录制鼠标动作！\n按Enter记录当前动作\n按Esc退出录制")
+        QMessageBox.information(self, "鼠标录制", "开始录制鼠标动作！\n按回车【Enter】记录当前动作\n按【Esc】退出录制")
         self.mouse_record()
 
     def keys_record_action_triggered(self):
         """ 键盘录制触发 """
-        QMessageBox.information(self, "键盘录制", "开始录制键盘动作！\n按 Tab+Esc 退出录制")
+        QMessageBox.information(self, "键盘录制", "开始录制键盘动作！\n按 【Tab + Esc】 退出录制")
         self.keys_record()
 
     def exit_application(self):
@@ -687,7 +687,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         # 显示菜单
         menu.exec(self.attr_edit_tableWidget.viewport().mapToGlobal(position))
 
-    # ===================================  条件编辑器  ==================================== #
+    # ===================================  条件构建器  ==================================== #
 
     def open_condition_builder(self, tree_item):
         """
@@ -1001,8 +1001,9 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
             file_name = os.path.basename(file_path)
             # 创建对话框
             dialog = QDialog(self)
-            dialog.setWindowTitle(f"查看{file_name}数据")
-            dialog.resize(500, 600)  # 默认大小
+            dialog.setWindowTitle(f"查看文件[{file_name}]的数据")
+            dialog.resize(500, 600)
+            dialog.setWindowFlags(dialog.windowFlags() & ~Qt.WindowContextHelpButtonHint)  # 移除默认帮助按钮
 
             # 布局
             layout = QVBoxLayout(dialog)
@@ -1035,9 +1036,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # 菜单 - 文件 - 新建任务目录
     def new_task_dir(self):
-        """
-        新建任务目录（同时会检查输入的目录字符串的合法性）
-        """
+        """新建任务目录（同时会检查输入的目录字符串的合法性）"""
         # 弹出对话框，让用户输入新任务的名称
         task_dir_name, ok_pressed = QInputDialog.getText(self, "新建任务目录", "请输入任务目录名称:", QLineEdit.Normal,
                                                          "")
@@ -1065,9 +1064,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # 菜单 - 文件 - 打开任务 json 文件到窗口
     def open_task(self):
-        """
-        打开资源管理器并选择任务 JSON 文件，加载任务内容到窗口。
-        """
+        """ 打开资源管理器并选择任务 JSON 文件，加载任务内容到窗口"""
         # 打开文件选择对话框，默认路径为当前模型根目录
         file_path, _ = QFileDialog.getOpenFileName(
             self, "选择任务文件", self.file_model.rootPath(), "JSON Files (*.json)"
@@ -1087,8 +1084,8 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # 菜单 - 文件 - 保存窗口任务到 json 文件
     def save_task(self, json_path: str = None):
-        """
-        保存任务到 json 文件
+        """ 保存任务到 json 文件
+        :param json_path: json文件路径
         """
         if json_path:
             self.task_editor_ctrl.save_to_json(json_path)
@@ -1160,7 +1157,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         clear_button = msg_box.addButton("清空", QMessageBox.YesRole)
         cancel_button = msg_box.addButton("取消", QMessageBox.NoRole)
         msg_box.setWindowTitle("提示")
-        msg_box.setText("是否清空当前任务, 清空后无法撤销!\n但是不会保存当前任务到文件")
+        msg_box.setText("是否清空当前任务, 清空后无法撤销!(即会删除所有历史操作)\n但是不会保存当前任务到文件中，确定清空指令吗？")
         msg_box.setDefaultButton(clear_button)  # 设置默认按钮
         msg_box.exec_()
 
@@ -1173,6 +1170,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.task_editor_ctrl.undo_stack.clear()  # 清空撤销栈
         self.task_editor_ctrl.redo_stack.clear()  # 清空重做栈
         self.task_editor_ctrl.is_save = False  # 设置是否保存标志为 False
+        self.change_undo_redo_state()  # 更新撤销、重做按钮状态
 
     # 菜单 - 视图 - 是否显示属性编辑器
     def is_attr_editor(self):
@@ -1314,9 +1312,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.auto_executor_manager.show()
 
     def stop_executor_thread(self):
-        """
-        强制终止当前运行的线程
-        """
+        """ 强制终止当前运行的线程 """
         if self.executor_thread and self.executor_thread.isRunning():
             print("(stop_executor_thread) 强制终止线程", self.executor_thread.isRunning())
             self.executor_thread.stop()
@@ -1337,9 +1333,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.action_menu_runNow.setEnabled(True)
 
     def on_executor_finished(self):
-        """
-        当线程运行结束时，恢复菜单项状态
-        """
+        """ 当执行引擎运行结束时，恢复菜单项运行图标状态 """
         # 判断当前窗口状态
         if self.windowState() & Qt.WindowMinimized:
             self.showNormal()
@@ -1381,8 +1375,11 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     # 菜单 - 工具 2 - 鼠标录制
     def mouse_record(self):
         """鼠标录制"""
+        # 先保存当前树的状态
+        pre_tree_state = self.task_editor_ctrl.export_tree_to_list()
         self.mouse_recorder = MouseRecorder(self.cmd_treeWidget, self.tray_icon)
         self.mouse_recorder.close_signal.connect(self.recover_recorder_status)
+        self.mouse_recorder.close_signal.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
         self.mouse_recorder.show()
         # 禁用主窗口的鼠标、键盘录制菜单项
         self.action_menu_keysRecord.setEnabled(False)
@@ -1391,16 +1388,14 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.mouse_record_action.setEnabled(False)
         self.keys_record_action.setEnabled(False)
 
-        # 先保存当前树的状态，以便撤销
-        self.task_editor_ctrl.whether_save_tree_state()
-
     # 菜单 - 工具 3 - 键盘录制
     def keys_record(self):
-        """
-        键盘录制
-        """
+        """ 键盘录制 """
+        # 先保存当前树的状态
+        pre_tree_state = self.task_editor_ctrl.export_tree_to_list()
         self.key_recorder = KeyboardRecorder(self.cmd_treeWidget)
         self.key_recorder.close_signal.connect(self.recover_recorder_status)
+        self.key_recorder.close_signal.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
         self.key_recorder.show()
         # 禁用主窗口的鼠标、键盘录制菜单项
         self.action_menu_keysRecord.setEnabled(False)
@@ -1408,9 +1403,6 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         # 禁用系统托盘的鼠标、键盘录制菜单项
         self.mouse_record_action.setEnabled(False)
         self.keys_record_action.setEnabled(False)
-
-        # 先保存当前树的状态，以便撤销
-        self.task_editor_ctrl.whether_save_tree_state()
 
     def recover_recorder_status(self):
         """ 恢复鼠标、键盘录制器菜单项状态 """
@@ -1420,6 +1412,15 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         # 恢复系统托盘的鼠标、键盘录制菜单项状态
         self.mouse_record_action.setEnabled(True)
         self.keys_record_action.setEnabled(True)
+
+    def whether_has_record(self, pre_tree_state):
+        """ 判断录制结束后是否有操作记录 """
+        # 如果录制前后树状态不一致，则保存录制前状态到撤销栈
+        if pre_tree_state != self.task_editor_ctrl.export_tree_to_list():
+            self.task_editor_ctrl.save_tree_state(pre_tree_state)
+            self.change_undo_redo_state()  # 更新撤销、重做按钮状态
+            self.task_editor_ctrl.node_changed_signal.emit()  # 发送节点改变信号
+            print("(whether_has_record) - 保存录制前状态到撤销栈") if _DEBUG else None
 
     # 菜单 - 工具 4 - 运行 python 脚本
     def exec_python(self):
@@ -1433,7 +1434,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def is_default_theme(self):
         """ 默认主题 """
         # 加载主窗口样式
-        self.setStyleSheet(QL.read_qss_file('resources/theme/default/default.css'))
+        self.setStyleSheet(QL.read_qss_file('resources/theme/default/main.css'))
         # 修改配置文件
         self.config_manager.config["General"]["Theme"] = "默认"
         # 刷新属性编辑窗口
@@ -1443,7 +1444,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def is_dark_theme(self):
         """ 深色主题 """
         # 加载主窗口样式
-        self.setStyleSheet(QL.read_qss_file('resources/theme/dark/dark.css'))
+        self.setStyleSheet(QL.read_qss_file('resources/theme/dark/main.css'))
         # 修改配置文件
         self.config_manager.config["General"]["Theme"] = "深色"
         # 刷新属性编辑窗口
@@ -1455,7 +1456,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         浅色主题
         """
         # 加载主窗口样式
-        self.setStyleSheet(QL.read_qss_file('resources/theme/light/light_0.css'))
+        self.setStyleSheet(QL.read_qss_file('resources/theme/light/main.css'))
         # 修改配置文件
         self.config_manager.config["General"]["Theme"] = "浅色"
         # 刷新属性编辑窗口

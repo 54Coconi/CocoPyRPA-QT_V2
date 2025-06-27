@@ -49,17 +49,17 @@ TRIGGER_TYPES_TO_ENGLISH = {
     "时间到达监控": "timeTrigger"
 }
 TRIGGER_DEFAULT_PARAMS = {
-    "进程状态监控": {
+    "processTrigger": {
         "name": "进程状态监控",
         "process_name": "",
         "trigger_type": "start"
     },
-    "网络连接监控": {
+    "networkTrigger": {
         "name": "网络连接监控",
         "host": "8.8.8.8",
         "port": 53
     },
-    "时间到达监控": {
+    "timeTrigger": {
         "name": "时间到达监控",
         "target_time": "2024-12-31 23:59:59"
     }
@@ -128,15 +128,23 @@ class TriggerItemWidget(QWidget):
     def __init__(self, script_path: str, parent=None):
         super(TriggerItemWidget, self).__init__(parent)
         self.script_path = script_path
+        self.parent = parent
+        self._is_initializing = True  # 标记是否正在初始化
+        self._last_trigger_type = None  # 记录上一次的触发器类型
+        self._last_trigger_params = None  # 记录上一次的触发器参数
+
         # 左侧下拉框
         self.cmb_trigger = QComboBox()
+        # 触发器实例显示标签
+        self.lbl_trigger_instance = QLabel()
         # 中间路径标签
-        self.lbl_path = QLabel(str(Path(self.script_path).relative_to(WORK_TASKS_ROOT)))
+        self.lbl_path = QLabel('~\\' + str(Path(self.script_path).relative_to(WORK_TASKS_ROOT)))
         # 右侧状态开关
         self.swh_enable = QCheckBox()
 
         self.init_ui()
         self.load_trigger()
+        self._is_initializing = False  # 初始化完成
 
     def init_ui(self):
         """ 初始化界面 """
@@ -146,40 +154,125 @@ class TriggerItemWidget(QWidget):
         # 触发器类型下拉框
         self.cmb_trigger.addItems(TRIGGER_TYPES.keys())
         self.cmb_trigger.currentIndexChanged.connect(self.on_trigger_changed)
-
+        self.cmb_trigger.setStyleSheet("border: 1px solid rgb(212, 212, 212); border-radius: 2px;")
+        # 触发器实例显示标签
+        self.lbl_trigger_instance.setStyleSheet("color: #666666; font-style: italic; font-size: 14px;")
         # 脚本路径标签
         self.lbl_path.setToolTip(self.script_path)
-
+        self.lbl_path.setStyleSheet("color: #0000FF; text-decoration: underline;")  # 蓝色字，下划线
         # 状态开关
         self.swh_enable.setVisible(False)
         self.swh_enable.stateChanged.connect(self.on_enable_changed)
 
-        layout.addWidget(self.cmb_trigger, 1)  # 1: 伸展
-        layout.addWidget(self.lbl_path, 3)  # 3: 伸展
+        # 设置布局
+        layout.addWidget(self.cmb_trigger, 2)  # 2: 伸展
+        layout.addWidget(self.lbl_trigger_instance, 3)  # 3: 伸展
+        layout.addWidget(self.lbl_path, 4)  # 4: 伸展
         layout.addStretch(1)  # 伸展
         layout.addWidget(self.swh_enable)
+
+        # 设置最小宽度
+        self.cmb_trigger.setMinimumWidth(140)
+        self.cmb_trigger.setMinimumHeight(30)
+        self.lbl_trigger_instance.setMinimumWidth(190)
+        self.lbl_path.setMinimumWidth(215)
         self.setLayout(layout)
 
     def load_trigger(self):
         """ 加载当前脚本的触发器 """
         try:
-            with open(self.script_path, 'r', encoding='utf-8') as f:
+            with open(self.script_path, encoding='utf-8') as f:
                 config = json.load(f)
                 steps = config.get("steps", [])
                 if steps and steps[0].get("type") == "trigger":
                     trigger_type = steps[0].get("action")  # 获取触发器类型（英文）
+                    params = steps[0].get("params", {})
+
+                    # 保存当前触发器状态，用于取消时恢复
+                    self._last_trigger_type = trigger_type
+                    self._last_trigger_params = params.copy()
+
+                    # 先设置下拉框选中项
                     index = self.cmb_trigger.findText(get_dict_key(TRIGGER_TYPES_TO_ENGLISH, trigger_type))
                     if index > 0:
+                        # 阻止信号触发，避免调用 on_trigger_changed
+                        self.cmb_trigger.blockSignals(True)
                         self.cmb_trigger.setCurrentIndex(index)
-                        self.swh_enable.setVisible(True)
+                        self.cmb_trigger.blockSignals(False)
+
+                        # 更新触发器实例显示
+                        self._update_trigger_instance(trigger_type, params)
+                        self.swh_enable.setVisible(True)  # 设置状态开关可见
+                        self.swh_enable.setChecked(False)  # 设置状态开关默认未选中
         except Exception as e:
-            logging.error(f"加载触发器失败: {str(e)}")
+            print("加载触发器失败:", e)
+            self.lbl_trigger_instance.clear()
 
     def on_trigger_changed(self, index):
-        """ 处理触发器类型变更 """
-        trigger_type = self.cmb_trigger.currentText()
-        self.swh_enable.setVisible(index > 0)
-        self.trigger_changed.emit(self.script_path, trigger_type)
+        """ 处理触发器类型变更 
+        
+        :param index: 当前选中的下拉框索引
+        """
+        if self._is_initializing:
+            return  # 初始化时不处理
+
+        trigger_type = self.cmb_trigger.currentText()  # 获取触发器类型（列表项显示的文字，中文）
+        eng_trigger_type = TRIGGER_TYPES_TO_ENGLISH.get(trigger_type, "")  # 获取触发器类型（英文）
+        is_trigger_selected = index > 0
+        self.swh_enable.setVisible(is_trigger_selected)
+
+        # 更新触发器实例显示
+        if is_trigger_selected:
+            # 获取默认参数
+            default_params = TRIGGER_DEFAULT_PARAMS.get(eng_trigger_type, {})
+            self._update_trigger_instance(eng_trigger_type, default_params)
+
+            # 触发信号，通知父组件处理触发器变更
+            self.trigger_changed.emit(self.script_path, eng_trigger_type)
+        else:
+            self.lbl_trigger_instance.clear()
+            self.trigger_changed.emit(self.script_path, None)  # None 表示无触发器
+
+    def restore_previous_trigger(self):
+        """ 恢复到上一次的触发器状态 """
+        if self._last_trigger_type is None:
+            # 如果之前没有触发器，则设置为无触发器
+            self.cmb_trigger.blockSignals(True)
+            self.cmb_trigger.setCurrentIndex(0)
+            self.cmb_trigger.blockSignals(False)
+            self.lbl_trigger_instance.clear()
+            self.swh_enable.setVisible(False)
+        else:
+            # 恢复之前的触发器类型和参数
+            trigger_name = get_dict_key(TRIGGER_TYPES_TO_ENGLISH, self._last_trigger_type)
+            index = self.cmb_trigger.findText(trigger_name)
+            if index > 0:
+                self.cmb_trigger.blockSignals(True)
+                self.cmb_trigger.setCurrentIndex(index)
+                self.cmb_trigger.blockSignals(False)
+                self._update_trigger_instance(self._last_trigger_type, self._last_trigger_params)
+                self.swh_enable.setVisible(True)
+
+    def _update_trigger_instance(self, trigger_type: str, params: dict):
+        """ 更新触发器实例显示 
+
+        :param trigger_type: 触发器类型（英文）
+        :param params: 触发器参数字典
+        """
+        if trigger_type == "processTrigger":
+            process_name = params.get("process_name", "")
+            trigger_action = params.get("trigger_type", "start")
+            action_text = "启动时" if trigger_action == "start" else "关闭时"
+            self.lbl_trigger_instance.setText(f"进程 {process_name} ({action_text})")
+        elif trigger_type == "networkTrigger":
+            host = params.get("host", "")
+            port = params.get("port", "")
+            self.lbl_trigger_instance.setText(f"连接 {host}:{port} 时")
+        elif trigger_type == "timeTrigger":
+            target_time = params.get("target_time", "")
+            self.lbl_trigger_instance.setText(f"到达 {target_time} 时")
+        else:
+            self.lbl_trigger_instance.clear()
 
     def on_enable_changed(self, state):
         """ 处理状态开关变更 """
@@ -194,6 +287,7 @@ class PropertyEditor(QDialog):
         self.parent = parent
         self.params = params.copy()
         self.table = QTableWidget(self.parent)
+        self.btn_box = QHBoxLayout()
         self.init_ui()
 
     def init_ui(self):
@@ -213,12 +307,16 @@ class PropertyEditor(QDialog):
         self.populate_table()
 
         # 按钮组
-        self.btn_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
-        self.btn_box.accepted.connect(self.accept)
-        self.btn_box.rejected.connect(self.reject)
+        but_save = QPushButton("保存")
+        but_save.clicked.connect(self.accept)
+        but_cancel = QPushButton("取消")
+        but_cancel.clicked.connect(self.reject)
+        self.btn_box.addWidget(but_save)
+        self.btn_box.addStretch()
+        self.btn_box.addWidget(but_cancel)
 
         layout.addWidget(self.table)
-        layout.addWidget(self.btn_box)
+        layout.addLayout(self.btn_box)
         self.setLayout(layout)
 
     def populate_table(self):
@@ -296,10 +394,14 @@ class ConfigManager:
         try:
             if self.config_path.exists():
                 with open(self.config_path, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    config = json.load(f)
+                    # 确保配置中包含默认的队列执行状态
+                    if "settings" not in config:
+                        config["settings"] = {"queue_execution": False}
+                    return config
         except Exception as e:
             logging.error(f"加载配置文件失败: {str(e)}")
-        return {"tasks": []}
+        return {"tasks": [], "settings": {"queue_execution": False}}
 
     def save_config(self):
         """ 保存配置文件 """
@@ -317,7 +419,7 @@ class ConfigManager:
             self.save_config()
 
     def remove_task(self, script_path: str):
-        """ 增强的移除任务方法 """
+        """ 移除任务方法 """
         # 先备份原始配置
         original_tasks = self.config["tasks"].copy()
 
@@ -376,6 +478,17 @@ class ConfigManager:
             if task["script_path"] == script_path:
                 task["enabled"] = enabled  # 确保使用布尔值
                 break
+        self.save_config()
+
+    def get_queue_execution(self) -> bool:
+        """ 获取队列执行状态 """
+        return self.config.get("settings", {}).get("queue_execution", False)
+
+    def set_queue_execution(self, enabled: bool):
+        """ 设置队列执行状态 """
+        if "settings" not in self.config:
+            self.config["settings"] = {}
+        self.config["settings"]["queue_execution"] = enabled
         self.save_config()
 
 
@@ -513,10 +626,11 @@ class TriggerManagerGUI(QWidget):
         self.task_items: Dict[str, QListWidgetItem] = {}  # 任务列表项
         # ---------------- 新增队列执行相关属性 ----------------
         self.exec_queues: Dict[str, list] = {}  # 执行队列 {trigger_key: [script_path, ...]}
-        self.pending_trigger_events: Dict[str, tuple[list, QTimer]] = {}  # 待处理触发事件 {trigger_key: ([script_paths], timer)}
+        self.pending_trigger_events: Dict[
+            str, tuple[list, QTimer]] = {}  # 待处理触发事件 {trigger_key: ([script_paths], timer)}
         self.executor = executor  # 全局脚本执行器实例
 
-        self.list_widget = None  # 任务列表
+        self.list_widget = QListWidget(self.parent)  # 任务列表
         self.init_ui()
         self.manager.triggered.connect(self.on_triggered)
         # 连接脚本执行器信号以便在脚本结束后继续队列
@@ -536,13 +650,41 @@ class TriggerManagerGUI(QWidget):
         self.btn_remove = QPushButton("移除脚本")
         self.chk_queue_exec = QCheckBox("排队执行")  # 排队执行复选框
 
+        # 加载保存的队列执行状态
+        self.chk_queue_exec.setChecked(ConfigManager().get_queue_execution())
+
         control_layout.addWidget(self.btn_add)
         control_layout.addWidget(self.btn_remove)
         control_layout.addWidget(self.chk_queue_exec)
         control_layout.addStretch()
 
         # 任务列表
-        self.list_widget = QListWidget(self.parent)
+#         self.list_widget.setStyleSheet("""
+#         QListWidget {
+#     background-color: #222831; /* 设置背景颜色 */
+#     border-style: solid; /* 设置边框样式 */
+#     border-width: 1px; /* 设置边框宽度 */
+#     border-color: #4a5562; /* 设置边框颜色 */
+#     border-radius: 2px; /* 设置边框圆角 */
+#     font-size: 14px; /* 设置字体大小 */
+#     padding: 2px 0px; /* 设置内边距 */
+#     color: #ffffff;
+# }
+#
+# QListWidget::item {
+#     background-color: #222831; /* 设置背景颜色 */
+# 	border-style: solid; /* 设置边框样式 */
+#     border-bottom-width: 1px; /* 设置边框宽度 */
+#     border-color: #4a5562; /* 设置边框颜色 */
+#     border-radius: 0px; /* 设置边框圆角 */
+#     font-size: 14px; /* 设置字体大小 */
+#     color: #ffffff;
+# }
+#
+# QListWidget::item::hover{
+#     background: #8ae6f3;
+# }
+#         """)
         self.list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
 
@@ -552,6 +694,7 @@ class TriggerManagerGUI(QWidget):
         # 信号连接
         self.btn_add.clicked.connect(self.add_script)
         self.btn_remove.clicked.connect(self.remove_script)
+        self.chk_queue_exec.stateChanged.connect(self._on_queue_exec_changed)
 
         self.setLayout(main_layout)
         self.load_tasks()
@@ -613,7 +756,7 @@ class TriggerManagerGUI(QWidget):
             del self.task_items[script_path]
             # 同步移除脚本文件内的触发器指令
             self.remove_trigger_from_script(widget.script_path)
-            # --------------- 新增：从队列中移除 ---------------
+            # 从队列中移除
             for q in self.exec_queues.values():
                 if script_path in q:
                     q.remove(script_path)
@@ -635,48 +778,68 @@ class TriggerManagerGUI(QWidget):
         # 存储列表项
         self.task_items[script_path] = item
 
-    def handle_trigger_change(self, script_path: str, trigger_type: str):
-        """ 处理触发器变更 """
-        if trigger_type == "无触发器":
+    def handle_trigger_change(self, script_path: str, eng_trigger_type: str | None):
+        """ 处理触发器变更信号
+        :param script_path: 脚本路径
+        :param eng_trigger_type: 触发器类型(英文) 或 None(表示无触发器)
+        """
+        # 查找对应的列表项
+        item_widget = None
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            widget = self.list_widget.itemWidget(item)
+            if widget.script_path == script_path:
+                item_widget = widget
+                break
+
+        if item_widget is None:
+            return
+        # tip: 通过信号传递进来的 eng_trigger_type 不是 None 而是 ''
+        if eng_trigger_type is None or eng_trigger_type == '':  # 无触发器
             self.remove_trigger_from_script(script_path)
             return
+        else:  # 保存当前触发器状态，用于取消时恢复
+            pass
 
         # 获取默认参数
-        default_params = TRIGGER_DEFAULT_PARAMS.get(trigger_type, {})
+        default_params = TRIGGER_DEFAULT_PARAMS.get(eng_trigger_type, {})
 
-        # 编辑属性
+        # 创建属性编辑器对象
         editor = PropertyEditor(default_params, self.parent)
         if editor.exec_() == QDialog.Accepted:
+            # 用户点击确定，更新脚本文件的触发器配置
             new_params = editor.get_params()
-            self.update_script_trigger(script_path, trigger_type, new_params)
+            self.update_script_trigger(script_path, eng_trigger_type, new_params)
+            # 更新最后一次有效的触发器类型和参数
+            item_widget._last_trigger_type = eng_trigger_type
+            item_widget._last_trigger_params = new_params.copy()
         else:
-            # 恢复选择状态
-            for i in range(self.list_widget.count()):
-                item = self.list_widget.item(i)
-                widget = self.list_widget.itemWidget(item)
-                if widget.script_path == script_path:
-                    widget.cmb_trigger.setCurrentIndex(0)
-                    break
+            # 用户点击取消，恢复到之前的触发器状态
+            item_widget.restore_previous_trigger()
 
-    def update_script_trigger(self, script_path: str, trigger_type: str, params: Dict):
-        """ 更新脚本触发器 """
+    def update_script_trigger(self, script_path: str, eng_trigger_type: str, params: Dict):
+        """ 更新脚本文件里的触发器配置
+        :param script_path: 脚本路径
+        :param eng_trigger_type: 触发器类型(英文)
+        :param params: 触发器参数配置
+        """
         try:
             with open(script_path, 'r+', encoding='utf-8') as f:
                 config = json.load(f)
                 steps = config.get("steps", [])
 
-                # 移除旧触发器
+                # 移除旧触发器配置
                 if steps and steps[0].get("type") == "trigger":
                     steps.pop(0)
 
-                # 插入新触发器
-                new_trigger = {
+                # 插入新触发器配置
+                new_trigger_config = {
                     "type": "trigger",
-                    "action": TRIGGER_TYPES_TO_ENGLISH[trigger_type],
+                    "action": eng_trigger_type,
                     "icon": "",
                     "params": params
                 }
-                steps.insert(0, new_trigger)
+                steps.insert(0, new_trigger_config)
 
                 f.seek(0)
                 json.dump(config, f, indent=4, ensure_ascii=False)
@@ -733,9 +896,11 @@ class TriggerManagerGUI(QWidget):
                     if editor.exec_() == QDialog.Accepted:
                         new_params = editor.get_params()
                         # 更新脚本触发器配置
+                        # 获取触发器类型（英文）
+                        eng_trigger_type = TRIGGER_TYPES_TO_ENGLISH[widget.cmb_trigger.currentText()]
                         self.update_script_trigger(
                             widget.script_path,
-                            widget.cmb_trigger.currentText(),
+                            eng_trigger_type,
                             new_params
                         )
                         if widget.swh_enable.isChecked():
@@ -768,6 +933,13 @@ class TriggerManagerGUI(QWidget):
         config = ConfigManager().config
         for task in config["tasks"]:
             self._add_list_item(task["script_path"], task.get("enabled", False))
+
+    @staticmethod
+    def _on_queue_exec_changed(state):
+        """ 处理队列执行状态改变事件 """
+        enabled = state == Qt.Checked
+        ConfigManager().set_queue_execution(enabled)
+        logging.info(f"队列执行状态已更新: {'启用' if enabled else '禁用'}")
 
     def on_triggered(self, script_path: str):
         """ 触发任务执行 """
@@ -890,7 +1062,8 @@ class AutoExecutorManager(QDialog):
     def init_ui(self):
         """ 初始化界面 """
         self.setWindowTitle("自动执行管理器")
-        self.resize(500, 600)
+        self.resize(700, 600)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)  # 去除帮助按钮
 
         layout = QVBoxLayout(self.parent)
         layout.addWidget(self.gui)

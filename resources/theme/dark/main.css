@@ -949,3 +949,95 @@ QComboBox QAbstractItemView{
     padding-left: 4px;
 	font-size: 19px;
 }
+/* ========================= QListWidget ========================== */
+QDialog QListWidget {
+    background-color: #222831; /* 设置背景颜色 */
+    border-style: solid; /* 设置边框样式 */
+    border-width: 1px; /* 设置边框宽度 */
+    border-color: #4a5562; /* 设置边框颜色 */
+    border-radius: 2px; /* 设置边框圆角 */
+    font-size: 14px; /* 设置字体大小 */
+    padding: 2px 0px; /* 设置内边距 */
+    color: #ffffff;
+}
+
+QListWidget::item {
+    background-color: #222831; /* 设置背景颜色 */
+	border-style: solid; /* 设置边框样式 */
+    border-bottom-width: 1px; /* 设置边框宽度 */
+    border-color: #4a5562; /* 设置边框颜色 */
+    border-radius: 0px; /* 设置边框圆角 */
+    font-size: 14px; /* 设置字体大小 */
+    color: #ffffff;
+}
+
+QListWidget::item::hover{
+    background: #8ae6f3;
+}
+
+/* ========================== 触发器属性编辑器内的 QDateTimeEdit ========================== */
+QDateTimeEdit {
+    background-color: #222831; /* 设置背景颜色 */
+    border-style: solid; /* 设置边框样式 */
+    border-width: 1px; /* 设置边框宽度 */
+    border-color: #4a5562; /* 设置边框颜色 */
+    border-radius: 2px; /* 设置边框圆角 */
+    font-size: 14px; /* 设置字体大小 */
+    padding: 2px 4px; /* 设置内边距 */
+	color: #ffffff;
+}
+
+QDateTimeEdit:hover {
+	background: #676767;
+    border-color: #6a6a74; /* 设置鼠标悬停时的边框颜色 */
+}
+
+QDateTimeEdit:pressed {
+    background: #676767; /* 设置鼠标按下时的背景颜色 */
+}
+
+QDateTimeEdit QAbstractItemView {
+    background-color: #222831; /* 设置下拉视图的背景颜色 */
+}
+
+QDateTimeEdit QAbstractItemView::item {
+    color: #ffffff; /* 设置下拉视图项的文本颜色 */
+    /*background-color: #f0f0f0; !* 设置下拉视图项的背景颜色 *!*/
+}
+
+
+QDateTimeEdit::drop-down{
+	width: 20px;
+    padding: 8px 4px 8px 12px;
+    background: transparent;
+    image: url(":/icons/combobox-arrow-down-blue");
+}
+
+QDateTimeEdit::down-button{
+	width: 25px;
+	background: #1A8BC4;
+	border-radius: 0px;
+}
+
+QDateTimeEdit::up-button{
+	width: 25px;
+	background: #1A8BC4;
+	border-radius: 0px;
+}
+
+QCalendarWidget{
+    border-left: 2px solid #AFAFAE;
+    border-right: 2px solid #AFAFAE;
+    border-bottom: 2px solid #AFAFAE;
+    border-bottom-left-radius:8px;
+    border-bottom-right-radius:8px;
+}
+
+QCalendarWidget QTableView{
+    outline: 0px;
+	alternate-background-color: #2F3138;  /* 交替行的背景色 */
+	background-color: #504050;
+	color: white;
+	selection-background-color: #8c8c8c;  /* 选中日期的背景色 */
+	selection-color: #20CFDE;  /* 选中日期的字体颜色 */
+}

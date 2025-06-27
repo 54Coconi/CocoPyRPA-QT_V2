@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(909, 658)
+        MainWindow.resize(995, 674)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -166,7 +166,7 @@ class Ui_MainWindow(object):
         self.main_verticalLayout.addWidget(self.main_splitter)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 909, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 995, 26))
         font = QtGui.QFont()
         font.setFamily("Microsoft Yahei")
         font.setBold(False)
@@ -683,6 +683,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.action_menu_runAll)
         self.toolBar.addAction(self.action_menu_runOne)
         self.toolBar.addAction(self.action_menu_runNow)
+        self.toolBar.addAction(self.action_menu_runAuto)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.action_menu_mouseRecord)
         self.toolBar.addAction(self.action_menu_keysRecord)

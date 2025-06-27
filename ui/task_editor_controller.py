@@ -434,7 +434,7 @@ class TaskEditorCore(QWidget):
 
         # ----------------------------------------------------------------------
         print("(treeDropEvent) 拖动结束")
-        if self.validate_tree():  # 验证整个树的结构
+        if self.validate_tree():  # TODO: 验证整个树的结构,是否符有必要？
             pass
         self.treeWidget.expandAll()  # 展开所有节点
         # self.node_changed_signal.emit()  # 发送节点改变信号
@@ -1032,11 +1032,12 @@ class TaskEditorCore(QWidget):
 
     # =================================== 保存节点编辑器的状态 ==================================== #
 
-    def save_tree_state(self):
+    def save_tree_state(self, tree_state: list = None):
         """
-        保存当前树的状态到撤销栈
+        保存当前树的状态或指定状态到撤销栈
+        :param tree_state: 要保存的树的状态,如果为空则保存当前树的状态
         """
-        tree_state = self.export_tree_to_list()
+        tree_state = self.export_tree_to_list() if tree_state is None else tree_state
         print(f"(save_tree_state) - 保存当前树的状态到撤销栈: \n{tree_state}") if _DEBUG else None
         self.undo_stack.append(tree_state)  # 添加到撤销栈
         if len(self.undo_stack) > self.MAX_UNDO_STACK_SIZE:
