@@ -603,8 +603,8 @@ QPushButton {
     border-radius: 5px;
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 0 rgba(0, 221, 225, 148), stop: 1 rgba(255, 200, 200, 197));
-    min-width: 80px;
-    min-height: 30px;
+    min-width: 20px;
+    min-height: 20px;
     color: rgba(40, 0, 57, 255);
     font-size: 20px;
 }

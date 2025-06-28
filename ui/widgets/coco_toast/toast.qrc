@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="icons">
+    <file alias="close">icons/close.svg</file>
+    <file alias="info">icons/info.svg</file>
+    <file alias="success">icons/success.svg</file>
+    <file alias="warning">icons/warning.svg</file>
+    <file alias="error">icons/error.svg</file>
+  </qresource>
+</RCC>

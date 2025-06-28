@@ -1,0 +1,51 @@
+#notification {
+	font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+}
+
+/* 标题样式 */
+#notification #lbl_title {
+	background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 10, 47, 250), stop:0.370079 rgba(0, 10, 47, 250), stop:0.673228 rgba(16, 39, 97, 250), stop:0.990157 rgba(10, 107, 196, 250));
+	padding: 4px;
+    font: 20px "黑体";
+    font-weight: bold;
+    color: rgb(10, 185, 188);
+	border-top: 2px solid rgba(33, 168, 232, 0.9);
+	border-right: 2px solid rgba(33, 168, 232, 0.9);
+	border-top-right-radius: 30px;
+}
+
+/* 消息内容样式 */
+#notification #lbl_message {
+	background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 10, 47, 250), stop:0.370079 rgba(0, 10, 47, 250), stop:0.673228 rgba(16, 39, 97, 250), stop:0.990157 rgba(10, 107, 196, 250));
+	padding: 4px;
+    font-size: 15px;
+    color: rgb(7, 130, 132);
+	border-bottom: 2px solid rgba(33, 168, 232, 0.9);
+	border-right: 2px solid rgba(33, 168, 232, 0.9);
+	border-bottom-right-radius: 30px;
+}
+
+/* 不同消息等级样式 */
+#notification #lbl_level {
+	background: #ffb503;
+    min-width: 32px;
+	border-left: 2px solid rgba(33, 168, 232, 0.9);
+	border-top: 2px solid rgba(33, 168, 232, 0.9);
+	border-bottom: 2px solid rgba(33, 168, 232, 0.9);
+	border-top-left-radius: 30px;
+	border-bottom-left-radius: 30px;
+}
+
+/* 关闭按钮样式 */
+#notification #btn_close {
+    background: rgba(4, 100, 145, 0.8);
+    border: 0px solid;
+	border-radius: 12px;
+    color: rgba(33, 168, 232, 0.9);
+    margin-left: 0px;
+    cursor: pointer;
+}
+
+#notification #btn_close:hover {
+    background: rgba(6, 137, 197, 0.8);
+}

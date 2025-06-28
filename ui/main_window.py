@@ -29,6 +29,7 @@
 import sys
 import json
 import os.path
+from pathlib import Path
 
 import keyboard
 import requests
@@ -41,9 +42,9 @@ from datetime import datetime
 from PyQt5 import QtGui
 from PyQt5.QtCore import QDir, QModelIndex, Qt, QLocale, pyqtSignal, QThread, QPoint
 from PyQt5.QtGui import QIcon, QStandardItemModel, QFont, QWheelEvent
-from PyQt5.QtWidgets import QMainWindow, QFileSystemModel, QMessageBox, QTreeWidgetItem, \
-    QInputDialog, QLineEdit, QMenu, QFileDialog, QTreeWidgetItemIterator, QDialog, QVBoxLayout, QHBoxLayout, \
-    QPushButton, QTableWidgetItem, QSystemTrayIcon, QApplication, QAction
+from PyQt5.QtWidgets import (QMainWindow, QFileSystemModel, QMessageBox, QTreeWidgetItem,QInputDialog,
+                             QLineEdit, QMenu, QFileDialog, QTreeWidgetItemIterator, QDialog, QVBoxLayout,
+                             QHBoxLayout,QPushButton, QTableWidgetItem, QSystemTrayIcon, QApplication, QAction)
 
 from .CocoPyRPA_v2_ui import Ui_MainWindow
 from .task_editor_controller import TaskEditorCore
@@ -59,6 +60,7 @@ from .widgets.IfCmdConditionBuilder import ConditionBuilder
 from .widgets.CodeEditor import CodeEditor
 from .widgets.MouseRecord import MouseRecorder
 from .widgets.KeyboardRecord import KeyboardRecorder
+from .widgets.coco_toast.toast import ToastService
 
 from utils.ocr_tools import OCRTool
 from utils.debug import print_func_time
@@ -66,6 +68,7 @@ from utils.check_input import validate_input
 from utils.screen_capture import CaptureScreen
 from utils.QSSLoader import QSSLoader as QL
 from utils.stop_executor import stop_running_thread
+from utils.theme_manager import ThemeManager
 
 from core.script_executor import executor
 from core.cmd_executor import CommandExecutor
@@ -205,9 +208,17 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.log_textEdit.setContextMenuPolicy(Qt.CustomContextMenu)
         self.log_textEdit.customContextMenuRequested.connect(self.show_log_context_menu)
 
+        # 初始化主题管理器
+        self.theme_manager = ThemeManager(str(Path(__file__).parent.parent.resolve()))
+        self.theme_manager.themeChanged.connect(self.on_theme_changed)
+
+        # toast 通知弹窗
+        self.toast_manager = ToastService(self, position="top", theme='cool_blue')
+
         self.cmd_list = []  # 指令列表
         self.is_running = False  # 是否正在运行
 
+        # 脚本文件指令执行器
         # executor.log_message.connect(lambda msg: print("【日志】：", msg, sep=''))
         executor.log_message.connect(self.log_textEdit.append)
         executor.progress_updated.connect(self.on_progress_updated)
@@ -217,7 +228,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         # 脚本自动执行管理器
         self.auto_executor_manager = AutoExecutorManager(parent=self)
         self.auto_executor_manager.script_executor_trigger.connect(self.start_script_executor)
-        # If 判断条件 ”condition“ 的构建器
+        # If 判断条件 “condition” 的构建器
         self.condition_builder = None
         # Python 编辑器
         self.python_editor = None
@@ -811,6 +822,17 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # ================================ 信号触发事件 ================================== #
 
+    def on_theme_changed(self, theme):
+        """
+        主题切换事件
+        :param theme: 当前主题
+        """
+        self.toast_manager.show_success('提示', f'主题已切换为：{theme}')
+        print(f"(on_theme_changed) - 主题已切换为：{theme}") if _DEBUG else None
+        # 修改配置文件并保持到文件
+        self.config_manager.config["General"]["Theme"] = theme
+        self.config_manager.save_config()
+
     def get_template_img(self, image_path):
         """
         获取截图路径
@@ -1157,7 +1179,8 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         clear_button = msg_box.addButton("清空", QMessageBox.YesRole)
         cancel_button = msg_box.addButton("取消", QMessageBox.NoRole)
         msg_box.setWindowTitle("提示")
-        msg_box.setText("是否清空当前任务, 清空后无法撤销!(即会删除所有历史操作)\n但是不会保存当前任务到文件中，确定清空指令吗？")
+        msg_box.setText(
+            "是否清空当前任务, 清空后无法撤销!(即会删除所有历史操作)\n但是不会保存当前任务到文件中，确定清空指令吗？")
         msg_box.setDefaultButton(clear_button)  # 设置默认按钮
         msg_box.exec_()
 
@@ -1433,43 +1456,31 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     # 菜单 - 主题 1 - 默认主题
     def is_default_theme(self):
         """ 默认主题 """
-        # 加载主窗口样式
-        self.setStyleSheet(QL.read_qss_file('resources/theme/default/main.css'))
-        # 修改配置文件
-        self.config_manager.config["General"]["Theme"] = "默认"
+        self.theme_manager.change_theme("默认", self)
         # 刷新属性编辑窗口
         self.attr_edit_tableWidget.viewport().update()
 
     # 菜单 - 主题 2 - 深色主题
     def is_dark_theme(self):
         """ 深色主题 """
-        # 加载主窗口样式
-        self.setStyleSheet(QL.read_qss_file('resources/theme/dark/main.css'))
-        # 修改配置文件
-        self.config_manager.config["General"]["Theme"] = "深色"
+        self.theme_manager.change_theme("深色", self)
         # 刷新属性编辑窗口
         self.attr_edit_tableWidget.viewport().update()
 
     # 菜单 - 主题 3 - 浅色主题
     def is_light_theme(self):
-        """
-        浅色主题
-        """
-        # 加载主窗口样式
-        self.setStyleSheet(QL.read_qss_file('resources/theme/light/main.css'))
-        # 修改配置文件
-        self.config_manager.config["General"]["Theme"] = "浅色"
+        """ 浅色主题 """
+        self.theme_manager.change_theme("浅色", self)
         # 刷新属性编辑窗口
         self.attr_edit_tableWidget.viewport().update()
 
     # 菜单 - 主题 4 - 护眼主题
     def is_protect_eyes_theme(self):
-        """
-        护眼主题
-        """
+        """ 护眼主题 """
         self.setStyleSheet(qdarkstyle.load_stylesheet_from_environment())
         # 修改配置文件
         self.config_manager.config["General"]["Theme"] = "护眼"
+        self.config_manager.save_config()
         # 刷新属性编辑窗口
         self.attr_edit_tableWidget.viewport().update()
 

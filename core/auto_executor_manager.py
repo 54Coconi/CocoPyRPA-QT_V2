@@ -23,6 +23,8 @@ from core.commands.base_command import STATUS_COMPLETED, STATUS_PENDING
 from core.commands.trigger_commands import ProcessTriggerCmd, NetworkConnectionTriggerCmd, DateTimeTriggerCmd
 from core.script_executor import executor  # 引入全局脚本执行器实例
 
+from ui.widgets.coco_toast.toast import ToastService
+
 # 配置常量
 WORK_TASKS_ROOT = Path(os.path.abspath("work/work_tasks"))
 CONFIG_FILE = r"config\auto_config.json"  # 独立配置文件
@@ -624,12 +626,13 @@ class TriggerManagerGUI(QWidget):
         self.is_stop = False  # 是否停止
         self.work_tasks_root = Path(WORK_TASKS_ROOT).absolute()  # 自动化脚本任务的根目录
         self.task_items: Dict[str, QListWidgetItem] = {}  # 任务列表项
-        # ---------------- 新增队列执行相关属性 ----------------
+        # 队列执行相关属性
         self.exec_queues: Dict[str, list] = {}  # 执行队列 {trigger_key: [script_path, ...]}
         self.pending_trigger_events: Dict[
             str, tuple[list, QTimer]] = {}  # 待处理触发事件 {trigger_key: ([script_paths], timer)}
         self.executor = executor  # 全局脚本执行器实例
-
+        # toast 通知
+        self.toast = ToastService(self.parent)
         self.list_widget = QListWidget(self.parent)  # 任务列表
         self.init_ui()
         self.manager.triggered.connect(self.on_triggered)
@@ -947,7 +950,10 @@ class TriggerManagerGUI(QWidget):
         if not self.chk_queue_exec.isChecked():
             if self.executor.active_scripts:  # 已有脚本在执行
                 active_script = os.path.basename(list(self.executor.active_scripts.keys())[0])
-                QMessageBox.warning(self, "触发执行失败", f"已有脚本 '{active_script}' 正在执行中，且未勾选【排队执行】！")
+                self.toast.show_warning('触发执行失败',
+                                        f"已有脚本 '{active_script}' 正在执行中，且未勾选【排队执行】",
+                                        5000)
+                # QMessageBox.warning(self, "触发执行失败", f"已有脚本 '{active_script}' 正在执行中，且未勾选【排队执行】！")
                 return
             # 无脚本执行，直接触发
             self.script_executor_on_triggered_signal.emit(script_path)

@@ -1,0 +1,51 @@
+#notification {
+	font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+}
+
+/* 标题样式 */
+#notification #lbl_title {
+	background-color: rgba(0, 0, 0, 0.8);
+	padding: 4px;
+    font: 20px "黑体";
+    font-weight: bold;
+    color: #dedede;
+	border-top: 2px solid #888888;
+	border-right: 2px solid #888888;
+	border-top-right-radius: 30px;
+}
+
+/* 消息内容样式 */
+#notification #lbl_message {
+	background-color: rgba(0, 0, 0, 0.8);
+	padding: 4px;
+    font-size: 15px;
+    color: #c0c0c0;
+	border-bottom: 2px solid #888888;
+	border-right: 2px solid #888888;
+	border-bottom-right-radius: 30px;
+}
+
+/* 不同消息等级样式 */
+#notification #lbl_level {
+	background: #ffb503;
+    min-width: 32px;
+	border-left: 2px solid #888888;
+	border-top: 2px solid #888888;
+	border-bottom: 2px solid #888888;
+	border-top-left-radius: 30px;
+	border-bottom-left-radius: 30px;
+}
+
+/* 关闭按钮样式 */
+#notification #btn_close {
+    background: #818181;
+    border: 0px solid;
+	border-radius: 12px;
+    color: #888888;
+    margin-left: 0px;
+    cursor: pointer;
+}
+
+#notification #btn_close:hover {
+    background: #A0A0A0;
+}

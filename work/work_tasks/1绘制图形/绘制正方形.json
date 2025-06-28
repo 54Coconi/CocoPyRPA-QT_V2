@@ -3,12 +3,12 @@
     "steps": [
         {
             "type": "trigger",
-            "action": "networkTrigger",
+            "action": "processTrigger",
             "icon": "",
             "params": {
-                "name": "网络连接监控",
-                "host": "192.168.1.100",
-                "port": 65535
+                "name": "进程状态监控",
+                "process_name": "notepad.exe",
+                "trigger_type": "start"
             }
         },
         {

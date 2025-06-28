@@ -1,0 +1,6 @@
+{
+  "info": { "color": "#00efff", "icon": ":icons/info" },
+  "success": { "color": "#00ff00", "icon": ":icons/success" },
+  "warning": { "color": "#ffc700", "icon": ":icons/warning" },
+  "error": { "color": "#FF000A", "icon": ":icons/error" }
+}
