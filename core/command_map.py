@@ -1,14 +1,10 @@
 """
 指令映射模块
 """
-from core.commands.trigger_commands import *
-from core.commands.mouse_commands import *
-from core.commands.keyboard_commands import *
-from core.commands.image_commands import *
 from core.commands.flow_commands import *
 from core.commands.script_commands import *
 from core.commands.subtask_command import *
-
+from core.commands.trigger_commands import *
 
 COMMAND_MAP = {
     "trigger": {
@@ -50,5 +46,5 @@ COMMAND_MAP = {
     },
     "subtask": {
         "runSubtask": SubtaskCommand
-    }
+    },
 }

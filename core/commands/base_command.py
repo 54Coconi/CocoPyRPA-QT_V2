@@ -1,7 +1,7 @@
 """
 @author: 54Coconi
 @date: 2024-11-10
-@version: 1.0.0
+@version: 1.0.1
 @path: /core/commands/base_command.py
 @software: PyCharm 2023.1.2
 @officialWebsite: https://github.com/54Coconi
@@ -10,21 +10,16 @@
 """
 
 import time
-import uuid
 import traceback
-
+import uuid
 from abc import ABC, abstractmethod
 from typing import Optional
 
 from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtWidgets import QTreeWidgetItem
 from pydantic import BaseModel, Field, field_validator
 
-from PyQt5.QtWidgets import QTreeWidgetItem
-
-from ui.widgets.BindPropertyDialog import PropertyBindingManager
-# 将日志信息、异常信息发送到日志窗口
-from utils.communication_across_modules import sent_message_to_logWidget as sm_to_log
-from utils.communication_across_modules import sent_exception_to_logWidget as se_to_log
+from config.app_config import info, error, warning
 
 _DEBUG = False
 
@@ -76,6 +71,8 @@ class CommandRunningException(Exception):
 class CommandQObject(QObject):
     """ 指令的Qt对象容器 """
     status_changed = pyqtSignal(int)  # 状态变化信号
+    error_message = pyqtSignal(str)  # 错误消息信号
+    info_message = pyqtSignal(str)  # 信息消息信号
 
 
 class BaseCommand(BaseModel, ABC):
@@ -90,7 +87,7 @@ class BaseCommand(BaseModel, ABC):
         is_active:(bool): 指令是否启用
         tree_item: (:class:`QTreeWidgetItem`): 指令对应的树节点
     """
-    # 指令的Qt对象，排除序列化
+    # 指令的 Qt 对象，排除序列化
     q_obj: CommandQObject = Field(default_factory=CommandQObject, exclude=True)
     id: str = Field(default_factory=_generate_short_id, description="指令唯一ID")
     name: str = Field(..., description="指令名称")
@@ -100,7 +97,7 @@ class BaseCommand(BaseModel, ABC):
     tree_item: Optional[QTreeWidgetItem] = Field(None, description="指令对应的树节点")
 
     class Config:
-        """  配置pydantic，允许任意类型的属性 """
+        """ 配置pydantic，允许任意类型的属性 """
         arbitrary_types_allowed = True
 
     @classmethod
@@ -118,20 +115,6 @@ class BaseCommand(BaseModel, ABC):
         """
         raise NotImplementedError("每个指令类必须实现 'execute' 方法")
 
-    def resolve_bound_properties(self):
-        """
-        解析绑定属性，并更新自身的属性值
-        """
-        for field_name in self.model_fields.keys():
-            bound_value = PropertyBindingManager.get_bound_value(self, field_name)
-            if bound_value is not None:
-                setattr(self, field_name, bound_value)
-
-    def get_dynamic_attr(self, attr):
-        """获取动态属性值"""
-        bound_value = PropertyBindingManager.get_bound_value(self, attr)
-        return bound_value if bound_value is not None else getattr(self, attr)
-
     def set_status(self, new_status: int):
         """ 设置指令状态 """
         self.status = new_status
@@ -148,7 +131,7 @@ class BaseCommand(BaseModel, ABC):
         return self.__str__()
 
 
-class RetryCmd(BaseCommand):
+class RetryCmd(BaseCommand, ABC):
     """
     :class:`RetryCmd` 是可以重复执行的指令基类，继承自 :class:`BaseCommand`
     Attributes:
@@ -164,13 +147,13 @@ class RetryCmd(BaseCommand):
     error_retries_time: float | int = Field(0.0, description="指令执行出错时的重试时间间隔")
 
     def execute(self, **kwargs):
-        """ 
-        执行指令，并根据retries和error_retries的设置进行重复执行和错误重试
+        """
+        执行指令，并根据 retries 和 error_retries 的设置进行重复执行和错误重试
         """
         for attempt in range(self.retries + 1):
-            _start_msg_1 = f"[INFO]\t(RetryCmd) 正在执行指令 🚀{self.name}🚀"
-            _start_msg_2 = f"[INFO]\t(RetryCmd) 正在第 [{attempt + 1}] 次执行指令 🚀{self.name}🚀"
-            print(_start_msg_2 if self.retries > 0 else _start_msg_1)
+            _start_msg_1 = f"正在执行指令 🚀<{self.name}>🚀"
+            _start_msg_2 = f"重复执行指令第 [{attempt + 1}] 次 🚀<{self.name}>🚀\n"
+            info(_start_msg_2 if self.retries > 0 else _start_msg_1)
 
             _successful = False
             for error_attempt in range(self.error_retries + 1):
@@ -182,46 +165,53 @@ class RetryCmd(BaseCommand):
                     _successful = True
                     break  # 执行成功后跳出错误重试循环, 继续执行下一次指令循环
                 except CommandRunningException as cre:
-                    _error_msg_0 = f"[ERROR]\t(RetryCmd) 执行 &lt;{self.name}&gt; 失败: {cre}"
-                    _error_msg_1 = f"[ERROR]\t(RetryCmd) 执行 &lt;{self.name}&gt; 失败,错误重试第 [{error_attempt}] 次: {cre}\n"
-                    se_to_log(_error_msg_1 if self.error_retries > 0 and error_attempt != 0 else _error_msg_0)
-                    print(_error_msg_1 if self.error_retries > 0 and error_attempt != 0 else _error_msg_0)
+                    _error_msg_0 = f"执行 &lt;{self.name}&gt; 失败: {cre}"
+                    _error_msg_1 = f"执行 &lt;{self.name}&gt; 失败,错误重试第 [{error_attempt}] 次: {cre}\n"
+                    if self.error_retries > 0 and error_attempt != 0:
+                        self.q_obj.error_message.emit("\t(RetryCmd) " + _error_msg_1)
+                        error(f"执行 <{self.name}> 失败,错误重试第 [{error_attempt}] 次: {cre}\n")
+                    else:
+                        self.q_obj.error_message.emit("\t(RetryCmd) " + _error_msg_0)
+                        error(f"执行 <{self.name}> 失败: {cre}")
+
                     self.set_status(STATUS_FAILED)  # 设置指令状态为失败
                 except AttributeError as ae:
-                    print(f"[ERROR]\t(RetryCmd) 属性错误：{ae}，退出指令执行")
+                    error(f"指令属性错误，退出执行：{ae}")
                     self.set_status(STATUS_FAILED)  # 设置指令状态为失败
                     return
                 except KeyboardInterrupt:
-                    print(f"[ERROR]\t(RetryCmd) 用户中断指令执行，退出指令执行")
+                    error(f"已手动中断指令执行，退出执行")
                     self.set_status(STATUS_FAILED)  # 设置指令状态为失败
                     return
                 except Exception as e:
-                    print(f"[ERROR]\t(RetryCmd) 未知错误：{e}，退出指令执行")
+                    error(f"未知错误，退出指令执行：{e}")
                     self.set_status(STATUS_FAILED)  # 设置指令状态为失败
                     return
 
                 # 等待一段时间再进行下一次重试
                 if error_attempt < self.error_retries:
-                    msg = f"[INFO]\t(RetryCmd) 等待 {self.error_retries_time:.2f} 秒后再进行下一次错误重试"
-                    sm_to_log(msg)
-                    print(msg)
+                    msg = f"等待 {self.error_retries_time:.2f} 秒后再进行下一次错误重试"
+                    self.q_obj.info_message.emit("\t(RetryCmd) " + msg)
+                    info(msg)
                     time.sleep(self.error_retries_time)
 
                 # 如果错误重试次数已用完，且指令容错次数大于 0，打印错误
                 if error_attempt == self.error_retries and self.error_retries > 0:
-                    print(f"[ERROR]\t(RetryCmd) 指令 {self.name} 在错误重试 {self.error_retries} 次后仍未成功")
+                    error(f"指令 <{self.name}> 在错误重试 {self.error_retries} 次后仍未成功")
 
             if _successful:
-                _end_msg_1 = f"[INFO]\t(RetryCmd) 指令 {self.name} 🎉执行成功🎉\n"
-                _end_msg_2 = f"[INFO]\t(RetryCmd) 指令 {self.name} 第 [{attempt + 1}] 次 🎉执行成功🎉\n"
-                print(_end_msg_2 if self.retries > 1 else _end_msg_1, "-" * 100)
+                _end_msg_1 = f"指令 <{self.name}> 🎉执行成功🎉"
+                _end_msg_2 = f"指令 <{self.name}> 第 [{attempt + 1}] 次 🎉执行成功🎉\n"
+                info(_end_msg_2 if self.retries > 1 else _end_msg_1)
+                info("-" * 100)
             else:
-                _end_msg_1 = f"[WARN]\t(RetryCmd) 指令 {self.name} ❌执行失败❌\n"
-                _end_msg_2 = f"[WARN]\t(RetryCmd) 指令 {self.name} 第 [{attempt + 1}] 次 ❌执行失败❌\n"
-                print(_end_msg_2 if self.retries > 1 else _end_msg_1, "x-" * 43)
+                _end_msg_1 = f"指令 <{self.name}> ❌执行失败❌\n"
+                _end_msg_2 = f"指令 <{self.name}> 第 [{attempt + 1}] 次 ❌执行失败❌"
+                warning(_end_msg_2 if self.retries > 1 else _end_msg_1)
+                warning("x-" * 43 + '\n')
 
             if attempt < self.retries:  # 确保只在每两次重复指令之间等待一段时间
-                print(f"[INFO]\t(RetryCmd) 等待 {self.retries_time:.2f}s 后，继续执行下一次指令")
+                info(f"等待 {self.retries_time:.2f}s 后，继续执行下一次指令")
                 time.sleep(self.retries_time)
 
     @abstractmethod

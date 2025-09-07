@@ -6,28 +6,26 @@
 @software: PyCharm 2023.1.2
 @officialWebsite: https://github.com/54Coconi
 @description:
-    自动执行管理界面
+    自动执行管理器界面
 """
-import os
 import json
 import logging
-from typing import Dict, Optional, Any
+import os
 from pathlib import Path
+from typing import Dict, Optional, Any
+
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QDateTime, QTimer
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QComboBox, QCheckBox, QFileDialog, QListWidget,
                              QListWidgetItem, QTableWidget, QTableWidgetItem, QHeaderView,
-                             QDialog, QDialogButtonBox, QMessageBox, QMenu, QDateTimeEdit, QSpinBox)
+                             QDialog, QMessageBox, QMenu, QDateTimeEdit, QSpinBox)
+
+from config.app_config import TASK_HOME, AUTO_EXEC_CONFIG
 from core.commands.base_command import STATUS_COMPLETED, STATUS_PENDING
 from core.commands.trigger_commands import ProcessTriggerCmd, NetworkConnectionTriggerCmd, DateTimeTriggerCmd
 from core.script_executor import executor  # 引入全局脚本执行器实例
-
 from ui.widgets.coco_toast.toast import ToastService
-
-# 配置常量
-WORK_TASKS_ROOT = Path(os.path.abspath("work/work_tasks"))
-CONFIG_FILE = r"config\auto_config.json"  # 独立配置文件
 
 TRIGGER_TYPES = {
     "无触发器": None,
@@ -110,10 +108,10 @@ QListWidget::item:selected {
 """
 
 
-# 通过字典的键值（value）获取对应的键（key）
+# 根据字典的键值（value）获取对应的键（key）
 def get_dict_key(my_dict, value):
     """
-    通过字典的键值（value）获取对应的键（key）
+    根据字典的键值（value）获取对应的键（key）
     :param my_dict: 字典
     :param value: 值
     :return: 键
@@ -140,7 +138,7 @@ class TriggerItemWidget(QWidget):
         # 触发器实例显示标签
         self.lbl_trigger_instance = QLabel()
         # 中间路径标签
-        self.lbl_path = QLabel('~\\' + str(Path(self.script_path).relative_to(WORK_TASKS_ROOT)))
+        self.lbl_path = QLabel('~\\' + str(Path(self.script_path).relative_to(TASK_HOME)))
         # 右侧状态开关
         self.swh_enable = QCheckBox()
 
@@ -387,7 +385,7 @@ class ConfigManager:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.config_path = Path(CONFIG_FILE)
+            cls._instance.config_path = Path(AUTO_EXEC_CONFIG)
             cls._instance.config = cls._instance._load_config()
         return cls._instance
 
@@ -562,7 +560,7 @@ class TriggerManager(QObject):
         trigger = trigger_class(**trigger_config["params"])
         thread = QThread()
 
-        # 将Qt对象移动到线程
+        # 将 Qt 对象移动到线程
         trigger.q_obj.moveToThread(thread)
 
         # 信号连接
@@ -624,7 +622,7 @@ class TriggerManagerGUI(QWidget):
         self.parent = parent
         self.current_script_path = None  # 当前脚本路径
         self.is_stop = False  # 是否停止
-        self.work_tasks_root = Path(WORK_TASKS_ROOT).absolute()  # 自动化脚本任务的根目录
+        self.work_tasks_root = Path(TASK_HOME).absolute()  # 自动化脚本任务的根目录
         self.task_items: Dict[str, QListWidgetItem] = {}  # 任务列表项
         # 队列执行相关属性
         self.exec_queues: Dict[str, list] = {}  # 执行队列 {trigger_key: [script_path, ...]}

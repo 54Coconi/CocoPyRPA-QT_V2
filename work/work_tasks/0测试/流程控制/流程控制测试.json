@@ -1,0 +1,173 @@
+{
+    "task_name": "流程控制测试",
+    "steps": [
+        {
+            "type": "flow",
+            "action": "loop",
+            "icon": ":/icons/loop",
+            "params": {
+                "name": "Loop 循环",
+                "count": 2,
+                "loop_commands": [
+                    {
+                        "type": "flow",
+                        "action": "delay",
+                        "icon": ":/icons/delay",
+                        "params": {
+                            "name": "等待 2.00 秒",
+                            "delay_time": 1.9999999999999993,
+                            "is_active": true,
+                            "status": 0,
+                            "id": "f272e19a"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "action": "imageClick",
+                        "icon": ":/icons/img-click",
+                        "params": {
+                            "name": "图片点击",
+                            "template_img": "G:/CocoPyRPA_QT/CocoPyRPA-QT_v2.0/CocoPyRPA_v2.0.0/work/work_images/IMAGE_2025-06-08-010053.png",
+                            "error_retries": 10,
+                            "error_retries_time": 0.6000000000000001,
+                            "clicks": 1,
+                            "interval": 0.0,
+                            "duration": 1.0,
+                            "button": "left",
+                            "retries": 0,
+                            "is_active": true,
+                            "use_pynput": true,
+                            "status": 0,
+                            "id": "12d239d3"
+                        }
+                    },
+                    {
+                        "type": "flow",
+                        "action": "if",
+                        "icon": ":/icons/if",
+                        "params": {
+                            "name": "If 判断",
+                            "condition": "results_list['12d239d3']['status'] == 2",
+                            "then_commands": [
+                                {
+                                    "type": "flow",
+                                    "action": "delay",
+                                    "icon": ":/icons/delay",
+                                    "params": {
+                                        "name": "等待 0.60 秒",
+                                        "delay_time": 0.6000000000000001,
+                                        "is_active": true,
+                                        "status": 0,
+                                        "id": "94b9bf81"
+                                    }
+                                },
+                                {
+                                    "type": "keyboard",
+                                    "action": "hotkey",
+                                    "icon": ":/icons/key-hotkey",
+                                    "params": {
+                                        "name": "热键组合(alt+f4)",
+                                        "keys": [
+                                            "alt",
+                                            "f4"
+                                        ],
+                                        "retries": 0,
+                                        "is_active": true,
+                                        "use_pynput": false,
+                                        "status": 0,
+                                        "id": "54476db9"
+                                    }
+                                },
+                                {
+                                    "type": "flow",
+                                    "action": "delay",
+                                    "icon": ":/icons/delay",
+                                    "params": {
+                                        "name": "等待 0.60 秒",
+                                        "delay_time": 0.6000000000000001,
+                                        "is_active": true,
+                                        "status": 0,
+                                        "id": "42b802c7"
+                                    }
+                                },
+                                {
+                                    "type": "keyboard",
+                                    "action": "keyType",
+                                    "icon": ":/icons/key-type",
+                                    "params": {
+                                        "name": "键盘输入文本",
+                                        "text_str": "图片点击成功",
+                                        "interval": 0.2,
+                                        "retries": 0,
+                                        "is_active": true,
+                                        "use_pynput": true,
+                                        "status": 0,
+                                        "id": "3fc03e62"
+                                    }
+                                }
+                            ],
+                            "else_commands": [
+                                {
+                                    "type": "mouse",
+                                    "action": "click",
+                                    "icon": ":/icons/mouse-click-left",
+                                    "params": {
+                                        "name": "鼠标左键点击(1550,92)",
+                                        "target_pos": [
+                                            1550,
+                                            92
+                                        ],
+                                        "clicks": 1,
+                                        "interval": 0.2,
+                                        "duration": 1.0,
+                                        "retries": 0,
+                                        "button": "left",
+                                        "is_active": true,
+                                        "use_pynput": false,
+                                        "status": 0,
+                                        "id": "60714014"
+                                    }
+                                },
+                                {
+                                    "type": "keyboard",
+                                    "action": "keyType",
+                                    "icon": ":/icons/key-type",
+                                    "params": {
+                                        "name": "键盘输入文本",
+                                        "text_str": "图片点击失败",
+                                        "interval": 0.2,
+                                        "retries": 0,
+                                        "is_active": true,
+                                        "use_pynput": true,
+                                        "status": 0,
+                                        "id": "c58c1787"
+                                    }
+                                },
+                                {
+                                    "type": "keyboard",
+                                    "action": "keyPress",
+                                    "icon": ":/icons/key-press",
+                                    "params": {
+                                        "name": "键盘按下-enter",
+                                        "key": "enter",
+                                        "retries": 0,
+                                        "is_active": true,
+                                        "use_pynput": false,
+                                        "status": 0,
+                                        "id": "41ad3e0a"
+                                    }
+                                }
+                            ],
+                            "is_active": true,
+                            "status": 0,
+                            "id": "3b31bbf2"
+                        }
+                    }
+                ],
+                "is_active": true,
+                "status": 0,
+                "id": "ae9eae8d"
+            }
+        }
+    ]
+}

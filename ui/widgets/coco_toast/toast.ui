@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>80</height>
+    <width>336</width>
+    <height>89</height>
    </rect>
   </property>
   <property name="cursor">
@@ -88,7 +88,7 @@
 }
 </string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="10,10,10">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -143,7 +143,6 @@
         <font>
          <family>黑体</family>
          <pointsize>-1</pointsize>
-         <weight>75</weight>
          <italic>false</italic>
          <bold>true</bold>
         </font>

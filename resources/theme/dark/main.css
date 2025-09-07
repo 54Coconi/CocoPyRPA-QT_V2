@@ -601,8 +601,8 @@ QPushButton {
     border-radius: 5px;
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 0 rgb(92, 92, 92), stop: 1 rgb(0, 0, 0));
-    min-width: 20px;
-    min-height: 20px;
+    min-width: 80px;
+    min-height: 30px;
     color: rgb(249, 233, 85);
     font-size: 20px;
 }
@@ -1040,4 +1040,16 @@ QCalendarWidget QTableView{
 	color: white;
 	selection-background-color: #8c8c8c;  /* 选中日期的背景色 */
 	selection-color: #20CFDE;  /* 选中日期的字体颜色 */
+}
+
+/* ========================== QLineEdit ========================== */
+QLineEdit {
+    background-color: #222831; /* 设置背景颜色 */
+    border-style: solid; /* 设置边框样式 */
+    border-width: 1px; /* 设置边框宽度 */
+    border-color: #4a5562; /* 设置边框颜色 */
+    border-radius: 3px; /* 设置边框圆角 */
+    font-size: 19px; /* 设置字体大小 */
+    padding: 2px 4px; /* 设置内边距 */
+    color: #ffffff;
 }

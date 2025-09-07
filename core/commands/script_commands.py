@@ -11,19 +11,15 @@
 """
 
 import subprocess
+from typing import Any, Dict
 
-from pydantic import Field
-from typing import Optional, Any, Dict
-
-from utils.debug import print_func_time, print_command
-from utils.opencv_funcs import drawRectangle
-
-from .base_command import BaseCommand, CommandRunningException, STATUS_COMPLETED, STATUS_FAILED
-from .mouse_commands import *
-from .keyboard_commands import *
+from utils.debug import print_command
+from utils.image_process.opencv_funcs import drawRectangle
+from .base_command import BaseCommand, STATUS_COMPLETED, STATUS_FAILED
 from .image_commands import *
+from .keyboard_commands import *
+from .mouse_commands import *
 from ..safe_globals import safe_globals_manager  # 导入全局单例
-
 
 _DEBUG = True
 

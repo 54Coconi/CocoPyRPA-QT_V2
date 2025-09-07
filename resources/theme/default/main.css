@@ -7,7 +7,7 @@
 }
 
 
-/* ======================================= 菜单项 ======================================= */
+/* ======================================= QMenu ======================================= */
 QMenu {
     background-color: rgb(86, 55, 55);  /* 菜单项背景色 */
     margin: 1px;	/* 菜单周围的一些间距 */
@@ -89,7 +89,7 @@ QMenu::indicator:exclusive:checked:selected {
     image: url();
 }
 
-/* ================================ 菜单栏 ================================ */
+/* ================================ QMenuBar ================================ */
 
 QMenuBar {
     font-family: "Microsoft Yahei";
@@ -117,7 +117,7 @@ QMenuBar::item:pressed {
     background: #608dd2;
 }
 
-/* ================================ 工具栏 ================================ */
+/* ================================ QToolBar ================================ */
 
 QToolBar {
     border: 1px solid rgba(45, 43, 43, 255);
@@ -153,8 +153,8 @@ QStatusBar{
 }
 
 /* ================================  任务列表  =================================*/
-QTreeView#tasks_view_treeView{
-	background: solid rgba(80,64,80,255);
+#tasks_view_treeView{
+	background-color: rgb(80,64,80);
 	color: rgba(255,255,255,255);
 	font-size: 18px;
 	selection-background-color: transparent;
@@ -165,7 +165,7 @@ QTreeView#tasks_view_treeView{
 
 }
 
-/* ================================ 指令编辑器 ================================ */
+/* =============================== QTreeWidget ================================ */
 /* 设置QTreeWidget整体背景 */
 QTreeWidget{
 	outline: 0px;
@@ -181,6 +181,7 @@ QTreeWidget::item{
 	margin-bottom:0px;
 }
 
+/* ================================ 指令编辑器 ================================ */
 /* item 悬停颜色 */
 #cmd_treeWidget::item:hover,
 #cmd_treeWidget::item:hover:has-children:!has-siblings,
@@ -241,8 +242,6 @@ QTreeWidget::item{
 
     image: url(':/icons/right-indicator-1');  /* 折叠图标 */
 }
-
-
 
 /* 设置父节点展开的branch分支样式 */
 #cmd_treeWidget::branch:open:has-children:!has-siblings,
@@ -310,7 +309,6 @@ QTreeWidget::item{
 }
 
 /* ==============================  日志浏览器  ============================== */
-
 QTextEdit#log_textEdit {
 	border-top: 3px solid rgb(36,36,44);  /* 日志浏览器与指令编辑器中间的分割线 */
 	border-bottom-right-radius: 0px; /* 设置右下角圆角 */
@@ -319,8 +317,7 @@ QTextEdit#log_textEdit {
 	background-attachment: scroll;
 }
 
-/* ===============================  属性表  =============================== */
-
+/* ===============================  QTableWidget =============================== */
 QTableWidget{
     outline: 0px;
 	border: 2px solid rgb(95,88,88);
@@ -451,22 +448,20 @@ QWidget#attr_edit_dockWidgetContents, QWidget#op_view_dockWidgetContents{
 }
 
 
-/* ============================== 工具提示信息 ============================== */
-
+/* ============================== QToolTip ============================== */
 QToolTip {
     border: 3px solid darkkhaki;
     padding: 5px;
     border-radius: 3px;
     opacity: 200;
 }
+
 /* ============================== QSplitter样式 ============================ */
 QSplitter::handle {
 	background: rgb(31,31,38);
 }
 
 /* ================================= 垂直滚动条 ================================= */
-
-
 QScrollBar:vertical{
 	margin:16px 0px 16px 0px;
 	background-color: transparent;
@@ -521,7 +516,6 @@ QScrollBar::sub-page:vertical,QScrollBar::add-page:vertical{
 }
 
 /* ================================= 水平滚动条 ================================= */
-
 QScrollBar:horizontal{
 	margin:0px 0px 0px 0px;
 	background-color: transparent;
@@ -574,7 +568,6 @@ QScrollBar::sub-page:horizontal,QScrollBar::add-page:horizontal{
 }
 
 /* ============================== *_frame对象样式 ============================== */
-
 QFrame#main_left_frame {
     border: 3px solid rgb(36,36,44);
 	border-right: 2px solid rgb(36,36,44);
@@ -595,15 +588,15 @@ QTreeWidget > QBox{
 	background-color: rgb(0,0,0);
 }
 
-/* ================================  按钮  ================================ */
+/* =============================  QPushButton  ============================= */
 
 QPushButton {
     border: 2px solid rgba(144,144,144,250);
     border-radius: 5px;
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 0 rgb(92, 92, 92), stop: 1 rgb(0, 0, 0));
-    min-width: 20px;
-    min-height: 20px;
+    min-width: 80px;
+    min-height: 30px;
     color: rgb(249, 233, 85);
     font-size: 20px;
 }
@@ -637,7 +630,7 @@ QPushButton::menu-indicator:pressed, QPushButton::menu-indicator:open {
     top: 2px; left: 2px; /* 将箭头移动 2 像素 */
 }
 
-/* ================================ 输入对话窗样式 ================================ */
+/* ============================= QInputDialog ============================= */
 QInputDialog {
     background-color: rgba(59, 94, 129, 80);
     border: none; /* 无边框 */
@@ -663,7 +656,7 @@ QInputDialog > QLineEdit {
 /* ================================ 标签 ================================ */
 
 QLabel#task_label, QLabel#cmd_label{
-	padding-left: 5px;  /* 为设置文字距离左边边界的距离 */
+	padding-left: 5px;  /* 设置文字距离左边边界的距离 */
 	padding-top: 5px;   /* 设置文字距离顶边边界的距离 */
 	padding-right: 5px;  /* 设置文字距离右边边界的距离 */
 	padding-bottom: 5px;  /* 设置文字距离底边边界的距离 */
@@ -763,7 +756,7 @@ QDialog > QTextBrowser {
     border-top: 1px solid rgb(128, 128, 128);
 }
 
-/* ================================ 弹窗样式 ================================ */
+/* ================================ QMessageBox ================================ */
 QMessageBox{
     background-color: rgb(49, 38, 49);
 }
@@ -815,7 +808,7 @@ QCheckBox::indicator:checked:pressed {
         image: url(":/icons/checkbox-on");
 }
 
-/* ========================== 属性编辑器内的 QSpinBox ========================== */
+/* ================== 属性编辑器内的 QSpinBox, QDoubleSpinBox ================== */
 QSpinBox, QDoubleSpinBox {
     padding-top: 2px;
     padding-bottom: 2px;
@@ -828,7 +821,7 @@ QSpinBox, QDoubleSpinBox {
 	selection-color: rgb(235,235,235);
 	selection-background-color: rgb(47, 100, 182);
 	font-family: "Microsoft Yahei";
-	font-size: 10pt;
+	font-size: 12pt;
 }
 
 QSpinBox:hover, QDoubleSpinBox:hover {
@@ -980,7 +973,6 @@ QDateTimeEdit QAbstractItemView::item {
     /*background-color: #f0f0f0; !* 设置下拉视图项的背景颜色 *!*/
 }
 
-
 QDateTimeEdit::drop-down{
 	width: 20px;
     padding: 8px 4px 8px 12px;
@@ -1015,4 +1007,16 @@ QCalendarWidget QTableView{
 	color: white;
 	selection-background-color: #8c8c8c;  /* 选中日期的背景色 */
 	selection-color: #20CFDE;  /* 选中日期的字体颜色 */
+}
+
+/* ========================== QLineEdit ========================== */
+QLineEdit {
+    background-color: #504050; /* 设置背景颜色 */
+    border-style: solid; /* 设置边框样式 */
+    border-width: 1px; /* 设置边框宽度 */
+    border-color: rgb(64,64,64); /* 设置边框颜色 */
+    border-radius: 3px; /* 设置边框圆角 */
+    font-size: 19px; /* 设置字体大小 */
+    padding: 2px 4px; /* 设置内边距 */
+    color: rgb(200, 200, 200);
 }

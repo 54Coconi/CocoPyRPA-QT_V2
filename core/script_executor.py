@@ -4,15 +4,14 @@ script_executor.py
 指令执行引擎（基于脚本文件）
 """
 
-import os
 import json
 import operator
+import os
 import time
-
-import keyboard
-
 from pathlib import Path
 from typing import List, Dict, Optional
+
+import keyboard
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 
 from core.commands.base_command import BaseCommand
@@ -20,6 +19,7 @@ from core.commands.flow_commands import IfCommand, LoopCommand
 from core.commands.image_commands import ImageOcrCmd, ImageOcrClickCmd, ImageMatchCmd, ImageClickCmd
 from core.commands.subtask_command import SubtaskCommand
 from .command_map import COMMAND_MAP
+from .command_result_manager import CommandResultManager
 
 _DEBUG = False
 
@@ -110,7 +110,7 @@ class ScriptWorker(QObject):
         self.script_path = script_path
         self._ocr = ocr
         self.commands: List[BaseCommand] = []
-        self.results_list: List[dict] = []  # 存储每个指令的执行结果
+        self.results_manager = CommandResultManager()  # 指令执行结果管理器
         self.current_top_step = 0
 
     def load_script(self) -> bool:
@@ -281,8 +281,14 @@ class ScriptWorker(QObject):
             else:
                 command.execute()
 
-            self.results_list.append(command.model_dump())
-            print(f"[INFO] - 当前指令 <{command.name}> 执行结果: {self.results_list[-1]}") if _DEBUG else None
+            # self.results_list.append(command.model_dump())
+            self.results_manager.add_result(
+                command.id, 
+                command.name, 
+                command.model_dump()
+            )
+            # print(f"[INFO] - 当前指令 <{command.name}> 执行结果: {self.results_list[-1]}") if _DEBUG else None
+            print(f"[INFO] - 当前指令 <{command.name}> 执行结果已添加到结果管理器") if _DEBUG else None
 
         except FileNotFoundError as e:
             self.log.emit(f"❌ 步骤 {self.current_top_step + 1} 执行失败: {str(e)}")  # 不向上抛出异常
@@ -340,10 +346,8 @@ class ScriptWorker(QObject):
 
         def get_command_by_id(_cmd_id):
             """通过指令 id 获取对应的指令执行结果"""
-            for result in self.results_list:
-                if result.get("id") == _cmd_id:
-                    return result
-            return None
+            result = self.results_manager.get_result(_cmd_id)
+            return result.result_data if result else None
 
         def safe_get_field(_cmd_result, _field_name):
             """安全地获取指令结果中的字段值"""

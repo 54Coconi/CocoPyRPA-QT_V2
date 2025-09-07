@@ -12,9 +12,8 @@
 import time
 
 import pyautogui
-
-from pynput.keyboard import Controller as KeyboardController, Key, KeyCode
 from pydantic import Field
+from pynput.keyboard import Controller as KeyboardController, Key, KeyCode
 
 from utils.debug import print_func_time
 from .base_command import RetryCmd, CommandRunningException
@@ -153,6 +152,7 @@ def get_pynput_cmd_key(key: str) -> str | None:
     """
     if key.lower() in ["win", "window", "windows", "command", "super"]:
         return "cmd"
+    return None
 
 
 # @ <键盘按下按键> 指令
@@ -171,7 +171,7 @@ class KeyPressCmd(RetryCmd):
     Note:
         - 在使用 `pynput` 库时,在 PC 平台上,cmd 键对应于 Super 键或 Windows 键,在 Mac 上,它对应于 Command 键
     """
-    name: str = Field(f"<键盘按下按键>", description="指令名称")
+    name: str = Field(f"键盘按下按键", description="指令名称")
     is_active: bool = Field(True, description="指令是否生效")
     retries: int = Field(0, description="指令重复执行次数")
 
@@ -336,7 +336,7 @@ class HotKeyCmd(RetryCmd):
                 for key in self.keys:
                     if not is_pyautogui_key_supported(key):
                         raise ValueError(f"[pyautogui] 不支持的按键 '{key}' ")
-                pyautogui.hotkey([key.lower() for key in self.keys])
+                pyautogui.hotkey(*[key.lower() for key in self.keys])
                 print(f"[INFO] - (HotKeyCmd)[pyautogui] 按下组合热键 {self.keys} ")
         except Exception as e:
             raise CommandRunningException(e)

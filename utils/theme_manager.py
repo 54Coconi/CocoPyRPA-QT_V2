@@ -7,7 +7,9 @@
 
 from pathlib import Path
 from typing import Optional, Dict
+
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QWidget
 
 MAIN_THEME_NAME = 'main.css'
 
@@ -37,8 +39,8 @@ class ThemeManager(QObject):
     def __init__(self, app_root: str):
         """ 初始化主题管理器 """
         super().__init__()
-        self.app_root = Path(app_root)
-        self.themes_dir = self.app_root / "resources" / "theme"
+        self.app_root = app_root
+        self.themes_dir = Path(app_root) / "resources" / "theme"
         self.current_theme = "默认"
         self.stylesheets_cache = {}  # 缓存已加载的样式表
 
@@ -91,7 +93,7 @@ class ThemeManager(QObject):
         return stylesheet
 
     @pyqtSlot(str, QObject)
-    def change_theme(self, theme_name: str, target: QObject) -> bool:
+    def change_theme(self, theme_name: str, target: QObject | QWidget) -> bool:
         """
         切换主题
         

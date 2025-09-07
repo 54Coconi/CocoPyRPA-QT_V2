@@ -108,5 +108,6 @@ class BindPropertyDialog(QDialog):
 
             PropertyBindingManager.all_tasks_cmd = self.all_tasks_cmd
             PropertyBindingManager.bind_property(source_cmd, source_attr, target_cmd, target_attr)
+            print(f'所有绑定的属性：{PropertyBindingManager._bindings}')
             QMessageBox.information(self, "绑定成功",
                                     f"{source_cmd.name}.{source_attr} -> {target_cmd.name}.{target_attr}")

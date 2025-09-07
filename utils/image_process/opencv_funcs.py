@@ -9,6 +9,7 @@
     - Opencv 函数封装
 """
 import cv2
+import numpy as np
 
 # 颜色字典(BGR格式)
 COLORS = {
@@ -103,7 +104,7 @@ def readImageColor(imagePath):
 
 # 在匹配到的图片位置绘制矩形
 def drawRectangle(imagePath, templateImgPath, threshold=0.8,
-                  color=COLORS['red'], thickness=2) -> tuple:
+                  color=COLORS['red'], thickness=2) -> tuple[np.ndarray | None, float]:
     """
     在匹配到的图片位置绘制矩形,使用归一化相关系数匹配方法(cv2.TM_CCOEFF_NORMED)
     若匹配失败返回一个 None 和最大相似度的阈值log[1]
@@ -112,28 +113,33 @@ def drawRectangle(imagePath, templateImgPath, threshold=0.8,
     :param threshold: 匹配模板图片的阈值，高于此值则绘制矩形
     :param color: 绘制的矩形框的颜色
     :param thickness: 绘制的矩形框的线条粗细
-    :return: image, loc[1] - 返回绘制之后的图片和最大相似度的阈值log[1]
+    :return: image, loc[1] - 返回绘制之后的图片(np.ndarray)和最大相似度的阈值log[1]
 
     loc 是由cv2.minMaxLoc 函数返回的结果，其中包含了以下四个值：
-        - log[0]：这是模板匹配结果中的最小值，表示所有匹配区域中相似度的最小分数。
-        - log[1]：这是模板匹配结果中的最大值，表示所有匹配区域中相似度的最大分数。
-        - log[2]：这是最小值的坐标位置，即相似度最低的点在图像中的位置。
-        - log[3]：这是最大值的坐标位置，即相似度最高的点在图像中的位置。
+        - loc[0]：这是模板匹配结果中的最小值，表示所有匹配区域中相似度的最小分数。
+        - loc[1]：这是模板匹配结果中的最大值，表示所有匹配区域中相似度的最大分数。
+        - loc[2]：这是最小值的坐标位置，即相似度最低的点在图像中的位置。
+        - loc[3]：这是最大值的坐标位置，即相似度最高的点在图像中的位置。
     """
     # 读取图片
+    image = None
     if isinstance(imagePath, str):
         image = readImageColor(imagePath)
-    else:
+    elif isinstance(imagePath, np.ndarray):
         # imagePath 为 np.ndarray
         image = cv2.cvtColor(imagePath, cv2.COLOR_BGR2RGB)
-        cv2.imwrite("temp.png", image)  # 保存全屏截图为临时文件
+    
+    if image is None:
+        print(f"[Warning] 读取图片 '{imagePath}' 失败")
+        return None, 0.0
 
     templateImg = readImageColor(templateImgPath)
-    # 使用模板匹配在大图中寻找小图的位置，cv2.TM_CCOEFF_NORMED 表示使用归一化相关系数匹配方法
+    if templateImg is None:
+        print(f"[Warning] 读取模板图片 '{templateImgPath}' 失败")
+        return None, 0.0
+
     result = cv2.matchTemplate(image, templateImg, cv2.TM_CCOEFF_NORMED)
-    # 使用cv2.minMaxLoc找出匹配结果中的最小值和最大值及它们的位置
     loc = cv2.minMaxLoc(result)
-    # 如果最大值大于等于阈值，则认为找到了模板的位置
     if loc[1] >= threshold:
         # 获取模板匹配到的左上角坐标
         top_left = loc[3]
@@ -141,7 +147,7 @@ def drawRectangle(imagePath, templateImgPath, threshold=0.8,
         h, w = templateImg.shape[:2]
         # 计算模板匹配到的右下角坐标
         bottom_right = (top_left[0] + w, top_left[1] + h)
-        # 在原始截图上绘制矩形框出匹配到的模板位置，边框颜色为绿色，线条粗细为2
+        # 在原始截图上绘制矩形框出匹配到的模板位置
         cv2.rectangle(image, top_left, bottom_right, color=color, thickness=thickness)
         return image, loc[1]
     # 未匹配成功
@@ -158,13 +164,17 @@ def centerPosition(imagePath, templateImgPath, threshold):
     :return: (center_x, center_y), log[1] - 返回匹配到的图像的中心坐标和最大相似度的阈值log[1];
     如果未匹配成功则返回 None 和最大相似度的阈值log[1]
     """
+    image = None
     # 读取图片
     if isinstance(imagePath, str):
         image = readImageColor(imagePath)
-    else:
+    elif isinstance(imagePath, np.ndarray):
         # imagePath 为 np.ndarray
         image = cv2.cvtColor(imagePath, cv2.COLOR_BGR2RGB)
-        cv2.imwrite("Temp/temp.png", image)  # 保存全屏截图为临时文件
+    if not image:
+        print(f"[Warning] 读取图片 '{imagePath}' 失败")
+        return None, None
+
     templateImg = readImageColor(templateImgPath)
     # 使用模板匹配在大图中寻找小图的位置，cv2.TM_CCOEFF_NORMED 表示使用归一化相关系数匹配方法
     result = cv2.matchTemplate(image, templateImg, cv2.TM_CCOEFF_NORMED)
@@ -174,16 +184,12 @@ def centerPosition(imagePath, templateImgPath, threshold):
         # 获取模板匹配到的左上角坐标
         topLeft = loc[3]
         # 获取模板图片的高度和宽度
-        # templateImg.shape 返回一个包含图像维度的元组。对于彩色图像，这个返回值通常是三个元素的元组
-        # (高度, 宽度, 颜色通道数)。:2 是一个切片操作符，它获取元组中的第一个元素和第二个元素
         templateImgHeight, templateImgWidth = templateImg.shape[:2]
-        print(f"[INFO] - (centerPosition) 匹配成功，模板图片的高度为 {templateImgHeight},宽度为 {templateImgWidth}")
         # 计算匹配到的图片的中心横坐标
         center_x = topLeft[0] + templateImgWidth / 2
         # 计算匹配到的图片的中心纵坐标
         center_y = topLeft[1] + templateImgHeight / 2
         # 返回中心坐标
-        print(f"[INFO] - (centerPosition) 模板图片中心坐标为 ({center_x}, {center_y})")
         return (center_x, center_y), loc[1]
     # 未匹配成功
     return None, loc[1]
@@ -208,7 +214,7 @@ def readVideo(video_path, scale=0.75):
     # 检查视频是否成功打开
     if not cap.isOpened():
         print(f"[ERROR] - 无法打开视频：{video_path}")
-        return None
+        return
     print(f"[INFO] - 正在打开视频：{video_path}\n按q键退出")
     # 循环直到视频结束
     while True:
@@ -229,5 +235,3 @@ def readVideo(video_path, scale=0.75):
     cap.release()
     # 关闭所有OpenCV窗口
     cv2.destroyAllWindows()
-
-

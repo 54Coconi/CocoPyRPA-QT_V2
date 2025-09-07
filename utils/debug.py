@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*- debug.py
 """ 调试工具模块 """
-import os
-import time
-import inspect  # 用于获取当前堆栈帧
-from functools import wraps
 
-from core.commands.base_command import BaseCommand
+import inspect  # 用于获取当前堆栈帧
+import os
+import threading
+import time
+from functools import wraps  # 用于装饰器
+from typing import Any, Callable, Dict
 
 _DEBUG = True
 
 
 # 打印指令对象属性(不包括私有属性)
-def print_command(obj: BaseCommand):
+def print_command(obj: Any):
     """
     自动获取对象的变量名，并以指定格式打印对象的属性信息。
     :param  obj: (BaseCommand): 需要打印的指令对象
@@ -68,3 +68,97 @@ def print_func_time(debug=_DEBUG):
         return decorator(debug)
     # 如果装饰器有参数，则返回装饰器函数
     return decorator
+
+
+# 全局计数器（线程安全）
+_call_counts: Dict[str, int] = {}
+_lock = threading.Lock()
+
+
+def _get_func_identity(func: Callable) -> str:
+    """安全获取函数唯一标识（含模块、类、文件、行号）"""
+    func_module = getattr(func, "__module__", "<unknown_module>")
+    func_qualname = getattr(func, "__qualname__", getattr(func, "__name__", "<unknown_func>"))
+
+    try:
+        source_file = inspect.getsourcefile(func) or "<unknown_file>"
+        _, start_line = inspect.getsourcelines(func)
+    except (OSError, TypeError):
+        source_file, start_line = "<unknown_file>", -1
+
+    return f"{func_module}.{func_qualname} ({source_file}:{start_line})"
+
+
+def timeit(func: Callable) -> Callable:
+    """计算函数执行耗时的装饰器"""
+    func_key = _get_func_identity(func)
+
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Any:
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        duration = (time.perf_counter() - start) * 1000
+        print(f"[timeit] {func_key} 执行耗时: {duration:.3f} ms")
+        return result
+
+    return wrapper
+
+
+def count_calls(func: Callable) -> Callable:
+    """统计函数调用次数的装饰器"""
+    func_key = _get_func_identity(func)
+
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Any:
+        with _lock:
+            _call_counts[func_key] = _call_counts.get(func_key, 0) + 1
+            count = _call_counts[func_key]
+        print(f"[count_calls] {func_key} 已被调用 {count} 次")
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def log_args(func: Callable) -> Callable:
+    """记录函数参数和返回值的装饰器"""
+    func_key = _get_func_identity(func)
+
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Any:
+        print(f"[log_args] {func_key} 参数: args={args}, kwargs={kwargs}")
+        result = func(*args, **kwargs)
+        print(f"[log_args] {func_key} 返回: {result}")
+        return result
+
+    return wrapper
+
+
+def debug(log_time: bool = True, log_count: bool = True, log_io: bool = True) -> Callable:
+    """组合调试装饰器"""
+
+    def decorator(func: Callable) -> Callable:
+        if log_io:
+            func_wrapped = log_args(func)
+        else:
+            func_wrapped = func
+        if log_count:
+            func_wrapped = count_calls(func_wrapped)
+        if log_time:
+            func_wrapped = timeit(func_wrapped)
+        return func_wrapped
+
+    return decorator
+
+
+if __name__ == '__main__':
+    @timeit
+    def foo(x, y):
+        return x + y
+
+    @debug(log_time=True, log_count=True, log_io=True)
+    def bar(n):
+        return sum(range(n))
+
+    print(foo(3, 4))
+    print(bar(10))
+    print(bar(20))

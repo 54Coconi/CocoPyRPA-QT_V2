@@ -5,13 +5,13 @@
 import os
 import re
 import time
+
 import cv2
 import numpy as np
 import pyautogui
 from paddleocr import PaddleOCR
 
 from utils.debug import print_func_time
-
 
 _DEBUG = True
 

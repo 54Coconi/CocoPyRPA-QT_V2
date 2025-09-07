@@ -1,0 +1,31 @@
+{
+    "task_name": "执行python-鼠标点击",
+    "steps": [
+        {
+            "type": "script",
+            "action": "dos",
+            "icon": ":/icons/script-dos",
+            "params": {
+                "name": "执行 DOS 命令",
+                "dos_cmd": "start cmd",
+                "working_dir": null,
+                "timeout": null,
+                "is_active": true,
+                "status": 0,
+                "id": "9a56c61f"
+            }
+        },
+        {
+            "type": "script",
+            "action": "python",
+            "icon": ":/icons/script-python",
+            "params": {
+                "name": "执行 Python 脚本",
+                "code": "# 第一步：实例化 <鼠标点击> 指令类\ncmd = MouseClickCmd(\n    name=\"鼠标左键点击\",\t\t# 指令名\n    target_pos=(215, 200),\t# 目标坐标\n    clicks=1,\t\t\t# 点击次数\n    interval=0.2,\t\t# 点击间隔\n    duration=1.0,\t\t# 移动时间\n    retries=0,\t\t\t# 重复次数\n    button=\"right\",\t\t# 鼠标按键\n    is_active=True,\t\t# 是否启用\n    use_pynput=True,\t\t# 使用Pynput\n)\n\n# 第二步：调用指令执行方法\ncmd.execute()",
+                "is_active": true,
+                "status": 0,
+                "id": "d970750a"
+            }
+        }
+    ]
+}

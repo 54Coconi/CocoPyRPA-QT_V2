@@ -2,13 +2,9 @@
 自定义标题栏
 """
 
-import sys
-
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout, QApplication
-
-import resources_rc
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QHBoxLayout
 
 # 全局常量
 TITLE_BAR_HEIGHT = 35  # 标题栏高度
@@ -161,7 +157,8 @@ class TitleBar(QWidget):
 
     def mouseMoveEvent(self, event):
         """ 移动标题栏 """
-        if self.isPressed:
+        # 只有在未进行窗口缩放时，才允许拖动窗口
+        if self.isPressed and not getattr(self.win, "resizing", False):
             if self.win.isMaximized:
                 self.win.showNormal()
 
@@ -169,8 +166,7 @@ class TitleBar(QWidget):
             self.startPos = event.globalPos()
             self.win.move(self.win.pos() + movePos)
 
-        return QWidget().mouseMoveEvent(event)
-
+        return QWidget.mouseMoveEvent(self, event)
 
 # 测试
 # if __name__ == '__main__':

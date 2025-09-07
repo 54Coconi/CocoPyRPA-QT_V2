@@ -1,42 +1,23 @@
-import os
 import configparser
 import json
+import os
 
 from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QEvent, QObject, pyqtSignal
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem,
-    QComboBox, QLineEdit, QCheckBox, QDoubleSpinBox, QMessageBox, QHeaderView
+    QComboBox, QLineEdit, QCheckBox, QDoubleSpinBox, QMessageBox
 )
-from PyQt5.QtCore import Qt, QEvent, QObject, pyqtSignal
 from PyQt5.QtWidgets import QPushButton
+
+from config.app_config import CONFIG_FILE, DEFAULT_SETTING, debug
 
 
 class ConfigManager(QObject):
     """ 全局配置管理器 """
     config_changed = pyqtSignal(dict)  # 配置更改信号,传递更改后的配置
 
-    # 默认配置
-    DEFAULT_CONFIG = {
-        "General": {
-            "Theme": "默认",
-            "Language": "zh",
-            "RunMode": "debug",
-            "EditMode": "normal",
-            "Window": {
-                "StaysOnTopHint": True,
-                "CloseMode": "system_tray",
-            },
-        },
-        "ImageMatch": {
-            "Threshold": 0.8,
-        },
-        "ImageOcr": {
-            "Threshold": 0.8,
-            "ModelName": "PaddleOCR",
-        },
-    }
-
-    def __init__(self, config_file="config.ini"):
+    def __init__(self, config_file: str):
         super().__init__()
         self.config_file = config_file  # 配置文件路径
         self.config = {}  # 当前配置
@@ -117,7 +98,7 @@ class ConfigManager(QObject):
 
     def reset_to_default(self):
         """恢复默认配置"""
-        self.config = self.DEFAULT_CONFIG
+        self.config = DEFAULT_SETTING
         self.save_config()
 
 
@@ -158,10 +139,10 @@ class SettingsWindow(QDialog):
         button_layout.addWidget(reset_button)
         button_layout.addWidget(cancel_button)
 
-        self.layout = QVBoxLayout()
-        self.layout.addWidget(self.tree)
-        self.layout.addLayout(button_layout)
-        self.setLayout(self.layout)
+        self.main_layout = QVBoxLayout()
+        self.main_layout.addWidget(self.tree)
+        self.main_layout.addLayout(button_layout)
+        self.setLayout(self.main_layout)
 
         # 信号绑定
         save_button.clicked.connect(self.save_settings)
@@ -189,75 +170,74 @@ class SettingsWindow(QDialog):
         """为某个类别添加具体的配置项"""
         for key, value in settings.items():
             full_key = f"{category}.{key}"
+            item = QTreeWidgetItem(parent_item)
+            item.setText(0, self._translate_key(key))
             if isinstance(value, dict):
                 # 如果是子字典，递归处理
-                child_item = QTreeWidgetItem(parent_item)
-                child_item.setText(0, self._translate_key(key))  # 设置映射后的文本
-                self._add_settings_to_tree(child_item, value, full_key)
+                self._add_settings_to_tree(item, value, full_key)
             else:
                 # 添加配置项到树
-                setting_item = QTreeWidgetItem(parent_item)
-                setting_item.setText(0, self._translate_key(key))
-                widget = self._create_widget(full_key, key, value)
-                self.tree.setItemWidget(setting_item, 1, widget)
-                self.settings_widgets[full_key] = widget
+                widget = self._create_widget(key, value)
+                if widget:
+                    self.tree.setItemWidget(item, 1, widget)
+                    self.settings_widgets[full_key] = widget
 
-    def _create_widget(self, full_key, key, value):
+    def _create_widget(self, key, value):
         """ 根据键名和值类型创建适当的控件 """
-        print(f"(_create_widget) 当前的键名是：{key},值是：{value}")
+        debug(f"当前的键名是：{key},值是：{value}")
+        widget = None
         if key == "Theme":
             # 主题采用下拉框
             widget = QComboBox()
             widget.addItems(["默认", "深色", "浅色", "护眼"])
             widget.setCurrentText(value)
             self._configure_combobox(widget)
-
         elif key == "Language":
             # 语言采用下拉框
             widget = QComboBox()
             widget.addItems(["中文", "English"])
             widget.setCurrentText("中文" if value == "zh" else "English")
             self._configure_combobox(widget)
-
         elif key == "RunMode":
             # 运行模式采用复选框（是否启用调试模式）
             widget = QCheckBox()
             widget.setText("启用调试模式")
             widget.setChecked(value == "debug")
-
         elif key == "EditMode":
             # 编辑模式采用下拉框
             widget = QComboBox()
             widget.addItems(["高级编辑", "普通编辑"])
             widget.setCurrentText("高级编辑" if value == "advanced" else "普通编辑")
             self._configure_combobox(widget)
-
         elif key == "CloseMode":
             # 关闭模式采用下拉框
             widget = QComboBox()
             widget.addItems(["放到系统托盘", "退出"])
             widget.setCurrentText("放到系统托盘" if value == "system_tray" else "退出")
-
         elif key == "ModelName":
             # OCR 模型名称采用下拉框
             widget = QComboBox()
             widget.addItems(["PaddleOCR"])
             widget.setCurrentText(value)
             self._configure_combobox(widget)
-
-        elif isinstance(value, bool) and key == "StaysOnTopHint":
-            widget = QCheckBox()
-            widget.setText("始终在顶部")
-            widget.setChecked(value)
-            # 连接信号
-            widget.stateChanged.connect(self.set_stays_on_top)
+        elif key == "SavePath":
+            display_text = os.path.relpath(value) if value and value != "None" else ""
+            widget = QLineEdit()
+            widget.setText(display_text)
+        elif isinstance(value, bool):
+            if key == "StaysOnTopHint":
+                widget = QCheckBox()
+                widget.setText("窗口置顶")
+                widget.setChecked(value)
+                widget.stateChanged.connect(self.set_stays_on_top)
         elif isinstance(value, (int, float)):
-            widget = QDoubleSpinBox()
-            widget.setMinimum(0.00)  # 设置最小值
-            widget.setMaximum(1.00)  # 设置最大值
-            widget.setSingleStep(0.02)  # 设置步长
-            widget.setValue(value)
-
+            if key == "Threshold":
+                widget = QDoubleSpinBox()
+                widget.setMinimum(0.00)  # 设置最小值
+                widget.setMaximum(1.00)  # 设置最大值
+                widget.setDecimals(2)  # 设置小数点后的位数
+                widget.setSingleStep(0.01)  # 设置步长
+                widget.setValue(value)
         else:
             widget = QLineEdit()
             widget.setText(str(value))
@@ -285,9 +265,10 @@ class SettingsWindow(QDialog):
             "ImageMatch": "图像匹配(ImageMatch)",
             "Threshold": "阈值(Threshold)",
             "ImageOcr": "OCR配置(ImageOcr)",
-            "ModelName": "模型名称(ModelName)"
+            "ModelName": "模型名称(ModelName)",
+            "SavePath": "识别结果保存路径(SavePath)"
         }
-        return translations.get(key, f"{key} ({key})")
+        return translations.get(key, f"{key}({key})")
 
     def set_stays_on_top(self, state):
         """设置始终在顶部"""
@@ -299,8 +280,8 @@ class SettingsWindow(QDialog):
     def save_settings(self):
         """保存设置"""
         config = self.config_manager.config
-        for key, widget in self.settings_widgets.items():
-            keys = key.split(".")
+        for full_key, widget in self.settings_widgets.items():
+            keys = full_key.split(".")
             d = config
             for part in keys[:-1]:
                 d = d.setdefault(part, {})
@@ -317,7 +298,6 @@ class SettingsWindow(QDialog):
             elif isinstance(widget, QDoubleSpinBox):
                 # 保存为两位浮点数
                 d[keys[-1]] = float(f"{widget.value():.2f}")
-                # d[keys[-1]] = widget.value()
             # 处理下拉框
             elif isinstance(widget, QComboBox):
                 if keys[-1] == "Theme":
@@ -326,23 +306,22 @@ class SettingsWindow(QDialog):
                 elif keys[-1] == "Language":
                     # 保存语言为 "zh" 或 "en"
                     d[keys[-1]] = "zh" if widget.currentText() == "中文" else "en"
-
                 elif keys[-1] == "EditMode":
                     # 保存编辑模式为 "advanced" 或 "normal"
                     d[keys[-1]] = "advanced" if widget.currentText() == "高级编辑" else "normal"
-
                 elif keys[-1] == "CloseMode":
                     # 保存关闭模式为 "system_tray" 或 "quit"
                     d[keys[-1]] = "system_tray" if widget.currentText() == "放到系统托盘" else "quit"
-
                 elif keys[-1] == "ModelName":
                     d[keys[-1]] = widget.currentText()
-
                 else:
                     d[keys[-1]] = widget.currentText()
             # 处理文本输入框
             elif isinstance(widget, QLineEdit):
-                d[keys[-1]] = widget.text()
+                if keys[-1] == "SavePath":
+                    path = widget.text()
+                    # 保存 SavePath 为绝对路径
+                    d[keys[-1]] = os.path.abspath(path) if path else None
 
         self.config_manager.save_config()
         QMessageBox.information(self, "成功", "设置已保存！")
@@ -357,4 +336,4 @@ class SettingsWindow(QDialog):
 
 
 # 全局单例
-config_manager = ConfigManager()
+config_manager = ConfigManager(CONFIG_FILE)

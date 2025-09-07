@@ -13,10 +13,11 @@ class StopRunningThread(QThread):
         self.exec_()
 
     def on_combination_pressed(self):
-        """Q + Esc 组合键被按下 """
+        """ Q + Esc 组合键被按下 """
         # 发出停止信号
         self.stopSignal.emit()
-        print("Q + Esc 组合键被按下")
+        from config.app_config import debug
+        debug("Q + Esc 组合键被按下")
 
 
 # 全局唯一的 StopRunningThread 对象

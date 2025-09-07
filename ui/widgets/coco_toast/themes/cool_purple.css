@@ -44,6 +44,8 @@
     color: #888888;
     margin-left: 0px;
     cursor: pointer;
+	min-width: 20px;
+	min-height: 20px;
 }
 
 #notification #btn_close:hover {

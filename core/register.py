@@ -7,19 +7,19 @@
 @officialWebsite: https://github.com/54Coconi
 @description:
     - CocoPyRPA_v2.0.0 - 指令注册模块
+    注册指令，管理指令记录
 """
 
-import uuid
-import json
-import time
-import os.path
-from typing import Dict, Optional
-from dataclasses import dataclass
 import datetime
+import json
+import os.path
+import time
+import uuid
+from dataclasses import dataclass
+from typing import Dict, Optional
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QTreeWidgetItem
-
 
 MAX_RECORDS = 1000  # 最大记录数
 
@@ -73,7 +73,7 @@ class CommandPersistence:
 
     def save_records(self, records: Dict[str, CommandRecord]):
         """
-        保存指令记录到文件
+        保存所有指令记录到注册表文件，以覆盖方式写入
         :param records: 指令记录
         """
         data = {}
@@ -92,7 +92,7 @@ class CommandPersistence:
 
     def load_records(self) -> Dict[str, CommandRecord]:
         """
-        加载指令记录
+        加载注册表所有指令记录
         :return:
         """
         # 从文件加载指令记录
@@ -122,10 +122,10 @@ class CommandPersistence:
         :param timestamp: 时间戳
         :return: 格式化后的时间字符串
         """
-        # 将时间戳格式化为xxxx-xx-xx-xx:xx:xx:xxx:xxx字符串，精确到微秒
+        # 将时间戳格式化为 xxxx-xx-xx xx:xx:xx:xxxxxx 字符串，精确到微秒
         dt = datetime.datetime.fromtimestamp(timestamp)
         microsecond = dt.microsecond
-        return dt.strftime("%Y-%m-%d-%H:%M:%S") + f":{microsecond:06d}"
+        return dt.strftime("%Y-%m-%d %H:%M:%S") + f":{microsecond:06d}"
 
     @staticmethod
     def parse_time(time_str):
@@ -134,18 +134,14 @@ class CommandPersistence:
         :param time_str: 时间字符串
         :return: 时间戳
         """
-        # 将xxxx-xx-xx-xx:xx:xx:xxx:xxx字符串解析为浮点数时间戳
+        # 将 2025-07-25 09:22:37:174479 格式字符串解析为浮点数时间戳
         try:
-            parts = time_str.split(":")
-            if len(parts) != 6:
-                return None
-            date_parts = parts[:4]
-            seconds = parts[4]
-            microseconds = parts[5]
-            dt_str = "-".join(date_parts) + ":" + seconds
-            dt = datetime.datetime.strptime(dt_str, "%Y-%m-%d-%H:%M:%S")
-            timestamp = dt.timestamp() + int(microseconds) / 1e6
-            return timestamp
+            parts = time_str.split(" ")
+            date_parts = parts[0].split("-")
+            time_parts = parts[1].split(":")
+            dt_str = "-".join(date_parts) + " " + ":".join(time_parts[:3]) + "." + time_parts[3]
+            dt = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S.%f")
+            return dt.timestamp()
         except ValueError:
             return None
 

@@ -1,0 +1,47 @@
+#frame_main {
+	background-color: rgba(40,42,54,200);
+	border: 2px solid rgba(0,200,255,200);
+	border-radius: 5px;
+}
+
+#frame_rgb {
+	border-right: 0px solid rgb(59,173,255);
+	/*background: rgba(84,138,247,80);*/
+	background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(10, 175, 196, 200), stop:0.1 rgba(21, 82, 129, 200), stop:0.204 rgba(4, 49, 141, 200), stop:0.799308 rgba(0, 53, 143, 200), stop:0.9 rgba(16, 109, 167, 200), stop:1 rgba(10, 160, 201, 200));
+}
+
+#frame_rgb #lbl_rgbshow {
+	min-width: 20px;
+	min-height: 20px;
+	border: 2px solid rgb(255,255,255,200);
+	border-radius: 2px;
+	/* 这个背景色取决于当前鼠标所在像素点的rgb色值 */
+    background-color: rgb(237,36,36);
+}
+
+#frame_rgb #lbl_rgbtext {
+	border-left: 0px solid rgb(59,173,255);
+    border-bottom: 0px solid rgb(59,173,255);
+	border-right: 0px solid rgb(59,173,255);
+	border-top: 0px solid rgb(255,255,255);
+    background-color: transparent;
+	padding: 3px;
+    color : rgba(255,255,255,220);
+}
+
+#frame_main #lbl_info {
+	border-top: 0px solid rgb(100,100,100);
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+    background-color: transparent;
+	padding: 2px;
+    color : rgba(255,255,255,255);
+}
+
+#frame_main #lbl_op {
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+    background-color: transparent;
+	padding: 3px;
+    color : rgba(11,211,228,255);
+}

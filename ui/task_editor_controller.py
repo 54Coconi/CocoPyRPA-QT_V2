@@ -21,28 +21,24 @@
 """
 
 import copy
-import os
 import json
-
+import os
 from collections import OrderedDict
 from typing import Optional
 
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIcon, QColor, QFont, QDropEvent, QCursor, QMouseEvent
+from PyQt5.QtGui import QIcon, QFont, QCursor, QMouseEvent
 from PyQt5.QtWidgets import QTreeWidget, QTableWidget, QWidget, QTreeWidgetItem, QTableWidgetItem, QCheckBox, \
-    QHeaderView, QMenu, QMessageBox, QHBoxLayout, QPushButton, QVBoxLayout, QDialog, QSpinBox, \
+    QMenu, QMessageBox, QHBoxLayout, QPushButton, QVBoxLayout, QDialog, QSpinBox, \
     QDoubleSpinBox, QComboBox, QFileDialog, QApplication, QTreeView
 
 from core.register import registry
-
-from ui.widgets.CocoPositionXY import PositionXY  # 导入自定义坐标控件
 from ui.widgets.CocoJsonView import JSONHighlighter  # 导入 JSON 数据高亮器
 from ui.widgets.CocoPlainTextEdit import CoPlainTextEdit  # 导入自定义文本编辑器
+from ui.widgets.CocoPositionXY import PositionXY  # 导入自定义坐标控件
 from ui.widgets.CocoSettingWidget import config_manager  # 导入配置管理器单例
 from ui.widgets.CocoTableItemShowImg import ImageWidget  # 导入图片显示控件
 from ui.widgets.KeyListenerButton import KeyCaptureButton  # 导入自定义按键捕获按钮
-
-import resources_rc
 
 _DEBUG = True
 
@@ -410,7 +406,7 @@ class TaskEditorCore(QWidget):
             new_item = self.create_new_item(source_item)
 
             if target_item is not None:
-                print(f"(treeDropEvent) 外部拖动到目标节点：{target_item.text(0)}")
+                print(f"(treeDropEvent) 外部拖动到目标节点：{target_item.text(0)}") if _DEBUG else None
                 self.add_dropped_item(event, target_item, new_item)
             else:
                 self.treeWidget.addTopLevelItem(new_item)
@@ -1363,7 +1359,7 @@ class TaskEditorCore(QWidget):
         :param parent: 父节点
         :param params: 子任务参数
         """
-        subtask_file = params.get('subtask_file', None)  # 获取子任务文件路径
+        subtask_file = params.get('subtask_file', '')  # 获取子任务文件路径
 
         # 检查循环引用
         if subtask_file in self._loading_stack:
@@ -1413,7 +1409,6 @@ class TaskEditorCore(QWidget):
 
     # ======================================== 显示属性表格 ====================================== #
 
-    # TODO: 显示指令属性表格相关
     def show_params_window(self, item, item_data):
         """
         将属性加载到主程序的 QTableWidget 中，并支持嵌套结构
@@ -1727,13 +1722,9 @@ class TaskEditorCore(QWidget):
         """
         更新按钮 button 的属性值，当 QComboBox 值改变时触发
         """
-        params = item_data.get('params', {})  # 获取参数字典
-        params[key] = value
+        print(f"(update_button_attribute) - 更新属性 {key} 为 {value}") if _DEBUG else None
         self.node_changed_signal.emit()
-        print(f"(update_button_attribute) - 更新按钮属性 {key} 为 {params[key]}")
 
-        self.current_item_data['params'] = params  # 更新参数字典
-        # 更新树节点文本
         button_map = {
             "left": "左键",
             "right": "右键",
@@ -1748,8 +1739,15 @@ class TaskEditorCore(QWidget):
         elif "中键" in old_text:
             text = old_text.replace("中键", button_map.get(value))
 
-        item.setText(0, text)
+        item.setText(0, text)  # 更新树节点文本
+        params = item_data.get('params', {})  # 获取参数字典
+        params[key] = value  # 更新button属性
+        params['name'] = text  # 更新指令name属性
+        self.current_item_data['params'] = params  # 更新参数字典
         item.setData(0, Qt.UserRole, self.current_item_data)
+
+        # 刷新属性表格
+        self.show_params_window(item, item_data)
 
     def update_match_mode_attribute(self, item_data, key, value, item):
         """

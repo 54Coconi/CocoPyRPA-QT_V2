@@ -18,20 +18,14 @@ from collections import OrderedDict
 
 import keyboard
 import pyautogui
+from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5.QtGui import QIcon
-
+from PyQt5.QtWidgets import QMainWindow, QLabel, QTreeWidget, QTreeWidgetItem, QMessageBox, \
+    QSystemTrayIcon
 from pynput import mouse
 from screeninfo import get_monitors
 
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QTreeWidget, QTreeWidgetItem, QMessageBox, \
-    QSystemTrayIcon
-
 from core.register import registry
-
-from utils.QSSLoader import QSSLoader
-
-import resources_rc
 
 _DEBUG = True
 
@@ -141,6 +135,7 @@ class MouseListenerThread(QThread):
         self.running = False
         if self.listener:
             self.listener.stop()
+        self.quit()
 
     @normalize_coordinates_decorator
     def on_move(self, x, y):
@@ -762,5 +757,12 @@ class MouseRecorder(QMainWindow):
 
     def closeEvent(self, event):
         """窗口关闭事件"""
+        print("(closeEvent) - 窗口关闭事件")
+        if self.mouse_thread.isRunning():
+            print("(closeEvent) - 鼠标监听线程还在运行中")
+        if self.mouse_thread.listener.is_alive():
+            print("(closeEvent) - 鼠标监听器还在运行中")
+        if self.keyboard_thread.isRunning():
+            print("(closeEvent) - 键盘监听线程还在运行中")
         self.close_signal.emit()
         super().closeEvent(event)

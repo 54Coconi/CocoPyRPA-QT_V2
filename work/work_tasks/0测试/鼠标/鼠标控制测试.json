@@ -1,0 +1,221 @@
+{
+    "task_name": "鼠标控制测试",
+    "steps": [
+        {
+            "type": "mouse",
+            "action": "click",
+            "icon": ":/icons/mouse-click-left",
+            "params": {
+                "name": "鼠标左键点击(1450,100)",
+                "target_pos": [
+                    1450,
+                    100
+                ],
+                "clicks": 1,
+                "interval": 0.2,
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "6ada5373"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "2a7ca530"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveRel",
+            "icon": ":/icons/mouse-rel-move",
+            "params": {
+                "name": "鼠标相对移动(0,160)",
+                "offset": [
+                    0,
+                    160
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "3febcb26"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "pressRelease",
+            "icon": ":/icons/mouse-press-release",
+            "params": {
+                "name": "鼠标按下释放(-1,-1)",
+                "target_pos": [
+                    -1,
+                    -1
+                ],
+                "hold_time": 0.2,
+                "press_times": 1,
+                "duration": 0.0,
+                "retries": 0,
+                "button": "left",
+                "is_release": true,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "e6d84b42"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "cba3f00b"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragTo",
+            "icon": ":/icons/mouse-drag",
+            "params": {
+                "name": "鼠标定点拖动(1145,260)",
+                "target_pos": [
+                    1145,
+                    260
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "93d613a4"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "432d43f9"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "moveTo",
+            "icon": ":/icons/mouse-move",
+            "params": {
+                "name": "鼠标定点移动(1200,260)",
+                "target_pos": [
+                    1200,
+                    260
+                ],
+                "duration": 0.4000000000000001,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "70669634"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "bb2b0d48"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "dragRel",
+            "icon": ":/icons/mouse-rel-drag",
+            "params": {
+                "name": "鼠标相对拖动(0,100)",
+                "offset": [
+                    0,
+                    100
+                ],
+                "duration": 1.0,
+                "retries": 0,
+                "button": "left",
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "e1e8f63b"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "2358a66e"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "scrollV",
+            "icon": ":/icons/wheel-v",
+            "params": {
+                "name": "鼠标竖直滚动(-5)",
+                "scroll_units": -5,
+                "retries": 0,
+                "is_active": true,
+                "use_pynput": true,
+                "status": 0,
+                "id": "a6b05122"
+            }
+        },
+        {
+            "type": "flow",
+            "action": "delay",
+            "icon": ":/icons/delay",
+            "params": {
+                "name": "等待 1.00 秒",
+                "delay_time": 1.0,
+                "is_active": true,
+                "status": 0,
+                "id": "9350c07d"
+            }
+        },
+        {
+            "type": "mouse",
+            "action": "scrollH",
+            "icon": ":/icons/wheel-h",
+            "params": {
+                "name": "鼠标水平滚动(5)",
+                "scroll_units": 5,
+                "retries": 0,
+                "is_active": true,
+                "status": 0,
+                "id": "7450157c"
+            }
+        }
+    ]
+}

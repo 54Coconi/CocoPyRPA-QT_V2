@@ -1,10 +1,8 @@
 """
 指令执行引擎模块（基于GUI界面）
 """
-import os
 import operator
-
-from pubsub import pub
+import os
 from enum import Enum
 from typing import List, Optional
 
@@ -12,8 +10,9 @@ from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator
 
 from ui.widgets.CocoSettingWidget import config_manager
-from utils.ocr_tools import OCRTool
+from utils.image_process.ocr_tools import OCRTool
 from .command_map import COMMAND_MAP
+from .command_result_manager import CommandResultManager
 from .commands.base_command import BaseCommand
 from .commands.flow_commands import LoopCommand, IfCommand
 from .commands.image_commands import ImageMatchCmd, ImageOcrCmd, ImageOcrClickCmd
@@ -47,7 +46,7 @@ LOG_COLORS = {
 
 
 def load_theme_config() -> dict:
-    """  加载主题配置 """
+    """ 加载主题配置 """
     theme = config_manager.config.get("General", {}).get("Theme", "默认")
     return LOG_COLORS[theme]
 
@@ -67,15 +66,13 @@ class CommandExecutor(QThread):
     task_finished = pyqtSignal()  # 任务完成信号
     task_error = pyqtSignal(str)  # 任务错误信号
     progress_update = pyqtSignal(str)  # 进度更新信号
-    log_message = pyqtSignal(str)  # 日志消息信号
+    log_message = pyqtSignal(str)  # 日志消息信号, 用于日志显示
 
     select_node = pyqtSignal(QTreeWidgetItem or None)  # 选中节点信号
 
     def __init__(self,
-                 tree_widget: QTreeWidget, run_action: str,
-                 ocr: OCRTool = None,
-                 all_tasks_cmd: List[BaseCommand] = None,
-                 parent=None):
+                 tree_widget: QTreeWidget, run_action: str, ocr: OCRTool = None,
+                 all_tasks_cmd: List[BaseCommand] = None, parent=None):
         """
         :param tree_widget: 使用主程序中的 QTreeWidget
         :param run_action: 运行动作种类（run_all、run_one、run_now）
@@ -85,7 +82,7 @@ class CommandExecutor(QThread):
         """
         super().__init__(parent)
         self.tree_widget = tree_widget  # 使用主程序中的 QTreeWidget
-        self.run_action = run_action  # 运行动作种类（run_all、run_one、run_now）
+        self.run_action = run_action  # 运行动作种类（run_all、run_one、run_from_now、run_to_now）
         self._ocr = ocr
         self.all_tasks_cmd: List[BaseCommand] = all_tasks_cmd or []  # 存储指令对象列表
         self.parent = parent
@@ -93,14 +90,14 @@ class CommandExecutor(QThread):
         self.stop_flag = False  # 停止标志
         self.current_node = None  # 当前正在执行的节点
         self.task_name = ""  # 当前任务名称
-        self.results_list: List[dict] = []  # 存储每个指令的执行结果
+        self.results_manager = CommandResultManager()  # 指令执行结果管理器
         self.current_index = 0  # 当前执行的指令索引
         self.bindings = {}  # 绑定关系
 
         # TODO: 订阅运行异常信号
-        pub.subscribe(self.cmd_running_exception, "command_running_exception")
+        # pub.subscribe(self.on_cmd_running_error, "command_running_exception")
         # TODO: 订阅运行日志信号
-        pub.subscribe(self.cmd_running_progress, "command_running_progress")
+        # pub.subscribe(self.on_cmd_running_progress, "command_running_progress")
 
         self.task_stop.connect(self._task_stop)  # 连接任务终止信号
         self.task_finished.connect(self._task_finished)  # 连接任务完成信号
@@ -108,7 +105,7 @@ class CommandExecutor(QThread):
         # 命令映射表
         self.command_map = COMMAND_MAP
 
-    def _log(self, level: LogLevel, message: str) -> None:
+    def _format_msg(self, level: LogLevel, message: str) -> None:
         """统一日志处理"""
         # 根据日志等级设置不同的颜色,采用 HTML 格式
         formatted_message = ""
@@ -127,11 +124,10 @@ class CommandExecutor(QThread):
                                 f"</font></p>"
 
         self.log_message.emit(formatted_message)
-        # print(formatted_message)
 
     def _task_stop(self):
         self.stop_flag = True
-        self._log(LogLevel.WARN, "⚠ ⚠ ⚠ 已停止任务执行!!!⚠ ⚠ ⚠ ")
+        self._format_msg(LogLevel.WARN, "⚠ ⚠ ⚠ 已停止任务执行!!!⚠ ⚠ ⚠ ")
         self._task_finished()  # 任务终止时，取消选中
 
     def _task_finished(self):
@@ -144,16 +140,17 @@ class CommandExecutor(QThread):
             item.setSelected(False)
             iterator += 1
 
-    # ===================================== 订阅消息 =====================================
-    def cmd_running_exception(self, message):
-        self.log_message.emit(message)
-        pass
+    # ========================= 连接指令Qt对象信号的槽函数 =========================
+    def on_cmd_running_error(self, message):
+        """指令运行出错"""
+        self._format_msg(LogLevel.ERROR, message)
 
-    def cmd_running_progress(self, message):
+    def on_cmd_running_progress(self, message):
+        """指令运行进度"""
         self.progress_update.emit(message)
-        self.log_message.emit(message)
+        self._format_msg(LogLevel.INFO, message)
 
-    # ===================================== 加载任务 =====================================
+    # ================================= 加载指令 =================================
 
     def extract_commands_from_tree(self) -> list:
         """从树控件中提取指令并实例化"""
@@ -184,7 +181,7 @@ class CommandExecutor(QThread):
             command_class = self.command_map.get(step_type, {}).get(action)  # 获取指令类型
 
             if not command_class:
-                self._log(LogLevel.WARN, f"(extract_node_commands) 未知的指令类型或动作: {step_type}, {action}")
+                self._format_msg(LogLevel.WARN, f"(extract_node_commands) 未知的指令类型或动作: {step_type}, {action}")
                 return None
 
             # TODO: 创建指令对象并关联树节点
@@ -200,7 +197,10 @@ class CommandExecutor(QThread):
                     command = command_class(**params)  # **params 将字典转换为关键字参数
 
                 command.tree_item = item  # 关联树节点
-                self._log(LogLevel.INFO, f"(extract_node_commands) 已加载指令: &lt;{command.name}&gt;")
+                # 连接指令对象的 Qt 对象信号
+                command.q_obj.error_message.connect(self.on_cmd_running_error)
+                command.q_obj.info_message.connect(self.on_cmd_running_progress)
+                self._format_msg(LogLevel.INFO, f"(extract_node_commands) 已加载指令: &lt;{command.name}&gt;")
 
                 # 如果当前节点是根节点，则将其添加到 all_tasks_cmd 中
                 if item.parent() is None:
@@ -260,64 +260,84 @@ class CommandExecutor(QThread):
                     command.subtask_steps = subtask_steps
                 return command
             except Exception as e:
-                self._log(LogLevel.ERROR, f"(extract_node_commands) 加载指令失败: {e}")
+                self._format_msg(LogLevel.ERROR, f"(extract_node_commands) 加载指令失败: {e}")
                 return None
 
         for i in range(self.tree_widget.topLevelItemCount()):
             top_item = self.tree_widget.topLevelItem(i)
             extract_node_commands(top_item)
 
-        self._log(LogLevel.INFO, f"所有任务加载完毕，准备开始执行")
+        self._format_msg(LogLevel.INFO, f"所有任务加载完毕，准备开始执行")
         self.log_message.emit("\n")
         print("加载的全部指令对象：\n", self.all_tasks_cmd) if _DEBUG else None
         return self.all_tasks_cmd
 
-    # =================================== run all commands ===============================
+    # =================================== 运行全部 ===============================
 
     def execute_all_commands(self) -> None:
         """运行所有指令"""
-        self._log(LogLevel.INFO, f"🚀 -------------- 开始执行所有指令 -------------- 🚀")
+        self._format_msg(LogLevel.INFO, f"🚀 -------------- 开始执行所有指令 -------------- 🚀")
         self.current_index = 0
+        self.results_manager.clear()  # 清空之前的结果
         self._execute_from_current()
 
-    # ================================ run now commands =================================
+    # ============================== 从当前开始运行 ===============================
 
-    def execute_from_index(self, index: int) -> None:
+    def execute_from_command(self, index: int) -> None:
         """ 运行选中的顶层节点指令 """
         if self.all_tasks_cmd is None or len(self.all_tasks_cmd) == 0:
-            self._log(LogLevel.ERROR, "❌(execute_from_index) 无法运行，没有加载任何指令")
+            self._format_msg(LogLevel.ERROR, "❌(execute_from_index) 无法运行，没有加载任何指令")
             return
         if index < 0 or index >= len(self.all_tasks_cmd):
-            self._log(LogLevel.ERROR, f"❌(execute_from_index) all_tasks_cmd中无效的索引: {index}")
+            self._format_msg(LogLevel.ERROR, f"❌(execute_from_index) all_tasks_cmd 中无效的索引: {index}")
             return
+        self._format_msg(LogLevel.INFO, f"🔽 ------------- 从步骤 {index + 1} 开始执行指令 ------------- 🔽")
         self.current_index = index
+        self.results_manager.clear()  # 清空之前的结果
         self._execute_from_current()
 
-    # ================================= run one command =================================
+    # ================================ 运行到当前 ===============================
+
+    def execute_to_command(self, index: int) -> None:
+        """ 从开始运行到当前选中的指令 """
+        if self.all_tasks_cmd is None or len(self.all_tasks_cmd) == 0:
+            self._format_msg(LogLevel.ERROR, "❌(execute_to_command) 无法运行，没有加载任何指令")
+            return
+        if index < 0 or index >= len(self.all_tasks_cmd):
+            self._format_msg(LogLevel.ERROR, f"❌(execute_to_command) all_tasks_cmd 中无效的索引: {index}")
+            return
+        self._format_msg(LogLevel.INFO, f"▶ ------------- 开始执行到步骤 {index + 1} ------------- ◀")
+        # 截取指令列表
+        self.all_tasks_cmd = self.all_tasks_cmd[:index + 1]
+        self.current_index = 0
+        self.results_manager.clear()  # 清空之前的结果
+        self._execute_from_current()
+
+    # ================================= 指定运行 =================================
 
     def execute_selected_normal_command(self, item: QTreeWidgetItem) -> None:
         """运行选中的普通节点指令"""
         item_data = item.data(0, Qt.UserRole)
         if not item_data:
-            self._log(LogLevel.ERROR, "(execute_selected_normal_command) 无效的节点数据")
+            self._format_msg(LogLevel.ERROR, "(execute_selected_normal_command) 无效的节点数据")
             return
         item_type = item_data.get("type")
         item_action = item_data.get("action")
         item_params = item_data.get("params", {})
 
         if item_type == "subtask" or (item_type == "flow" and item_action in ["if", "loop"]):
-            self._log(LogLevel.WARN, "⚠ 无法指定运行子任务或If、Loop指令")
+            self._format_msg(LogLevel.WARN, "⚠ 无法指定运行子任务或If、Loop指令")
             return
 
         if item_type == "trigger":
-            self._log(LogLevel.WARN, "⚠ 无法指定运行触发器指令")
+            self._format_msg(LogLevel.WARN, "⚠ 无法指定运行触发器指令")
             return
 
         command_class = self.command_map.get(item_type, {}).get(item_action)  # 获取指令类型
         if not command_class:
-            self._log(LogLevel.WARN,
-                      f"(execute_selected_normal_command) ⚠ 未知的指令类型或动作: {item_type}, {item_action}")
-            return None
+            self._format_msg(LogLevel.WARN,
+                             f"(execute_selected_normal_command) ⚠ 未知的指令类型或动作: {item_type}, {item_action}")
+            return
 
         try:
             if command_class == ImageOcrCmd:
@@ -327,18 +347,21 @@ class CommandExecutor(QThread):
             else:
                 command = command_class(**item_params)
             command.tree_item = item  # 关联树节点
-            if command.is_active is False:
-                self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
+            # 连接指令对象的 Qt 对象信号
+            command.q_obj.info_message.connect(lambda msg: self._format_msg(LogLevel.INFO, msg))
+            command.q_obj.error_message.connect(lambda msg: self._format_msg(LogLevel.WARN, msg))
+            if not command.is_active:
+                self._format_msg(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
                 return
 
             if isinstance(command, ImageMatchCmd) and \
                     os.path.exists(command.template_img) is False:
-                self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 模板图片路径错误, 退出执行")
+                self._format_msg(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 模板图片路径错误, 退出执行")
                 return
 
-            self._log(LogLevel.INFO, f"👉 --------- 指定运行指令 --------- 👈")
+            self._format_msg(LogLevel.INFO, f"👉 --------- 指定运行指令 --------- 👈")
 
-            self._log(LogLevel.INFO, f"开始执行: &lt;{command.name}&gt;")
+            self._format_msg(LogLevel.INFO, f"开始执行: &lt;{command.name}&gt;")
             start_time = time.time()
 
             self.execute_one_command(command, self.current_index)  # 运行指令
@@ -346,40 +369,34 @@ class CommandExecutor(QThread):
             # 如果模板图片中心坐标存在，则输出
             if isinstance(command, ImageMatchCmd):
                 if command.template_img_center:
-                    self._log(LogLevel.INFO, f"🖼模板图片中心坐标为{command.template_img_center}")
+                    self._format_msg(LogLevel.INFO, f"🖼模板图片中心坐标为{command.template_img_center}")
                 else:
-                    self._log(LogLevel.WARN, f"⚠模板图片中心坐标未找到")
+                    self._format_msg(LogLevel.WARN, f"⚠模板图片中心坐标未找到")
             # 如果OCR识别结果存在，则输出
             elif type(command) is ImageOcrCmd:
                 if command.matching_boxes:
-                    self._log(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
+                    self._format_msg(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
                 else:
-                    self._log(LogLevel.WARN, f"⚠ 未找到匹配区域")
+                    self._format_msg(LogLevel.WARN, f"⚠ 未找到匹配区域")
             # 如果OCR点击结果存在，则输出
             elif type(command) is ImageOcrClickCmd:
                 if command.matching_boxes_center:
-                    self._log(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
-                    self._log(LogLevel.INFO, f"✅ 文字识别点击中心坐标: {command.matching_boxes_center}")
-                    self._log(LogLevel.INFO, f"共计匹配成功 {len(command.matching_boxes)} 个区域")
+                    self._format_msg(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
+                    self._format_msg(LogLevel.INFO, f"✅ 文字识别点击中心坐标: {command.matching_boxes_center}")
+                    self._format_msg(LogLevel.INFO, f"共计匹配成功 {len(command.matching_boxes)} 个区域")
                 else:
-                    self._log(LogLevel.WARN, f"⚠ 未找到匹配区域")
-            self._log(LogLevel.INFO, f"执行耗时🕓: {time.time() - start_time:.5f} 秒")
-            self._log(LogLevel.INFO, f"🎉 --------- 指令执行完成 --------- 🎉")
+                    self._format_msg(LogLevel.WARN, f"⚠ 未找到匹配区域")
+            self._format_msg(LogLevel.INFO, f"执行耗时🕓: {time.time() - start_time:.5f} 秒")
+            self._format_msg(LogLevel.INFO, f"🎉 --------- 指令执行完成 --------- 🎉")
 
         except CommandRunningException as cre:
-            self._log(LogLevel.ERROR, f"❌(execute_selected_normal_command) 指令执行出错: {cre}")
+            self._format_msg(LogLevel.ERROR, f"❌(execute_selected_normal_command) 指令执行出错: {cre}")
             return
         except Exception as e:
-            self._log(LogLevel.ERROR, f"❌(execute_selected_normal_command) 指令执行出错: {e}")
-
-    # *********************************** 其它方法 *************************************
-
-    def execute_from_current(self) -> None:
-        """从当前指令索引运行后续指令"""
-        self._execute_from_current()
+            self._format_msg(LogLevel.ERROR, f"❌(execute_selected_normal_command) 指令执行出错: {e}")
 
     def _execute_from_current(self) -> None:
-        """内部方法，从当前索引开始依次运行指令"""
+        """从当前索引开始依次运行指令"""
         if self.stop_flag:
             return
         try:
@@ -398,11 +415,11 @@ class CommandExecutor(QThread):
                 # 如果模板图片路径不存在，则跳过
                 if isinstance(command, ImageMatchCmd) and \
                         os.path.exists(command.template_img) is False:
-                    self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 模板图片路径错误, 跳过执行")
+                    self._format_msg(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 模板图片路径错误, 跳过执行")
                     self.current_index += 1  # 更新当前索引
                     continue
 
-                self._log(LogLevel.INFO, f"开始执行 [{self.current_index + 1}]: &lt;{command.name}&gt;")
+                self._format_msg(LogLevel.INFO, f"开始执行步骤 {self.current_index + 1}: &lt;{command.name}&gt;")
                 start_time = time.time()
 
                 self.execute_one_command(command, self.current_index)  # 运行单个指令
@@ -410,38 +427,38 @@ class CommandExecutor(QThread):
                 # 如果模板图片中心坐标存在，则输出
                 if isinstance(command, ImageMatchCmd):
                     if command.template_img_center:
-                        self._log(LogLevel.INFO, f"🖼 模板图片中心坐标为{command.template_img_center}")
+                        self._format_msg(LogLevel.INFO, f"🖼 模板图片中心坐标为{command.template_img_center}")
                     else:
-                        self._log(LogLevel.WARN, f"⚠ 模板图片中心坐标未找到！")
+                        self._format_msg(LogLevel.WARN, f"⚠ 模板图片中心坐标未找到！")
                 # 如果OCR识别结果存在，输出
                 elif type(command) is ImageOcrCmd:
                     if command.matching_boxes:
-                        self._log(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
+                        self._format_msg(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
                     else:
-                        self._log(LogLevel.WARN, f"⚠ 未找到文字识别匹配区域！")
+                        self._format_msg(LogLevel.WARN, f"⚠ 未找到文字识别匹配区域！")
                 # 如果OCR点击结果存在，则输出
                 elif type(command) is ImageOcrClickCmd:
                     if command.matching_boxes_center:
-                        self._log(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
-                        self._log(LogLevel.INFO, f"✅ 文字识别点击中心坐标: {command.matching_boxes_center}")
-                        self._log(LogLevel.INFO, f"共计匹配成功 {len(command.matching_boxes)} 个区域")
+                        self._format_msg(LogLevel.INFO, f"✅ 文字识别匹配区域结果: {command.matching_boxes}")
+                        self._format_msg(LogLevel.INFO, f"✅ 文字识别点击中心坐标: {command.matching_boxes_center}")
+                        self._format_msg(LogLevel.INFO, f"共计匹配成功 {len(command.matching_boxes)} 个区域")
                     else:
-                        self._log(LogLevel.WARN, f"⚠ 未找到文字识别匹配区域！")
+                        self._format_msg(LogLevel.WARN, f"⚠ 未找到文字识别匹配区域！")
 
-                self._log(LogLevel.INFO, f"执行耗时🕓: {time.time() - start_time:.3f} 秒")
-                self._log(LogLevel.INFO, "-" * 60)
+                self._format_msg(LogLevel.INFO, f"执行耗时🕓: {time.time() - start_time:.3f} 秒")
+                self._format_msg(LogLevel.INFO, "-" * 60)
                 self.current_index += 1  # 更新当前索引
 
-            self._log(LogLevel.INFO,
-                      f"🎉所有的 {len(self.all_tasks_cmd)} 个指令运行完成, "
-                      f"总耗时⏰: {time.time() - start_all_time:.3f} 秒🎉") if not self.stop_flag else None
+            self._format_msg(LogLevel.INFO,
+                             f"🎉所有的 {self.results_manager.get_result_count()} 个指令运行完成, "
+                             f"总耗时⏰: {time.time() - start_all_time:.3f} 秒🎉") if not self.stop_flag else None
 
             self.task_finished.emit()  # 发送任务完成信号, 以取消当前选中的节点
 
         except CommandRunningException as cre:
-            self._log(LogLevel.ERROR, f"❌指令运行时出错: {cre}")
+            self._format_msg(LogLevel.ERROR, f"❌指令运行时出错: {cre}")
         except Exception as e:
-            self._log(LogLevel.ERROR, f"❌执行任务时出错: {e}")
+            self._format_msg(LogLevel.ERROR, f"❌执行任务时出错: {e}")
 
     # ------------------------------------ 单个指令执行方法 ----------------------------------
 
@@ -454,8 +471,8 @@ class CommandExecutor(QThread):
         if command is None:
             return
         # 如果指令未激活，则不执行
-        if command.is_active is False:
-            self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
+        if not command.is_active:
+            self._format_msg(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
             return
 
         try:
@@ -464,13 +481,13 @@ class CommandExecutor(QThread):
 
             # ------------------- 发送选中信号 -------------------
             if current_node:
-                self._log(LogLevel.INFO, f"选中指令: &lt;{current_node.text(0)}&gt;")
+                self._format_msg(LogLevel.INFO, f"选中指令: &lt;{current_node.text(0)}&gt;")
                 # 展开当前节点
                 self.tree_widget.expandAll()
                 # 选中当前节点
                 self.select_node.emit(current_node)
             else:
-                self._log(LogLevel.WARN, f"⚠ 指令 &lt;{command.name}&gt; 的 tree_item 为None，无法选中当前节点")
+                self._format_msg(LogLevel.WARN, f"⚠ 指令 &lt;{command.name}&gt; 的 tree_item 为None，无法选中当前节点")
 
             # -------------------- 执行指令 --------------------
 
@@ -481,22 +498,23 @@ class CommandExecutor(QThread):
             elif isinstance(command, SubtaskCommand):
                 self._execute_subtask_command(command, current_idx)
             else:
-                # TODO:解析绑定属性
-                # command.resolve_bound_properties()
                 command.execute()
-                self.results_list.append(command.model_dump())
-                print(f"[INFO] - 当前指令 <{command.name}> 执行结果: {self.results_list[-1]}")
+                self.results_manager.add_result(
+                    command.id,
+                    command.name,
+                    command.model_dump()
+                )
         except CommandRunningException as cre:
-            self._log(LogLevel.ERROR, f"❌(运行时错误) 执行指令 &lt;{command.name}&gt; 失败: {cre}")
+            self._format_msg(LogLevel.ERROR, f"❌(运行时错误) 执行指令 &lt;{command.name}&gt; 失败: {cre}")
         except Exception as e:
-            self._log(LogLevel.ERROR, f"❌(未知错误) 执行指令 &lt;{command.name}&gt; 失败: {e}")
+            self._format_msg(LogLevel.ERROR, f"❌(未知错误) 执行指令 &lt;{command.name}&gt; 失败: {e}")
 
     def _execute_if_command(self, command: IfCommand, current_idx: int) -> None:
         """执行 If 命令"""
         if self.stop_flag:
             return
-        if command.is_active is False:
-            self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
+        if not command.is_active:
+            self._format_msg(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
             return
         # 使用更安全的方式解析条件表达式，避免使用 eval
         condition_result = self.evaluate_condition(command.condition)
@@ -505,7 +523,7 @@ class CommandExecutor(QThread):
         block = command.then_commands if condition_result else command.else_commands
 
         # 打印日志，表明条件是否成立
-        self._log(LogLevel.INFO, f"{'✅ 条件成立' if condition_result else '❎ 条件不成立'}，执行对应代码块")
+        self._format_msg(LogLevel.INFO, f"{'✔ 条件成立' if condition_result else '❌ 条件不成立'}，执行对应代码块")
 
         # 遍历并执行选中的代码块中的子命令
         for subcommand in block:
@@ -515,13 +533,13 @@ class CommandExecutor(QThread):
         """执行 Loop 命令"""
         if self.stop_flag:
             return
-        if command.is_active is False:
-            self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
+        if not command.is_active:
+            self._format_msg(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
             return
         for i in range(command.count):
             if self.stop_flag:
                 return
-            self._log(LogLevel.INFO, f"开始执行循环步骤 (第 {i + 1} 次)")
+            self._format_msg(LogLevel.INFO, f"开始执行循环步骤 (第 {i + 1} 次)")
             for subcommand in command.loop_commands:
                 self.execute_one_command(subcommand, current_idx)
 
@@ -529,8 +547,8 @@ class CommandExecutor(QThread):
         """执行子任务命令"""
         if self.stop_flag:
             return
-        if command.is_active is False:
-            self._log(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
+        if not command.is_active:
+            self._format_msg(LogLevel.WARN, f"⚠ 指令: &lt;{command.name}&gt; 未激活, 跳过执行")
             return
         for subcommand in command.subtask_steps:
             self.execute_one_command(subcommand, current_idx)
@@ -542,11 +560,13 @@ class CommandExecutor(QThread):
         """
 
         def get_command_by_id(_cmd_id):
-            """通过指令 id 获取对应的指令执行结果，从后往前查找以确保获取最新的执行结果"""
-            for result in reversed(self.results_list):
-                if result.get("id") == _cmd_id:
-                    return result
-            return None
+            """通过指令 id 获取对应的指令执行结果"""
+            # for result in self.results_list:
+            #     if result.get("id") == _cmd_id:
+            #         return result
+            # return None
+            result = self.results_manager.get_result(_cmd_id)
+            return result.result_data if result else None
 
         def safe_get_field(_cmd_result, _field_name):
             """安全地获取指令结果中的字段值"""
@@ -560,7 +580,7 @@ class CommandExecutor(QThread):
             # eg: "results_list['12345678']['status'] == 2"
             parts = condition.split(" ")
             if len(parts) != 3:
-                self._log(LogLevel.ERROR, "❌ 条件表达式格式错误")
+                self._format_msg(LogLevel.ERROR, "❌ 条件表达式格式错误")
                 return False
 
             # 提取 id、字段、操作符和值
@@ -597,18 +617,18 @@ class CommandExecutor(QThread):
             operation = operators.get(operator_symbol)
 
             if operation is None:
-                self._log(LogLevel.ERROR, f"❌ 不支持的操作符: {operator_symbol}")
+                self._format_msg(LogLevel.ERROR, f"❌ 不支持的操作符: {operator_symbol}")
                 return False
 
             # 执行判断
             return operation(field_value, right_value)
         except Exception as e:
-            self._log(LogLevel.ERROR, f"❌ 条件解析失败: {e}")
+            self._format_msg(LogLevel.ERROR, f"❌ 条件解析失败: {e}")
             return False
 
     # ------------------------------------ 线程运行入口 ----------------------------------
 
-    def run(self) -> None:
+    def run(self):
         """线程运行入口"""
 
         if self.run_action == "run_all":
@@ -617,17 +637,22 @@ class CommandExecutor(QThread):
         elif self.run_action == "run_one":
             current_item = self.tree_widget.currentItem()  # 获取当前选中的节点
             self.execute_selected_normal_command(current_item)  # 运行选中的节点
-        elif self.run_action == "run_now":
+        elif self.run_action == "run_from_now":
             current_item = self.tree_widget.currentItem()  # 获取当前选中的节点
             index = self.tree_widget.indexOfTopLevelItem(current_item)
             self.extract_commands_from_tree()  # 提取指令
-            self.execute_from_index(index)  # 运行选中的顶层节点
+            self.execute_from_command(index)  # 运行选中的顶层节点
+        elif self.run_action == "run_to_now":
+            current_item = self.tree_widget.currentItem()  # 获取当前选中的节点
+            index = self.tree_widget.indexOfTopLevelItem(current_item)
+            self.extract_commands_from_tree()  # 提取指令
+            self.execute_to_command(index)  # 运行到选中的顶层节点
         elif self.run_action == "attr_bind":
             self.extract_commands_from_tree()  # 提取指令不执行
         else:
-            self._log(LogLevel.ERROR, "❌无效的运行动作!")
+            self._format_msg(LogLevel.ERROR, "❌无效的运行动作!")
             return
 
-    def stop(self) -> None:
+    def stop(self):
         """停止线程运行"""
         self.task_stop.emit()  # 发送任务停止信号

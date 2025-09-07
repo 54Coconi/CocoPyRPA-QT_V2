@@ -26,63 +26,52 @@
     此外，模块中使用了多线程技术来处理耗时操作，例如 OCR 模型加载、GitHub 版本检测等，保证了主界面的流畅响应。同时，模块内实现了良好的异常处理机制和用户交互设计，提升了整体的稳定性和用户体验。
 """
 
-import sys
 import json
-import os.path
-from pathlib import Path
-
-import keyboard
-import requests
-import qdarkstyle
+import os
+import sys
+import time
 import webbrowser
-
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
+import qdarkstyle
+import requests
 from PyQt5 import QtGui
 from PyQt5.QtCore import QDir, QModelIndex, Qt, QLocale, pyqtSignal, QThread, QPoint
 from PyQt5.QtGui import QIcon, QStandardItemModel, QFont, QWheelEvent
-from PyQt5.QtWidgets import (QMainWindow, QFileSystemModel, QMessageBox, QTreeWidgetItem,QInputDialog,
+from PyQt5.QtWidgets import (QMainWindow, QFileSystemModel, QMessageBox, QTreeWidgetItem, QInputDialog,
                              QLineEdit, QMenu, QFileDialog, QTreeWidgetItemIterator, QDialog, QVBoxLayout,
-                             QHBoxLayout,QPushButton, QTableWidgetItem, QSystemTrayIcon, QApplication, QAction)
+                             QHBoxLayout, QPushButton, QTableWidgetItem, QSystemTrayIcon, QApplication, QAction)
 
-from .CocoPyRPA_v2_ui import Ui_MainWindow
-from .task_editor_controller import TaskEditorCore
-
-from .widgets.BindPropertyDialog import BindPropertyDialog
-from .widgets.CocoHtmlDialog import CocoDialog
-from .widgets.CocoJsonView import JSONHighlighter
-from .widgets.CocoPlainTextEdit import CoPlainTextEdit
-from .widgets.CocoCmdLibWidget import CmdLibAndSearchBar
-from .widgets.CocoIndicator import CustomTreeIndicatorStyle
-from .widgets.CocoSettingWidget import SettingsWindow as SettingDialog, config_manager
-from .widgets.IfCmdConditionBuilder import ConditionBuilder
-from .widgets.CodeEditor import CodeEditor
-from .widgets.MouseRecord import MouseRecorder
-from .widgets.KeyboardRecord import KeyboardRecorder
-from .widgets.coco_toast.toast import ToastService
-
-from utils.ocr_tools import OCRTool
-from utils.debug import print_func_time
-from utils.check_input import validate_input
-from utils.screen_capture import CaptureScreen
+from config.app_config import (APP_ROOT, TASK_HOME, CMD_LIB_JSON_FILE, WORK_SPACE,
+                               DET_MODEL_DIR, REC_MODEL_DIR, CLS_MODEL_DIR,
+                               cmd_desc_path, about_path, debug, info, error)
+from core.auto_executor_manager import AutoExecutorManager
+from core.cmd_executor import CommandExecutor
+from core.script_executor import executor
+from ui.widgets.code_editor.CodeEditor import CodeEditor
 from utils.QSSLoader import QSSLoader as QL
+from utils.check_input import validate_input
+from utils.debug import print_func_time
+from utils.image_process.ocr_tools import OCRTool
+from utils.screen_capture import CaptureScreen
 from utils.stop_executor import stop_running_thread
 from utils.theme_manager import ThemeManager
-
-from core.script_executor import executor
-from core.cmd_executor import CommandExecutor
-from core.auto_executor_manager import AutoExecutorManager
+from .CocoPyRPA_v2_ui import Ui_MainWindow
+from .task_editor_controller import TaskEditorCore
+from .widgets.BindPropertyDialog import BindPropertyDialog
+from .widgets.CocoCmdLibWidget import CmdLibAndSearchBar
+from .widgets.CocoHtmlDialog import CocoDialog
+from .widgets.CocoIndicator import CustomTreeIndicatorStyle
+from .widgets.CocoJsonView import JSONHighlighter
+from .widgets.CocoPlainTextEdit import CoPlainTextEdit
+from .widgets.CocoSettingWidget import SettingsWindow as SettingDialog, config_manager
+from .widgets.IfCmdConditionBuilder import ConditionBuilder
+from .widgets.coco_toast.toast import ToastService
+from .widgets.keyboard_recorder import Controller as KeyboardRecorderWindow
+from .widgets.mouse_recorder import MouseRecorderWindow
 
 _DEBUG = True
-
-# 控制台LOGO
-LOGO1 = "      ______                 ____       ____   ____  ___                        "
-LOGO2 = "     / ____/___  _________  / __ \__ __/ __ \ / __ \/   |       _      __ ___   "
-LOGO3 = "    / /   / __ \/ ___/ __ \/ /_/ / / / / /_/ / /_/ / /| |      | |    / / ___ \\"
-LOGO4 = "   / /___/ /_/ / /__/ /_/ / ____/ /_/ / _, _/ ____/ ___ |      | |   / / ___/ / "
-LOGO5 = "   \____/\____/\___/\____/_/    \__, /_/ |_/_/   /_/  |_|      | |  / / / ___/  "
-LOGO6 = "                               /____/                          | ___ / /_____/  "
 
 # 版本信息
 __version__ = '2.0.2'
@@ -90,22 +79,6 @@ __author__ = '54Coconi'
 __copyright__ = 'Copyright 2024-present 54Coconi'
 __license__ = 'MIT'
 __status__ = 'Development'
-
-# 配置文件（用于设置功能）
-CONFIG_FILE = 'config.ini'
-# 指令库配置（用于加载预设的指令）
-CMD_LIB_JSON_FILE = 'config/CocoCmdLib.json'
-# 工作空间根目录
-WORK_SPACE = './work'
-TASK_HOME = WORK_SPACE + '/work_tasks'
-# HTML文件
-cmd_desc_path = 'ui/static/feature.html'
-about_path = 'ui/static/about.html'
-
-# OCR 模型
-DET_MODEL_DIR = './models/det/ch/ch_PP-OCRv4_det_infer'
-REC_MODEL_DIR = './models/rec/ch/ch_PP-OCRv4_rec_infer'
-CLS_MODEL_DIR = './models/cls/ch/ch_PP-OCRv4_cls_infer'
 
 # 全局配置（用于保存config.ini文件配置）
 GLOBAL_CONFIG = {}
@@ -152,7 +125,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         # 加载配置管理器
         self.config_manager = config_manager
         GLOBAL_CONFIG.update(self.config_manager.config)  # 读取配置文件,初始化全局配置变量
-        print(f"[INFO] - (CocoPyRPA_v2) - 当前配置为：{GLOBAL_CONFIG}") if _DEBUG else None
+        debug(f"当前配置为：{json.dumps(GLOBAL_CONFIG, ensure_ascii=False)}")
         self.config_manager.config_changed.connect(
             lambda new_config: update_global_config(self, new_config))  # 连接配置改变信号
 
@@ -166,10 +139,10 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self._load_ocr = LoadOcrModel(model=GLOBAL_CONFIG["ImageOcr"]["ModelName"], parent=self)
         self._load_ocr.ocr_model_signal.connect(self.set_ocr_model)
         self._load_ocr.finished.connect(self._print_console_logo)
-        self._load_ocr.start()  # 启动线程
+        self._load_ocr.start()
 
         self._task_home = TASK_HOME  # 任务根目录
-        self._clipboard_path = ''  # 剪贴板路径
+        self._clipboard_path = ''  # 用于保存复制的路径
         self.cmd_treeWidget.clear()  # 清空指令树
 
         # 检查 github 上的最新版本
@@ -198,18 +171,12 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.coco_op_view = CmdLibAndSearchBar(self.op_search_line, self.op_view_treeWidget,
                                                json_path=CMD_LIB_JSON_FILE)
 
-        # 设置自定义的截图窗口
-        self.screenshot = CaptureScreen(parent=self)  # 截图类实例
-        self.screenshot.setWindowModality(Qt.ApplicationModal)  # 设置截图窗口为模态
-        self.screenshot.screen_shot_finish_signal.connect(self.get_template_img)  # 截图结束
-        self.screenshot.screen_window_close_signal.connect(self.screenshot_window_close)  # 截图窗口关闭
-
         # 设置日志文本框的上下文菜单
         self.log_textEdit.setContextMenuPolicy(Qt.CustomContextMenu)
         self.log_textEdit.customContextMenuRequested.connect(self.show_log_context_menu)
 
         # 初始化主题管理器
-        self.theme_manager = ThemeManager(str(Path(__file__).parent.parent.resolve()))
+        self.theme_manager = ThemeManager(APP_ROOT)
         self.theme_manager.themeChanged.connect(self.on_theme_changed)
 
         # toast 通知弹窗
@@ -230,6 +197,8 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.auto_executor_manager.script_executor_trigger.connect(self.start_script_executor)
         # If 判断条件 “condition” 的构建器
         self.condition_builder = None
+        # 截图窗口
+        self.screenshot = None
         # Python 编辑器
         self.python_editor = None
         # 鼠标录制器
@@ -296,11 +265,11 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.action_menu_attrEditor.triggered.connect(self.is_attr_editor)  # 是否显示属性编辑器
         self.action_menu_cmdLib.triggered.connect(self.is_cmd_lib)  # 是否显示指令库
         self.action_menu_attrBind.triggered.connect(self.open_attr_bind_dialog)  # 打开属性绑定
-        self.action_menu_attrBind.setVisible(False)  # TODO: 暂时隐藏属性绑定，后续开发
+        # self.action_menu_attrBind.setVisible(False)  # TODO: 暂时隐藏属性绑定，后续开发
         # 菜单项 - 运行
         self.action_menu_runAll.triggered.connect(self.run_all)  # 运行全部指令
         self.action_menu_runOne.triggered.connect(self.run_one)  # 运行当前选中指令
-        self.action_menu_runNow.triggered.connect(self.run_now)  # 从当前选中的指令开始往后运行
+        self.action_menu_runNow.triggered.connect(self.run_from_now)  # 从当前选中的指令开始往后运行
         self.action_menu_runAuto.triggered.connect(self.run_auto)  # 自动运行
         # 菜单项 - 工具
         self.action_menu_screenShot.triggered.connect(self.screen_shot)  # 截图
@@ -333,7 +302,16 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     @staticmethod
     def _print_console_logo():
-        print(LOGO1, LOGO2, LOGO3, LOGO4, LOGO5, LOGO6, sep='\n')
+        # print(LOGO1, LOGO2, LOGO3, LOGO4, LOGO5, LOGO6, sep='\n')
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logo.txt')
+        try:
+            with open(logo_path, encoding='utf-8') as file:
+                logo_content = file.read()
+                print(logo_content)
+        except FileNotFoundError:
+            print("logo.txt文件未找到")
+        except Exception as e:
+            print(f"读取logo文件时出错: {e}")
         print(' ' * 30, "欢迎使用 CocoPyRPA_v%s" % __version__)
         print(' ' * 30, "作者: %s" % __author__)
         print('-' * 80, end='\n\n\n')
@@ -498,9 +476,9 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("提示")
         msg_box.setText("当前任务未保存，请先保存后再关闭，是否保存当前任务？")
-        save_button = msg_box.addButton("保存", QMessageBox.YesRole)  # 添加保存按钮, 索引为0
-        no_save_button = msg_box.addButton("不保存", QMessageBox.NoRole)  # 添加不保存按钮, 索引为1
-        cancel_button = msg_box.addButton("取消", QMessageBox.RejectRole)  # 添加取消按钮, 索引为2
+        msg_box.addButton("保存", QMessageBox.YesRole)  # 添加保存按钮, 索引为0
+        msg_box.addButton("不保存", QMessageBox.NoRole)  # 添加不保存按钮, 索引为1
+        msg_box.addButton("取消", QMessageBox.RejectRole)  # 添加取消按钮, 索引为2
         return msg_box.exec_()
 
     def close_python_editor(self):
@@ -532,17 +510,17 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def expand_all_nodes(self):
         """递归展开所有节点"""
 
-        def recursive_expand(index: QModelIndex):
+        def _recursive_expand(index: QModelIndex):
             if not index.isValid():
                 return
 
             self.tasks_view_treeView.expand(index)  # 展开当前节点
             for row in range(self.file_model.rowCount(index)):  # 遍历子节点
                 child_index = self.file_model.index(row, 0, index)
-                recursive_expand(child_index)
+                _recursive_expand(child_index)
 
         root_index = self.tasks_view_treeView.rootIndex()
-        recursive_expand(root_index)
+        _recursive_expand(root_index)
 
     def sync_menu_with_attr_edit_dock(self, visible):
         """根据 属性编辑DockWidget 的可见性同步菜单项状态"""
@@ -941,16 +919,11 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # 右键菜单 - 重命名
     def rename_task(self, file_path):
-        """
-        重命名任务或目录
-        此函数通过图形界面提示用户输入新的名称，并对选定的文件或目录进行重命名操作
-        如果重命名成功，将弹出信息对话框显示新的路径，如果失败，则显示错误信息
-
-        :param file_path: (str): 需要重命名的文件或目录的路径
-        """
-        # 分离文件路径、文件名和扩展名
+        """重命名任务文件或目录"""
+        # 分离文件路径
         base_path, old_name = os.path.split(file_path)
-        file_name, file_ext = os.path.splitext(old_name)  # 分离文件名和扩展名
+        # 分离文件名和扩展名
+        file_name, file_ext = os.path.splitext(old_name)
         # 提示用户输入新的名称，默认值为原文件名（不包括扩展名）
         new_name, ok = QInputDialog.getText(self, "重命名", "请输入新名称：", QLineEdit.Normal, file_name)
         # 如果用户点击确定按钮且输入了新的名称，并且新名称与旧名称不同
@@ -977,13 +950,13 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # 右键菜单 - 复制
     def copy_task(self, file_path):
-        """复制任务或目录"""
+        """复制任务文件或目录"""
         self._clipboard_path = file_path
         QMessageBox.information(self, "成功", f"已复制任务文件路径：\n'{file_path}' ")
 
     # 右键菜单 - 粘贴
     def paste_task(self, target_dir):
-        """粘贴任务或目录"""
+        """粘贴任务文件或目录"""
         if hasattr(self, '_clipboard_path') and os.path.exists(self._clipboard_path):
             base_name = os.path.basename(self._clipboard_path)
             new_path = os.path.join(target_dir, base_name)
@@ -1000,7 +973,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # 右键菜单 - 删除
     def delete_task(self, file_path):
-        """删除任务或目录"""
+        """删除任务文件或目录"""
         confirm = QMessageBox.question(self, "删除确认", f"确定要删除 '{file_path}' 吗？",
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if confirm == QMessageBox.Yes:
@@ -1018,7 +991,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
 
     # 右键菜单 - 查看文件内容
     def view_task_file(self, file_path):
-        """查看任务或目录"""
+        """查看任务文件内容"""
         if os.path.isfile(file_path):
             file_name = os.path.basename(file_path)
             # 创建对话框
@@ -1060,23 +1033,22 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def new_task_dir(self):
         """新建任务目录（同时会检查输入的目录字符串的合法性）"""
         # 弹出对话框，让用户输入新任务的名称
-        task_dir_name, ok_pressed = QInputDialog.getText(self, "新建任务目录", "请输入任务目录名称:", QLineEdit.Normal,
-                                                         "")
-        if ok_pressed and task_dir_name.strip():
+        task_dir, ok = QInputDialog.getText(self, "新建任务目录", "请输入任务目录名称:", QLineEdit.Normal, "")
+        if ok and task_dir.strip():
             # 检查目录名称是否合法
-            if validate_input(task_dir_name):
+            if validate_input(task_dir):
                 parent_path = os.path.abspath(WORK_SPACE + '/work_tasks')
                 # 构建新任务目录的路径
-                task_dir_path = os.path.join(parent_path, task_dir_name)
+                task_dir_path = os.path.join(parent_path, task_dir)
                 # 检查目录是否已经存在
                 if os.path.exists(task_dir_path):
-                    QMessageBox.warning(self, "警告", f"任务目录 '{task_dir_name}' 已经存在！", QMessageBox.Ok)
+                    QMessageBox.warning(self, "警告", f"任务目录 '{task_dir}' 已经存在！", QMessageBox.Ok)
                 else:
                     try:
                         # 尝试创建新目录
                         os.makedirs(task_dir_path)
                         # 在这里可以添加一些额外的逻辑，例如显示成功消息
-                        QMessageBox.information(self, "成功", f"任务目录 '{task_dir_name}' 创建成功！",
+                        QMessageBox.information(self, "成功", f"任务目录 '{task_dir}' 创建成功！",
                                                 QMessageBox.Ok)
                     except Exception as e:
                         # 如果目录创建失败，显示错误消息
@@ -1229,7 +1201,6 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.log_textEdit.clear()  # 清空日志
 
         if GLOBAL_CONFIG.get("General", {}).get("RunMode", "debug") != "debug":
-            print("(run_all) - 当前为非 debug 模式")
             # 不是 debug 模式, 最小化窗口
             self.showMinimized()
 
@@ -1267,7 +1238,6 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.log_textEdit.clear()  # 清空日志
 
         if GLOBAL_CONFIG.get("General", {}).get("RunMode", "debug") != "debug":
-            print("(run_all) - 当前为非 debug 模式")
             # 不是 debug 模式, 最小化窗口
             self.showMinimized()
 
@@ -1288,7 +1258,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.executor_thread.finished.connect(self.on_executor_finished)
 
     # 菜单 - 运行 - 从当前指令开始运行
-    def run_now(self):
+    def run_from_now(self):
         """从当前选中的指令开始往后运行"""
         if self.is_running:
             self.stop_executor_thread()
@@ -1309,12 +1279,11 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         self.log_textEdit.clear()  # 清空日志
 
         if GLOBAL_CONFIG.get("General", {}).get("RunMode", "debug") != "debug":
-            print("(run_all) - 当前为非 debug 模式")
             # 不是 debug 模式, 最小化窗口
             self.showMinimized()
 
         # 创建并启动线程
-        self.executor_thread = CommandExecutor(self.cmd_treeWidget, "run_now", ocr=self._ocr)
+        self.executor_thread = CommandExecutor(self.cmd_treeWidget, "run_from_now", ocr=self._ocr)
         self.executor_thread.log_message.connect(self.log_textEdit.append)  # 连接日志信号
         self.executor_thread.select_node.connect(self.on_select_node)  # 连接选中信号
         # self.executor_thread.finished.connect(self.executor_thread.deleteLater)  # 自动释放线程资源
@@ -1337,7 +1306,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def stop_executor_thread(self):
         """ 强制终止当前运行的线程 """
         if self.executor_thread and self.executor_thread.isRunning():
-            print("(stop_executor_thread) 强制终止线程", self.executor_thread.isRunning())
+            info("强制终止线程")
             self.executor_thread.stop()
             self.executor_thread.wait()  # 等待线程完全退出
             self.executor_thread = None
@@ -1393,17 +1362,32 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     def screen_shot(self):
         """截图"""
         self.hide()  # 隐藏主窗口
+        time.sleep(0.3)  # 等待主窗口完全隐藏
+        # 初始化截图窗口
+        self.screenshot = CaptureScreen(parent=self)  # 截图类实例
+        self.screenshot.setWindowModality(Qt.ApplicationModal)  # 设置截图窗口为模态
+        self.screenshot.screen_shot_finish_signal.connect(self.get_template_img)  # 截图结束
+        self.screenshot.screen_window_close_signal.connect(self.screenshot_window_close)  # 截图窗口关闭
         self.screenshot.show()
 
     # 菜单 - 工具 2 - 鼠标录制
     def mouse_record(self):
         """鼠标录制"""
+        debug('启动鼠标录制器')
         # 先保存当前树的状态
         pre_tree_state = self.task_editor_ctrl.export_tree_to_list()
-        self.mouse_recorder = MouseRecorder(self.cmd_treeWidget, self.tray_icon)
-        self.mouse_recorder.close_signal.connect(self.recover_recorder_status)
-        self.mouse_recorder.close_signal.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
+
+        # 旧版
+        # self.mouse_recorder = MouseRecorder(self.cmd_treeWidget, self.tray_icon)
+        # self.mouse_recorder.close_signal.connect(self.recover_recorder_status)
+        # self.mouse_recorder.close_signal.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
+        # self.mouse_recorder.show()
+
+        self.mouse_recorder = MouseRecorderWindow(self.cmd_treeWidget, self.tray_icon)
+        self.mouse_recorder.closed.connect(self.recover_recorder_status)
+        self.mouse_recorder.closed.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
         self.mouse_recorder.show()
+
         # 禁用主窗口的鼠标、键盘录制菜单项
         self.action_menu_keysRecord.setEnabled(False)
         self.action_menu_mouseRecord.setEnabled(False)
@@ -1414,12 +1398,21 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
     # 菜单 - 工具 3 - 键盘录制
     def keys_record(self):
         """ 键盘录制 """
+        debug('启动键盘录制器')
         # 先保存当前树的状态
         pre_tree_state = self.task_editor_ctrl.export_tree_to_list()
-        self.key_recorder = KeyboardRecorder(self.cmd_treeWidget)
-        self.key_recorder.close_signal.connect(self.recover_recorder_status)
-        self.key_recorder.close_signal.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
-        self.key_recorder.show()
+
+        # 旧版
+        # self.key_recorder = KeyboardRecorder(self.cmd_treeWidget)
+        # self.key_recorder.close_signal.connect(self.recover_recorder_status)
+        # self.key_recorder.close_signal.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
+        # self.key_recorder.show()
+
+        # 新版
+        self.key_recorder = KeyboardRecorderWindow(cmd_treeWidget=self.cmd_treeWidget, _exit_key="esc")
+        self.key_recorder.closed.connect(self.recover_recorder_status)
+        self.key_recorder.closed.connect(lambda: self.whether_has_record(pre_tree_state))  # 判断是否添加新操作记录
+        self.key_recorder.start_recording()
         # 禁用主窗口的鼠标、键盘录制菜单项
         self.action_menu_keysRecord.setEnabled(False)
         self.action_menu_mouseRecord.setEnabled(False)
@@ -1450,7 +1443,7 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
         """
         执行 python 脚本
         """
-        self.python_editor = CodeEditor()  # TODO:这里不能传递父窗口
+        self.python_editor = CodeEditor()  # TODO:这里暂时不能传递父窗口
         self.python_editor.show()
 
     # 菜单 - 主题 1 - 默认主题
@@ -1571,33 +1564,16 @@ class CocoPyRPA_v2(QMainWindow, Ui_MainWindow):
                 ...
         elif version is not None and version <= __version__:
             msg = f"获取的版本为 '{version}'\n当前已是最新版本。"
-            print(msg)
             QMessageBox.information(self, "无新版本", msg)
         elif version is None:
             QMessageBox.warning(self, "警告", "无法获取最新版本信息！")
-
-
-class StopRunningThread(QThread):
-    """ 停止指令运行线程 """
-    stopSignal = pyqtSignal()
-
-    def run(self):
-        # 监听全局的 "Q + Esc" 组合键
-        keyboard.add_hotkey('q+esc', self.on_combination_pressed)
-        # 进入线程的主循环
-        self.exec_()
-
-    def on_combination_pressed(self):
-        """Q + Esc 组合键被按下 """
-        # 发出停止信号
-        self.stopSignal.emit()
-        print("Q + Esc 组合键被按下")
 
 
 class FileSystemModel(QFileSystemModel):
     """自定义 QFileSystemModel 来格式化创建时间"""
 
     def data(self, index: QModelIndex, role: int = Qt.DisplayRole):
+        """重写 data 方法"""
         # 格式化时间为本地化字符串
         if role == Qt.DisplayRole and index.column() == 3:
             file_info = self.fileInfo(index)
@@ -1633,12 +1609,12 @@ class GetVersionThread(QThread):
             if response.status_code == 200:  # 如果请求成功
                 data = response.json()
                 latest_version = data['tag_name'].split('v')[-1]
-                print("最新版本: ", latest_version)
+                info(f"最新版本: {latest_version}")
                 return latest_version
             else:
                 return None
         except requests.exceptions.RequestException as e:
-            print(f"获取最新版本时出错: {e}")
+            error(f"获取最新版本时出错: {e}")
             return None
 
     def run(self):

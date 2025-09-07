@@ -10,8 +10,8 @@
 """
 from pathlib import Path
 from typing import List
-from pydantic import Field
 
+from pydantic import Field
 
 from .base_command import BaseCommand
 
@@ -20,7 +20,7 @@ class SubtaskCommand(BaseCommand):
     """  子任务指令类
     通过子任务文件路径加载子任务
     """
-    name: str = Field("<子任务>", description="指令名称")
+    name: str = Field("子任务", description="指令名称")
     is_active: bool = Field(True, description="指令是否启用")
 
     subtask_file: Path = Field(..., description="子任务文件路径")
