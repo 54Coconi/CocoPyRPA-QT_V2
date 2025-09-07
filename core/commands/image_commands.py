@@ -46,12 +46,14 @@ def get_threshold():
     return threshold
 
 
-def save_matching_result():
+def save_matching_result() -> Optional[str]:
     """
     保存匹配结果图片
     :return: save_path - (str): 保存路径
     """
     save_path = config_manager.config.get('ImageMatch', {}).get('SavePath', None)
+    if save_path in ["None", ""] or save_path is None:
+        return None
     return save_path
 
 

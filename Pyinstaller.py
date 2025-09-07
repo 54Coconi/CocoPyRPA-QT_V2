@@ -30,6 +30,12 @@ if __name__ == '__main__':
             '--add-data', f'{tools_path}{os.pathsep}tools',  # 包含 tools 目录
             '--add-data', f'{ppocr_path}{os.pathsep}ppocr',  # 包含 ppocr 目录
 
+            # 添加本地文件
+            # '--add-data', 'config;config',
+            # '--add-data', 'models;models',
+            # '--add-data', 'resources/theme;resources/theme',
+            # '--add-data', 'ui/static;ui/static',
+
             '--clean',  # 强制清理缓存
             '-y'   # 覆盖已存在的输出文件
         ]
